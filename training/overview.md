@@ -6,6 +6,23 @@ This is a 5-day, hands-on Laravel API training program based on the concepts fro
 
 The main project is the ABC Company Profile API. Students build the same API across all 5 days, starting with a simple JSON endpoint and ending with a structured API that includes authentication, validation, throttling, caching, exception handling, route model binding, service classes, and API resources.
 
+## PDF Source Mapping
+
+The core 5-day course is based on the PDF, but the training expands the PDF into a fuller classroom project with complete code, labs, examples, and bonus topics.
+
+Page numbers below use the physical PDF page number shown by most PDF viewers. The printed book page number is included where useful.
+
+| Training part | Related PDF pages | PDF content used | Course expansion beyond PDF |
+| --- | --- | --- | --- |
+| Day 1 - Laravel API Foundations | PDF pages 4-8, book pages 1-5 | Laravel API overview, Laravel 12 setup, MVC structure, request flow, `routes/api.php` setup | Full project setup, SQLite workflow, first model, migration, controller, and JSON endpoint |
+| Day 2 - RESTful Routes, CRUD, And Validation | PDF pages 9-12, book pages 6-9 | REST methods, route prefixes, versioning, `Route::apiResource`, named routes, route caching notes | Full CRUD controller, form request validation, status codes, curl labs |
+| Day 3 - API Security | PDF pages 11-13, book pages 8-10 | `auth:sanctum`, middleware registration, throttling, frontend `X-API-TOKEN`, API security checklist | Complete Sanctum login/logout flow, token testing, middleware alias implementation |
+| Day 4 - Performance And Exception Handling | PDF pages 14-18, book pages 11-15 | Redis caching, `Cache::remember`, eager loading, route/config cache, centralized exception handling, pagination | Project relationship example, cache keys, cache clearing after writes, detailed JSON exception responses |
+| Day 5 - Service Layer And Final Project | PDF pages 16-18, book pages 13-15 | service layer pattern, route model binding, API resources/serialization, optimization summary | Full service class, API resources, final architecture, route model binding refactor |
+| Bonus - TDD | Not directly covered in PDF | Not covered | Added as an advanced practice for feature testing the API |
+| Bonus - Swagger/OpenAPI | PDF page 12 briefly mentions documenting routes; pages 19-20 list learning resources | Route documentation is mentioned only briefly | Added full OpenAPI/Swagger documentation workflow |
+| Bonus - FilamentPHP | Not directly covered in PDF | Not covered | Added as an admin panel extension for managing API data |
+
 ## Duration
 
 | Item | Details |
@@ -222,4 +239,3 @@ Example folders:
 - `examples/bonus-tdd-laravel-api`
 - `examples/bonus-swagger-openapi`
 - `examples/bonus-filamentphp-admin-api`
-
