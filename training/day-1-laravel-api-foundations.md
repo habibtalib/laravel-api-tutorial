@@ -4,6 +4,10 @@
 
 By the end of Day 1, students can set up a Laravel 12 API project, explain the API request lifecycle, create a model and migration, and return the first JSON response from a versioned API route.
 
+## PDF Reference
+
+This day is based on PDF pages 4-8, covering the Laravel API overview, Laravel 12 setup, MVC structure, request flow, and `routes/api.php` setup. The hands-on model, migration, controller, and SQLite workflow are course expansions beyond the PDF.
+
 ## Project Context
 
 The training project is the ABC Company Profile API. ABC Company needs an internal API to manage user profile records such as full name, phone number, address, and ID card number.
