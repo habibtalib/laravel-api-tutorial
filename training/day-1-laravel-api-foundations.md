@@ -31,6 +31,25 @@ The whole 5-day course builds this same API step by step.
 - Create a database-backed API resource.
 - Return consistent JSON responses.
 
+## Architecture Diagram
+
+Day 1 focuses on the basic Laravel API request lifecycle. Students should understand this flow before adding CRUD, security, caching, or service classes.
+
+```mermaid
+flowchart LR
+    Client["Client curl or Postman"] --> Request["GET /api/v1/users"]
+    Request --> Entry["public/index.php"]
+    Entry --> Bootstrap["bootstrap/app.php"]
+    Bootstrap --> Routes["routes/api.php"]
+    Routes --> Controller["UserProfileController index"]
+    Controller --> Model["UserProfile model"]
+    Model --> Database["SQLite database"]
+    Database --> Model
+    Model --> Controller
+    Controller --> Response["JSON response"]
+    Response --> Client
+```
+
 ## Prerequisites
 
 Students should have:
@@ -417,4 +436,3 @@ If the migration already ran, students can create a new migration:
 ```bash
 php artisan make:migration add_company_fields_to_user_profiles_table
 ```
-
