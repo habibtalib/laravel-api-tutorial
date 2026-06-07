@@ -109,6 +109,18 @@ Common setup rule:
 
 Do not mix URLs. If Laravel is served at `http://127.0.0.1:8000`, React should call `http://127.0.0.1:8000/api/v1`. If Laravel is served at `http://abc-api.test`, React should call `http://abc-api.test/api/v1`.
 
+### Existing Project Mode
+
+Some students will use their own existing Laravel project instead of the prepared example folder. In that case, the AI prompt must start by mapping the existing project before asking for code changes.
+
+Use these rules for every AI prompt:
+
+- Tell AI whether the student uses the prepared `abc-api` project or an existing Laravel project.
+- If it is an existing project, paste `php artisan route:list --path=api`, the relevant model name, controller name, migration/table name, and current route prefix.
+- Ask AI to preserve existing namespaces, middleware, authentication, policies, naming style, and database conventions.
+- Do not ask AI to overwrite existing project structure just to match the tutorial.
+- Ask AI to map the Day 2 tutorial goal to the closest existing resource, then propose the smallest change.
+
 ### AI Prompt Checkpoint - Local Setup
 
 Use this before writing CRUD code:
@@ -117,6 +129,9 @@ Use this before writing CRUD code:
 I am preparing Day 2 of a Laravel API training project.
 
 Please check my local setup before I build CRUD.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
 
 My setup:
 - Local stack: [Laragon or XAMPP]
@@ -127,12 +142,19 @@ My setup:
 - DB_DATABASE: [paste value]
 - DB_USERNAME: [paste value]
 
+If this is an existing project:
+- Existing API route prefix: [example: /api, /api/v1, /api/admin]
+- Existing resource to use for the lab: [example: users, customers, members]
+- Existing model/controller if known: [paste names]
+
 Task:
 Identify any mismatch that could break php artisan migrate, curl/API client requests, or React API calls.
 
 Rules:
 - Do not change code yet.
 - Do not ask for database passwords.
+- Do not assume the project uses the tutorial file names.
+- Preserve existing project conventions and identify equivalent files first.
 - Give me a short checklist of what to fix first.
 ```
 
@@ -216,21 +238,32 @@ Use this after editing `routes/api.php`:
 Review my Laravel API route file for Day 2.
 
 Goal:
-I need RESTful user profile routes under /api/v1/users using Route::apiResource.
+I need RESTful CRUD routes for the Day 2 resource. In the prepared tutorial this is /api/v1/users using Route::apiResource. In an existing project, first map the tutorial goal to the current resource name and route prefix.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
+Existing project context if applicable:
+- Current route prefix: [paste]
+- Current resource URI: [paste]
+- Controller used by this resource: [paste]
+- Output of php artisan route:list --path=api: [paste relevant lines]
 
 Code to review:
 [paste routes/api.php]
 
 Please check:
-- /api/v1/users maps to index and store.
-- /api/v1/users/{user} maps to show, update, and destroy.
+- the collection URI maps to index and store.
+- the member URI maps to show, update, and destroy.
 - create and edit web routes are not generated.
 - route grouping keeps API versioning clear.
+- existing middleware, route names, and prefixes are not accidentally removed.
 
 Return:
 - any issue found,
-- the expected php artisan route:list --path=api/v1/users output,
-- one corrected routes/api.php example only if my code is wrong.
+- the expected route-list output for my actual route prefix,
+- one corrected routes/api.php example only if my code is wrong,
+- no rewrite of unrelated routes.
 ```
 
 ## Step 2 - Create Form Request Classes
@@ -325,12 +358,20 @@ Use this after creating both form request classes:
 ```text
 Review my Laravel FormRequest validation for Day 2.
 
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
 Files:
 - StoreUserProfileRequest.php
 - UpdateUserProfileRequest.php
 
 Code to review:
 [paste both files]
+
+Existing project context if applicable:
+- Current table columns or migration: [paste relevant columns]
+- Current model fillable/casts: [paste relevant model section]
+- Existing validation style used elsewhere: [paste example if any]
 
 Please check:
 - create requires full_name, phone, and id_card_number.
@@ -339,6 +380,7 @@ Please check:
 - update ignores the current user profile ID when checking uniqueness.
 - nullable fields are safe and have reasonable max lengths.
 - authorize() returns true for this training lab.
+- if my existing project uses different field names, map the tutorial validation intent to my existing columns instead of renaming my schema.
 
 Return:
 - validation issues,
@@ -428,7 +470,16 @@ Use this after implementing the CRUD controller:
 Review my Day 2 Laravel API controller.
 
 Goal:
-The controller must implement index, store, show, update, and destroy for /api/v1/users.
+The controller must implement index, store, show, update, and destroy for the Day 2 resource. In the prepared tutorial this is /api/v1/users. In an existing project, use the current resource URI, model, and controller names.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
+Existing project context if applicable:
+- Resource URI: [paste]
+- Controller class: [paste]
+- Model class: [paste]
+- Existing response format used in this project: [paste one example]
 
 Code to review:
 [paste UserProfileController.php]
@@ -440,6 +491,7 @@ Please check:
 - update uses $request->validated().
 - destroy returns 204 No Content.
 - no unrelated authentication, service layer, or route model binding changes were introduced.
+- existing middleware, policies, resources, services, and response format are preserved unless I explicitly ask to change them.
 
 Return:
 - bugs or missing status codes,
@@ -616,11 +668,18 @@ Use this after testing create, validation error, show, update, and delete:
 Review my Day 2 API test results.
 
 Expected behavior:
-- POST /api/v1/users returns 201 JSON.
+- POST collection endpoint returns 201 JSON.
 - invalid POST returns 422 JSON with errors.
-- GET /api/v1/users/{id} returns 200 JSON or 404 JSON.
-- PATCH /api/v1/users/{id} returns 200 JSON.
-- DELETE /api/v1/users/{id} returns 204 with an empty body.
+- GET member endpoint returns 200 JSON or 404 JSON.
+- PATCH member endpoint returns 200 JSON.
+- DELETE member endpoint returns 204 with an empty body.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
+Actual endpoints used:
+- Collection endpoint: [paste]
+- Member endpoint: [paste]
 
 My results:
 [paste each request URL, status code, and response JSON]
@@ -671,12 +730,14 @@ Use this after wiring the Day 2 React list and create form:
 Review my React client integration for Day 2.
 
 Goal:
-React should call the Laravel REST API to list profiles and create a profile.
+React should call the Laravel REST API to list records and create a record for the Day 2 resource.
 
 Context:
 - Laravel API base URL: [paste URL]
 - VITE_API_BASE_URL: [paste value]
-- Expected endpoints: GET /users and POST /users
+- Project mode: [Prepared tutorial project / Existing Laravel project]
+- Tutorial endpoints: GET /users and POST /users
+- Actual endpoints in this project if different: [paste]
 
 Code to review:
 [paste src/api.js and the relevant App.jsx form/list code]
@@ -687,6 +748,7 @@ Please check:
 - validation errors from 422 are displayed near the correct fields.
 - the form does not hard-code Laravel validation rules beyond basic UI hints.
 - no Laravel controllers, models, or PHP files are imported into React.
+- if this is an existing project, React follows the existing endpoint names and response shape instead of forcing the tutorial /users shape.
 
 Return:
 - integration issues,
@@ -703,37 +765,45 @@ Goal:
 Help me complete Day 2 of the Laravel API tutorial.
 
 Context:
-I have a Day 1 Laravel API endpoint. Today I need RESTful CRUD routes, form request validation, correct HTTP status codes, expected JSON response checks, and React create/list calls for user profiles. Most participants use Laragon or XAMPP, so verify the MySQL service, `.env` database settings, and one consistent API base URL before editing CRUD code.
+I have a Day 1 Laravel API endpoint. Today I need RESTful CRUD routes, form request validation, correct HTTP status codes, expected JSON response checks, and React create/list calls. Some students use the prepared tutorial project, while others use an existing Laravel project. Most participants use Laragon or XAMPP, so verify the MySQL service, `.env` database settings, and one consistent API base URL before editing CRUD code.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
+If this is an existing Laravel project:
+- First inspect and summarize the current API routes, model, controller, migration/table, middleware, auth, response format, and naming conventions.
+- Map the Day 2 tutorial resource to the closest existing resource.
+- Do not rename existing domain concepts just to match the tutorial.
+- Preserve current namespaces, middleware, policies, route names, services, API resources, tests, and database conventions unless I explicitly approve a change.
 
 Relevant files:
-- routes/api.php
-- app/Http/Controllers/Api/V1/UserProfileController.php
-- app/Http/Requests/StoreUserProfileRequest.php
-- app/Http/Requests/UpdateUserProfileRequest.php
-- app/Models/UserProfile.php
-- examples/day-2-restful-routes-validation
-- examples/react-client-api-consumer/src/api.js
-- examples/react-client-api-consumer/src/App.jsx
+- Tutorial example files: examples/day-2-restful-routes-validation and examples/react-client-api-consumer.
+- Existing project files, if different: [paste route/controller/model/request/resource/test paths].
+- Route-list output: [paste php artisan route:list --path=api relevant lines].
+- Current table columns or migration: [paste relevant columns].
+- Current React API helper/component files: [paste paths].
 
 Constraints:
 - Inspect the current files before editing.
-- Preserve /api/v1 route versioning.
+- Preserve the existing route versioning or prefix; for the prepared tutorial project, use /api/v1.
 - Use Route::apiResource unless the existing project has a better local pattern.
 - Keep validation in FormRequest classes.
 - Do not change unrelated endpoints.
 - Keep the API base URL consistent between Laravel, curl/API client, and React.
+- For existing projects, propose minimal patches that fit the current architecture instead of copying the tutorial structure blindly.
 
 Done criteria:
-- GET, POST, GET by ID, PATCH, and DELETE work for /api/v1/users.
+- GET, POST, GET by ID, PATCH, and DELETE work for the selected Day 2 resource endpoint.
 - POST returns 201.
 - DELETE returns 204.
 - invalid input returns 422 JSON with errors.
-- React can create and list profiles through the same API contract.
+- React can create and list records through the same API contract.
 
 Verification:
 - Run or suggest php artisan route:list --path=api.
 - Provide request examples and expected JSON responses for create, validation error, show, update, and delete.
 - If tests exist, run or suggest the targeted API feature tests.
+- If this is an existing project, explain what existing conventions were preserved.
 ```
 
 ## HTTP Status Code Guide
