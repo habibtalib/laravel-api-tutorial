@@ -32,6 +32,7 @@ Peserta boleh:
 - membina form request validation.
 - memulangkan status code yang sesuai.
 - configure Hari 2 dengan konsisten untuk pengguna Laragon atau XAMPP.
+- menggunakan AI prompt sebagai checkpoint semasa setup, routes, validation, controller, API testing, dan React integration.
 - test CRUD dengan menyemak request dan response JSON.
 - membina React list screen dan create form yang call REST API.
 - memaparkan validation errors daripada Laravel.
@@ -110,6 +111,33 @@ Peraturan setup yang paling penting:
 
 Jangan campur URL. Jika Laravel berjalan di `http://127.0.0.1:8000`, React perlu call `http://127.0.0.1:8000/api/v1`. Jika Laravel berjalan di `http://abc-api.test`, React perlu call `http://abc-api.test/api/v1`.
 
+### AI Prompt Checkpoint - Setup Local
+
+Gunakan prompt ini sebelum menulis kod CRUD:
+
+```text
+I am preparing Day 2 of a Laravel API training project.
+
+Please check my local setup before I build CRUD.
+
+My setup:
+- Local stack: [Laragon or XAMPP]
+- Laravel API URL: [example: http://127.0.0.1:8000/api/v1]
+- React VITE_API_BASE_URL: [paste value]
+- DB_HOST: [paste value]
+- DB_PORT: [paste value]
+- DB_DATABASE: [paste value]
+- DB_USERNAME: [paste value]
+
+Task:
+Identify any mismatch that could break php artisan migrate, curl/API client requests, or React API calls.
+
+Rules:
+- Do not change code yet.
+- Do not ask for database passwords.
+- Give me a short checklist of what to fix first.
+```
+
 ## RESTful API Pattern
 
 | Method | URI | Action | Status |
@@ -163,6 +191,31 @@ store
 show
 update
 destroy
+```
+
+### AI Prompt Checkpoint - Resource Routes
+
+Gunakan prompt ini selepas edit `routes/api.php`:
+
+```text
+Review my Laravel API route file for Day 2.
+
+Goal:
+I need RESTful user profile routes under /api/v1/users using Route::apiResource.
+
+Code to review:
+[paste routes/api.php]
+
+Please check:
+- /api/v1/users maps to index and store.
+- /api/v1/users/{user} maps to show, update, and destroy.
+- create and edit web routes are not generated.
+- route grouping keeps API versioning clear.
+
+Return:
+- any issue found,
+- the expected php artisan route:list --path=api/v1/users output,
+- one corrected routes/api.php example only if my code is wrong.
 ```
 
 ## Step 2 - Create Form Request Classes
@@ -228,6 +281,34 @@ Nota trainer:
 - `sometimes` bermaksud validate hanya jika field itu dihantar.
 - `unique` menghalang duplicate `id_card_number`.
 - `ignore($profileId)` membenarkan record semasa mengekalkan `id_card_number` sendiri semasa update.
+
+### AI Prompt Checkpoint - Validation Rules
+
+Gunakan prompt ini selepas create kedua-dua FormRequest:
+
+```text
+Review my Laravel FormRequest validation for Day 2.
+
+Files:
+- StoreUserProfileRequest.php
+- UpdateUserProfileRequest.php
+
+Code to review:
+[paste both files]
+
+Please check:
+- create requires full_name, phone, and id_card_number.
+- update uses sometimes for partial PATCH requests.
+- id_card_number is unique on create.
+- update ignores the current user profile ID when checking uniqueness.
+- nullable fields are safe and have reasonable max lengths.
+- authorize() returns true for this training lab.
+
+Return:
+- validation issues,
+- corrected rules if needed,
+- one invalid JSON payload I can use to confirm a 422 response.
+```
 
 ## Step 3 - Build Controller CRUD
 
@@ -300,6 +381,33 @@ class UserProfileController extends Controller
 Kenapa guna `findOrFail` hari ini?
 
 Pada Hari 5, kita akan tukar kepada route model binding. Untuk Hari 2, peserta perlu nampak flow asas: ambil ID daripada URL, cari record, dan pulangkan `404` jika record tidak wujud.
+
+### AI Prompt Checkpoint - Controller Review
+
+Gunakan prompt ini selepas implement CRUD controller:
+
+```text
+Review my Day 2 Laravel API controller.
+
+Goal:
+The controller must implement index, store, show, update, and destroy for /api/v1/users.
+
+Code to review:
+[paste UserProfileController.php]
+
+Please check:
+- index returns a JSON list.
+- store uses $request->validated() and returns 201.
+- show uses findOrFail and returns JSON.
+- update uses $request->validated().
+- destroy returns 204 No Content.
+- no unrelated authentication, service layer, or route model binding changes were introduced.
+
+Return:
+- bugs or missing status codes,
+- any risky Laravel behavior,
+- corrected code only for the broken methods.
+```
 
 ## Step 4 - Test Create Endpoint
 
@@ -441,6 +549,29 @@ Jangkaan response untuk delete:
 204 No Content, body kosong
 ```
 
+### AI Prompt Checkpoint - API Response Review
+
+Gunakan prompt ini selepas test create, validation error, show, update, dan delete:
+
+```text
+Review my Day 2 API test results.
+
+Expected behavior:
+- POST /api/v1/users returns 201 JSON.
+- invalid POST returns 422 JSON with errors.
+- GET /api/v1/users/{id} returns 200 JSON or 404 JSON.
+- PATCH /api/v1/users/{id} returns 200 JSON.
+- DELETE /api/v1/users/{id} returns 204 with an empty body.
+
+My results:
+[paste each request URL, status code, and response JSON]
+
+Please identify:
+- which endpoint is wrong,
+- whether the issue is route, validation, controller, model fillable, database, or request headers,
+- the next command or file I should check.
+```
+
 ## Step 7 - Connect React Kepada CRUD Endpoints
 
 Gunakan folder contoh React:
@@ -472,6 +603,37 @@ apiRequest('/users', {
 Point pengajaran:
 
 React form tidak menentukan validation rules. Laravel validate request dan memulangkan JSON errors. React memaparkan errors itu kepada user.
+
+### AI Prompt Checkpoint - React Integration
+
+Gunakan prompt ini selepas sambung React list dan create form untuk Hari 2:
+
+```text
+Review my React client integration for Day 2.
+
+Goal:
+React should call the Laravel REST API to list profiles and create a profile.
+
+Context:
+- Laravel API base URL: [paste URL]
+- VITE_API_BASE_URL: [paste value]
+- Expected endpoints: GET /users and POST /users
+
+Code to review:
+[paste src/api.js and the relevant App.jsx form/list code]
+
+Please check:
+- React uses the same API base URL as Laravel.
+- POST sends JSON and handles 201.
+- validation errors from 422 are displayed near the correct fields.
+- the form does not hard-code Laravel validation rules beyond basic UI hints.
+- no Laravel controllers, models, or PHP files are imported into React.
+
+Return:
+- integration issues,
+- corrected JavaScript only where needed,
+- one manual browser test checklist.
+```
 
 ## Prompt GSD Claude Code
 
