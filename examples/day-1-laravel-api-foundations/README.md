@@ -66,16 +66,26 @@ Test the endpoint:
 bash examples/day-1-laravel-api-foundations/snippets/curl-test.sh
 ```
 
-If you copied the examples into a different location, run the curl command manually:
+If you copied the examples into a different location, send the request manually:
 
 ```bash
-curl http://127.0.0.1:8000/api/v1/users
+curl http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json"
 ```
 
-Expected endpoint:
+Expected JSON response shape:
 
-```text
-GET /api/v1/users
+```json
+{
+  "message": "User profiles retrieved successfully.",
+  "data": [
+    {
+      "id": 1,
+      "full_name": "Aina Rahman",
+      "phone": "+60123456789"
+    }
+  ]
+}
 ```
 
 ## Files Included
@@ -86,4 +96,4 @@ GET /api/v1/users
 - `user_profiles` migration
 - MySQL `.env` example
 - Tinker seed snippet
-- curl test script
+- JSON response test script
