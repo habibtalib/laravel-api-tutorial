@@ -424,6 +424,44 @@ Teaching point:
 - The browser client talks to Laravel using HTTP, JSON, and headers.
 - If the browser blocks the request, check Laravel CORS settings.
 
+## GSD Claude Code Prompt
+
+Use this prompt if students want Claude Code to help with the Day 1 tutorial. It keeps the assistant focused on inspection, planning, implementation, and verification.
+
+```text
+Goal:
+Help me complete Day 1 of the Laravel API tutorial.
+
+Context:
+I am building the ABC Company Profile API in Laravel 12. Today I need a fresh API project, SQLite setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
+
+Relevant files:
+- routes/api.php
+- database/migrations
+- app/Models/UserProfile.php
+- app/Http/Controllers/Api/V1/UserProfileController.php
+- examples/day-1-laravel-api-foundations
+- examples/react-client-api-consumer
+
+Constraints:
+- Inspect the repo before suggesting edits.
+- Do not change unrelated files.
+- Keep the route versioned under /api/v1.
+- Do not hard-code secrets or local machine paths.
+- Explain assumptions before editing.
+
+Done criteria:
+- php artisan route:list --path=api shows GET /api/v1/users.
+- php artisan migrate runs successfully.
+- GET /api/v1/users returns JSON.
+- React has VITE_API_BASE_URL configured for the Laravel API.
+
+Verification:
+- Run or suggest php artisan route:list --path=api.
+- Run or suggest a curl command for GET /api/v1/users.
+- Explain any failure before fixing it.
+```
+
 ## Class Exercise
 
 Students must add a third user profile and confirm it appears in:
