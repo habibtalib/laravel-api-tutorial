@@ -2,11 +2,11 @@
 
 ## Class Goal
 
-By the end of Day 1, students can set up a Laravel 12 API project, explain the API request lifecycle, create a model and migration, return the first JSON response from a versioned API route, and prepare a React/Vite client shell for later API calls.
+By the end of Day 1, students can set up a Laravel API project, explain the API request lifecycle, create a model and migration, return the first JSON response from a versioned API route, and prepare a React/Vite client shell for later API calls.
 
 ## PDF Reference
 
-This day is based on PDF pages 4-8, covering the Laravel API overview, Laravel 12 setup, MVC structure, request flow, and `routes/api.php` setup. The hands-on model, migration, controller, and SQLite workflow are course expansions beyond the PDF.
+This day is based on PDF pages 4-8, covering the Laravel API overview, Laravel setup, MVC structure, request flow, and `routes/api.php` setup. The hands-on model, migration, controller, and SQLite workflow are course expansions beyond the PDF.
 
 ## Project Context
 
@@ -19,7 +19,7 @@ The whole 5-day course builds this same API step by step.
 | Time | Topic | Activity |
 | --- | --- | --- |
 | 00:00-00:45 | API fundamentals | Explain what APIs do and why JSON APIs matter |
-| 00:45-01:30 | Laravel 12 setup | Install or verify PHP, Composer, database, and Laravel |
+| 00:45-01:30 | Laravel setup | Install or verify PHP, Composer, database, and Laravel |
 | 01:30-02:15 | Laravel structure | Walk through routes, controllers, models, migrations, config, and bootstrap |
 | 02:15-02:30 | Break | Short break |
 | 02:30-03:30 | API route setup | Enable API routes and create the first route |
@@ -32,7 +32,7 @@ The whole 5-day course builds this same API step by step.
 
 - Understand Laravel as an API backend.
 - Explain the route to controller to model to database flow.
-- Enable Laravel 12 API routing.
+- Enable Laravel API routing.
 - Create a database-backed API resource.
 - Return consistent JSON responses.
 - Explain that React consumes the API over HTTP and does not call Laravel classes directly.
@@ -72,9 +72,9 @@ Students should have:
 
 For local training, SQLite is the simplest database choice.
 
-## Important Laravel 12 Note
+## Important Laravel Note
 
-The PDF mentions `php artisan api:install`. Current Laravel 12 documentation uses:
+The PDF mentions `php artisan api:install`. Current Laravel documentation uses:
 
 ```bash
 php artisan install:api
@@ -142,7 +142,7 @@ php artisan config:clear
 
 ## Step 3 - Enable API Routes
 
-Laravel 12 does not always include `routes/api.php` in a fresh project. Install API support:
+Laravel does not always include `routes/api.php` in a fresh project. Install API support:
 
 ```bash
 php artisan install:api
@@ -433,7 +433,7 @@ Goal:
 Help me complete Day 1 of the Laravel API tutorial.
 
 Context:
-I am building the ABC Company Profile API in Laravel 12. Today I need a fresh API project, SQLite setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
+I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, SQLite setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
 
 Relevant files:
 - routes/api.php
