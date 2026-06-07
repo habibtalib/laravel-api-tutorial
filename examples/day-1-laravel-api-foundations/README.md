@@ -12,7 +12,6 @@ Create the Laravel project first:
 composer create-project laravel/laravel abc-api
 cd abc-api
 php artisan install:api
-touch database/database.sqlite
 ```
 
 Update `.env` using:
@@ -29,6 +28,12 @@ Then copy these files into the Laravel project:
 | `app/Models/UserProfile.php` | `app/Models/UserProfile.php` |
 | `app/Http/Controllers/Api/V1/UserProfileController.php` | `app/Http/Controllers/Api/V1/UserProfileController.php` |
 | `database/migrations/2026_06_06_000001_create_user_profiles_table.php` | `database/migrations/2026_06_06_000001_create_user_profiles_table.php` |
+
+Make sure the MySQL database exists before running migrations:
+
+```sql
+CREATE DATABASE abc_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
 Run:
 
@@ -79,7 +84,6 @@ GET /api/v1/users
 - `UserProfile` model
 - `UserProfileController`
 - `user_profiles` migration
-- SQLite `.env` example
+- MySQL `.env` example
 - Tinker seed snippet
 - curl test script
-
