@@ -151,7 +151,7 @@ The plan must include:
 - validation rules,
 - security/middleware impact,
 - tests to add or update,
-- manual curl or Postman checks.
+- request examples and expected JSON responses.
 
 Do not edit files until the plan is clear.
 ```
@@ -220,7 +220,7 @@ After editing, summarize changed files and how to test in the browser.
 
 ## Prompt 5 - Debug A Failing API Request
 
-Use this when a request fails from curl, Postman, or React.
+Use this when a request fails from an API client, Postman, or React.
 
 ```text
 I have a failing Laravel API request.
@@ -240,7 +240,7 @@ Please debug systematically:
 3. explain the most likely cause.
 4. propose the smallest fix.
 5. only edit files after explaining the fix.
-6. provide a curl command or test command to verify.
+6. provide the verification request, expected JSON response, or test command.
 
 Do not change unrelated code.
 ```
@@ -409,7 +409,7 @@ Use this Markdown checklist during labs.
 
 ## Verify
 - [ ] Tests pass
-- [ ] curl/Postman request works
+- [ ] Request returns the expected JSON response
 - [ ] React client behavior works if affected
 - [ ] Error cases checked
 

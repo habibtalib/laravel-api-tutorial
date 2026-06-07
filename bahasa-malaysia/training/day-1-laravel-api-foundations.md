@@ -2,11 +2,11 @@
 
 ## Matlamat Kelas
 
-Peserta memahami asas Laravel API, menyediakan projek Laravel 12, mengaktifkan API routes, membina model dan migration pertama, kemudian menghasilkan endpoint JSON versioned pertama.
+Peserta memahami asas Laravel API, menyediakan projek Laravel, mengaktifkan API routes, membina model dan migration pertama, menghasilkan endpoint JSON versioned pertama, dan menyediakan React/Vite client shell.
 
 ## Rujukan PDF
 
-Hari ini merujuk kepada PDF halaman 4-8, buku halaman 1-5. Kandungan utama: setup Laravel 12, struktur MVC, request flow, dan `routes/api.php`.
+Hari ini merujuk kepada PDF halaman 4-8, buku halaman 1-5. Kandungan utama: setup Laravel, struktur MVC, request flow, dan `routes/api.php`.
 
 ## Konteks Projek
 
@@ -21,47 +21,53 @@ GET /api/v1/users
 | Masa | Fokus | Aktiviti |
 | --- | --- | --- |
 | 00:00-00:45 | Pengenalan API | Terangkan REST, JSON, HTTP status, dan versioning |
-| 00:45-01:30 | Setup Laravel | Create project, configure SQLite, install API scaffold |
+| 00:45-01:30 | Setup Laravel | Create project, configure MySQL, install API scaffold |
 | 01:30-02:15 | API routes | Aktifkan `routes/api.php` dan bina route pertama |
 | 02:15-03:15 | Model dan migration | Bina `UserProfile` model dan table |
-| 03:15-04:30 | Controller | Bina endpoint JSON pertama |
-| 04:30-06:00 | Lab | Seed data, test dengan curl/Postman, review common mistakes |
+| 03:15-04:25 | Controller | Bina endpoint JSON pertama |
+| 04:25-05:10 | Lab API | Seed data dan semak response JSON |
+| 05:10-05:45 | React client shell | Create/inspect Vite app dan configure API `.env` values |
+| 05:45-06:00 | Review | Recap peranan backend API dan browser client |
 
 ## Objektif Pembelajaran
 
 Peserta boleh:
 
-- setup projek Laravel 12.
+- setup projek Laravel.
 - mengaktifkan API route file.
 - menerangkan request flow asas Laravel API.
 - membina model, migration, dan controller.
 - memulangkan response JSON.
 - menggunakan route prefix `/api/v1`.
+- menerangkan bahawa React memanggil API melalui HTTP.
+- configure React API base URL dan frontend token.
 
 ## Diagram Architecture
 
 ```mermaid
 flowchart LR
-    Client["curl/Postman"] --> Route["GET /api/v1/users"]
+    Client["API client"] --> Route["GET /api/v1/users"]
+    React["React client shell"] --> Route
     Route --> ApiRoutes["routes/api.php"]
     ApiRoutes --> Controller["UserProfileController@index"]
     Controller --> Model["UserProfile model"]
-    Model --> DB["SQLite database"]
+    Model --> DB["MySQL database"]
     Controller --> JSON["JSON response"]
+    JSON --> React
 ```
 
 ## Prasyarat
 
 - PHP 8.2 atau lebih baru.
 - Composer.
-- SQLite atau database lain.
+- MySQL 8.0 atau lebih baru.
 - Terminal.
 - Code editor.
 - curl, Postman, atau Insomnia.
 
-## Nota Penting Laravel 12
+## Nota Penting Laravel
 
-Laravel 12 tidak sentiasa menghasilkan `routes/api.php` secara automatik. Jalankan:
+Laravel tidak sentiasa menghasilkan `routes/api.php` secara automatik. Jalankan:
 
 ```bash
 php artisan install:api
@@ -94,20 +100,26 @@ Semak app berjalan:
 curl http://127.0.0.1:8000
 ```
 
-## Step 2 - Configure SQLite Untuk Kelas
+## Step 2 - Configure MySQL Untuk Kelas
 
-Bina fail SQLite:
+Bina database latihan:
 
-```bash
-touch database/database.sqlite
+```sql
+CREATE DATABASE abc_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 Update `.env`:
 
 ```dotenv
-DB_CONNECTION=sqlite
-DB_DATABASE=database/database.sqlite
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=abc_api
+DB_USERNAME=root
+DB_PASSWORD=
 ```
+
+Jika user MySQL local bukan `root`, ubah `DB_USERNAME` dan `DB_PASSWORD` mengikut mesin anda.
 
 Clear config:
 
@@ -275,6 +287,80 @@ Jangkaan bentuk response:
 }
 ```
 
+## Step 11 - Sediakan React Client Shell
+
+Peserta meminta client side seperti React, jadi latihan 5 hari kini memasukkan React secara berperingkat. Pada Hari 1, fokus hanya kepada setup client dan sempadan sistem:
+
+```text
+React browser client -> HTTP request -> Laravel API -> JSON response
+```
+
+Create Vite React app:
+
+```bash
+npm create vite@latest abc-api-client -- --template react
+cd abc-api-client
+npm install
+```
+
+Salin starter client daripada:
+
+```text
+examples/react-client-api-consumer
+```
+
+Create `.env.local`:
+
+```dotenv
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+VITE_FRONTEND_API_TOKEN=abc-training-frontend-token
+```
+
+Point pengajaran:
+
+- Laravel berjalan pada `http://127.0.0.1:8000`.
+- React biasanya berjalan pada `http://localhost:5173`.
+- Browser client bercakap dengan Laravel menggunakan HTTP, JSON, dan headers.
+- Jika browser block request, semak CORS Laravel.
+
+## Prompt GSD Claude Code
+
+Gunakan prompt ini jika peserta mahu Claude Code membantu tutorial Hari 1. Prompt ini memastikan assistant inspect, plan, implement, dan verify dengan disiplin.
+
+```text
+Goal:
+Help me complete Day 1 of the Laravel API tutorial.
+
+Context:
+I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, MySQL setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
+
+Relevant files:
+- routes/api.php
+- database/migrations
+- app/Models/UserProfile.php
+- app/Http/Controllers/Api/V1/UserProfileController.php
+- examples/day-1-laravel-api-foundations
+- examples/react-client-api-consumer
+
+Constraints:
+- Inspect the repo before suggesting edits.
+- Do not change unrelated files.
+- Keep the route versioned under /api/v1.
+- Do not hard-code secrets or local machine paths.
+- Explain assumptions before editing.
+
+Done criteria:
+- php artisan route:list --path=api shows GET /api/v1/users.
+- php artisan migrate runs successfully.
+- GET /api/v1/users returns JSON.
+- React has VITE_API_BASE_URL configured for the Laravel API.
+
+Verification:
+- Run or suggest php artisan route:list --path=api.
+- Provide the request and expected JSON response for GET /api/v1/users.
+- Explain any failure before fixing it.
+```
+
 ## Latihan Kelas
 
 1. Tambah dua lagi user profile melalui Tinker.
@@ -291,7 +377,7 @@ Route::get('/health', fn () => response()->json(['message' => 'ABC API is health
 - Menulis `/api/v1/users` di dalam `routes/api.php`; sepatutnya `/v1/users`.
 - Lupa run `php artisan migrate`.
 - Lupa set `$fillable` pada model.
-- Menggunakan database path SQLite yang salah.
+- Menggunakan nama database, username, atau password MySQL yang salah.
 - Tidak clear config selepas edit `.env`.
 
 ## Soalan Review Hari 1
@@ -301,6 +387,7 @@ Route::get('/health', fn () => response()->json(['message' => 'ABC API is health
 - Apakah beza controller dan model?
 - Kenapa kita pulangkan JSON?
 - Apakah URL sebenar jika route ditulis sebagai `/v1/users` dalam `routes/api.php`?
+- Kenapa React perlu call API melalui HTTP dan bukan import kod Laravel?
 
 ## Kerja Rumah
 
@@ -310,3 +397,4 @@ Tambah field `department` dalam `user_profiles`:
 2. Update model `$fillable`.
 3. Tambah sample data.
 4. Pastikan response JSON memaparkan `department`.
+5. Pastikan `.env.local` React mempunyai API base URL yang betul.

@@ -15,7 +15,7 @@ Page numbers below use the physical PDF page number shown by most PDF viewers. T
 | Training part | Related PDF pages | PDF content used | Course expansion beyond PDF |
 | --- | --- | --- | --- |
 | Day 1 - Laravel API Foundations | PDF pages 4-8, book pages 1-5 | Laravel API overview, Laravel setup, MVC structure, request flow, `routes/api.php` setup | Full project setup, MySQL workflow, first model, migration, controller, and JSON endpoint |
-| Day 2 - RESTful Routes, CRUD, And Validation | PDF pages 9-12, book pages 6-9 | REST methods, route prefixes, versioning, `Route::apiResource`, named routes, route caching notes | Full CRUD controller, form request validation, status codes, curl labs |
+| Day 2 - RESTful Routes, CRUD, And Validation | PDF pages 9-12, book pages 6-9 | REST methods, route prefixes, versioning, `Route::apiResource`, named routes, route caching notes | Full CRUD controller, form request validation, status codes, and JSON response labs |
 | Day 3 - API Security | PDF pages 11-13, book pages 8-10 | `auth:sanctum`, middleware registration, throttling, frontend `X-API-TOKEN`, API security checklist | Complete Sanctum login/logout flow, token testing, middleware alias implementation |
 | Day 4 - Performance And Exception Handling | PDF pages 14-18, book pages 11-15 | Redis caching, `Cache::remember`, eager loading, route/config cache, centralized exception handling, pagination | Project relationship example, cache keys, cache clearing after writes, detailed JSON exception responses |
 | Day 5 - Service Layer And Final Project | PDF pages 16-18, book pages 13-15 | service layer pattern, route model binding, API resources/serialization, optimization summary | Full service class, API resources, final architecture, route model binding refactor |
@@ -112,7 +112,7 @@ flowchart LR
 flowchart TB
     Browser["React browser client"] --> Fetch["fetch API calls"]
     Fetch --> Security["Frontend token, throttling, Sanctum"]
-    Client["curl/Postman API client"] --> Security
+    Client["API client"] --> Security
     Security --> Routes["routes/api.php"]
     Routes --> Controllers["API controllers"]
     Controllers --> Requests["Form requests"]
@@ -171,7 +171,7 @@ Recommended local tools:
 - MySQL 8.0 or newer.
 - Git.
 - Node.js LTS and npm.
-- Postman, Insomnia, or curl.
+- Postman, Insomnia, or another API client.
 - Code editor.
 
 ## Instructor Preparation
@@ -181,7 +181,7 @@ Before training starts, prepare:
 - a clean Laravel project.
 - working PHP and Composer environment.
 - MySQL database and a dedicated `abc_api` schema for class setup.
-- Postman collection or curl examples.
+- Postman collection or JSON response examples.
 - React/Vite client starter in `examples/react-client-api-consumer`.
 - local CORS setting that allows `http://localhost:5173`.
 - local copy of all `training/*.md` files.

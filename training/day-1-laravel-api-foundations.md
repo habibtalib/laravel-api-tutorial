@@ -26,7 +26,7 @@ The whole 5-day course builds this same API step by step.
 | 03:30-04:45 | Model and migration | Create `UserProfile`, migration, and database table |
 | 04:45-05:20 | Controller response | Return JSON from a controller |
 | 05:20-05:45 | React client shell | Create or inspect the Vite app and configure API `.env` values |
-| 05:45-06:00 | Review lab | Run route list, test with curl/Postman, recap client/server roles |
+| 05:45-06:00 | Review lab | Run route list, inspect JSON response, recap client/server roles |
 
 ## Learning Objectives
 
@@ -44,7 +44,7 @@ Day 1 focuses on the basic Laravel API request lifecycle. Students should unders
 
 ```mermaid
 flowchart LR
-    Client["curl/Postman"] --> Request["GET /api/v1/users"]
+    Client["API client"] --> Request["GET /api/v1/users"]
     React["React client shell"] --> Request
     Request --> Entry["public/index.php"]
     Entry --> Bootstrap["bootstrap/app.php"]
@@ -465,7 +465,7 @@ Done criteria:
 
 Verification:
 - Run or suggest php artisan route:list --path=api.
-- Run or suggest a curl command for GET /api/v1/users.
+- Provide the request and expected JSON response for GET /api/v1/users.
 - Explain any failure before fixing it.
 ```
 

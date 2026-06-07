@@ -94,7 +94,7 @@ Bonus examples:
 2. Present the matching slide section.
 3. Walk through the daily Markdown tutorial.
 4. Copy or compare code from the matching `examples/` folder.
-5. Run the API with curl, Postman, or the React/Vite client.
+5. Run API requests and inspect the JSON responses with an API client or the React/Vite client.
 6. End each day with the review checklist and lab exercise.
 
 ## Local Tools
@@ -107,7 +107,7 @@ Recommended tools for participants:
 - MySQL 8.0 or newer.
 - Node.js LTS and npm.
 - Git.
-- Postman, Insomnia, or curl.
+- Postman, Insomnia, or another API client.
 - Code editor.
 
 ## Notes
