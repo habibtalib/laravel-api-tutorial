@@ -372,7 +372,8 @@ php artisan serve
 Call the API:
 
 ```bash
-curl http://127.0.0.1:8000/api/v1/users
+curl http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json"
 ```
 
 Expected shape:
