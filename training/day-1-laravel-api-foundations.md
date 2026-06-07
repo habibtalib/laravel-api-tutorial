@@ -6,7 +6,7 @@ By the end of Day 1, students can set up a Laravel API project, explain the API 
 
 ## PDF Reference
 
-This day is based on PDF pages 4-8, covering the Laravel API overview, Laravel setup, MVC structure, request flow, and `routes/api.php` setup. The hands-on model, migration, controller, and SQLite workflow are course expansions beyond the PDF.
+This day is based on PDF pages 4-8, covering the Laravel API overview, Laravel setup, MVC structure, request flow, and `routes/api.php` setup. The hands-on model, migration, controller, and MySQL workflow are course expansions beyond the PDF.
 
 ## Project Context
 
@@ -51,7 +51,7 @@ flowchart LR
     Bootstrap --> Routes["routes/api.php"]
     Routes --> Controller["UserProfileController index"]
     Controller --> Model["UserProfile model"]
-    Model --> Database["SQLite database"]
+    Model --> Database["MySQL database"]
     Database --> Model
     Model --> Controller
     Controller --> Response["JSON response"]
@@ -65,12 +65,12 @@ Students should have:
 
 - PHP 8.2 or newer
 - Composer
-- SQLite, MySQL, or PostgreSQL
+- MySQL 8.0 or newer
 - Git
 - A code editor
 - Postman, Insomnia, or curl
 
-For local training, SQLite is the simplest database choice.
+For this training, MySQL is the default database so students practice the same relational database workflow commonly used in Laravel production projects.
 
 ## Important Laravel Note
 
@@ -115,12 +115,12 @@ Expected result:
 Laravel Framework 12.x.x
 ```
 
-## Step 2 - Configure SQLite For Class
+## Step 2 - Configure MySQL For Class
 
-Create the SQLite file:
+Create the training database:
 
-```bash
-touch database/database.sqlite
+```sql
+CREATE DATABASE abc_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 Update `.env`:
@@ -131,8 +131,15 @@ APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000
 
-DB_CONNECTION=sqlite
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=abc_api
+DB_USERNAME=root
+DB_PASSWORD=
 ```
+
+If your local MySQL user is not `root`, update `DB_USERNAME` and `DB_PASSWORD` to match your machine.
 
 Clear cached configuration if needed:
 
@@ -433,7 +440,7 @@ Goal:
 Help me complete Day 1 of the Laravel API tutorial.
 
 Context:
-I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, SQLite setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
+I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, MySQL setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
 
 Relevant files:
 - routes/api.php
