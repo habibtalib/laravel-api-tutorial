@@ -2,7 +2,7 @@
 
 ## Class Goal
 
-By the end of Day 1, students can set up a Laravel 12 API project, explain the API request lifecycle, create a model and migration, and return the first JSON response from a versioned API route.
+By the end of Day 1, students can set up a Laravel 12 API project, explain the API request lifecycle, create a model and migration, return the first JSON response from a versioned API route, and prepare a React/Vite client shell for later API calls.
 
 ## PDF Reference
 
@@ -24,8 +24,9 @@ The whole 5-day course builds this same API step by step.
 | 02:15-02:30 | Break | Short break |
 | 02:30-03:30 | API route setup | Enable API routes and create the first route |
 | 03:30-04:45 | Model and migration | Create `UserProfile`, migration, and database table |
-| 04:45-05:30 | Controller response | Return JSON from a controller |
-| 05:30-06:00 | Review lab | Run route list, test with curl or Postman, recap |
+| 04:45-05:20 | Controller response | Return JSON from a controller |
+| 05:20-05:45 | React client shell | Create or inspect the Vite app and configure API `.env` values |
+| 05:45-06:00 | Review lab | Run route list, test with curl/Postman, recap client/server roles |
 
 ## Learning Objectives
 
@@ -34,6 +35,8 @@ The whole 5-day course builds this same API step by step.
 - Enable Laravel 12 API routing.
 - Create a database-backed API resource.
 - Return consistent JSON responses.
+- Explain that React consumes the API over HTTP and does not call Laravel classes directly.
+- Configure the React client API base URL and frontend token.
 
 ## Architecture Diagram
 
@@ -41,7 +44,8 @@ Day 1 focuses on the basic Laravel API request lifecycle. Students should unders
 
 ```mermaid
 flowchart LR
-    Client["Client curl or Postman"] --> Request["GET /api/v1/users"]
+    Client["curl/Postman"] --> Request["GET /api/v1/users"]
+    React["React client shell"] --> Request
     Request --> Entry["public/index.php"]
     Entry --> Bootstrap["bootstrap/app.php"]
     Bootstrap --> Routes["routes/api.php"]
@@ -52,6 +56,7 @@ flowchart LR
     Model --> Controller
     Controller --> Response["JSON response"]
     Response --> Client
+    Response --> React
 ```
 
 ## Prerequisites
@@ -383,6 +388,42 @@ Expected shape:
 }
 ```
 
+## Step 11 - Prepare The React Client Shell
+
+Participants requested a browser client, so the 5-day plan now includes React progressively. On Day 1, only prepare the client and explain the boundary:
+
+```text
+React browser client -> HTTP request -> Laravel API -> JSON response
+```
+
+Create a Vite React app:
+
+```bash
+npm create vite@latest abc-api-client -- --template react
+cd abc-api-client
+npm install
+```
+
+Copy the starter client from:
+
+```text
+examples/react-client-api-consumer
+```
+
+Create `.env.local`:
+
+```dotenv
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+VITE_FRONTEND_API_TOKEN=abc-training-frontend-token
+```
+
+Teaching point:
+
+- Laravel runs on `http://127.0.0.1:8000`.
+- React usually runs on `http://localhost:5173`.
+- The browser client talks to Laravel using HTTP, JSON, and headers.
+- If the browser blocks the request, check Laravel CORS settings.
+
 ## Class Exercise
 
 Students must add a third user profile and confirm it appears in:
@@ -419,6 +460,7 @@ Ask them to identify:
 3. What is the role of a controller?
 4. What is the role of a model?
 5. Why does Laravel return `/api/v1/users` even though the route only says `v1/users`?
+6. Why should React call the API over HTTP instead of importing Laravel code?
 
 ## Homework
 
@@ -434,6 +476,7 @@ Then update:
 - Model `$fillable`
 - Tinker sample data
 - API response check
+- React `.env.local` API base URL
 
 If the migration already ran, students can create a new migration:
 
