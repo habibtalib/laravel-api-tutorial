@@ -111,7 +111,7 @@ Output:
 Use this before asking for changes.
 
 ```text
-You are helping with a Laravel 12 API training project.
+You are helping with a Laravel API training project.
 
 Please inspect the repository before suggesting changes.
 

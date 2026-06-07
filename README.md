@@ -58,12 +58,14 @@ English:
 - `training/bonus-tdd-laravel-api.md`
 - `training/bonus-swagger-openapi.md`
 - `training/bonus-filamentphp-admin-api.md`
+- `training/bonus-gsd-claude-code-prompts.md`
 
 Bahasa Malaysia:
 
 - `bahasa-malaysia/training/bonus-tdd-laravel-api.md`
 - `bahasa-malaysia/training/bonus-swagger-openapi.md`
 - `bahasa-malaysia/training/bonus-filamentphp-admin-api.md`
+- `bahasa-malaysia/training/bonus-gsd-claude-code-prompts.md`
 
 ## Example Projects
 
@@ -101,8 +103,8 @@ Recommended tools for participants:
 
 - PHP 8.2 or newer.
 - Composer.
-- Laravel 12.
-- SQLite, MySQL, or PostgreSQL.
+- Laravel.
+- MySQL 8.0 or newer.
 - Node.js LTS and npm.
 - Git.
 - Postman, Insomnia, or curl.
