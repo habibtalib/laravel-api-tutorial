@@ -3,6 +3,12 @@ const FRONTEND_API_TOKEN = import.meta.env.VITE_FRONTEND_API_TOKEN;
 
 export async function apiRequest(path, { method = 'GET', token, body, query } = {}) {
   const url = new URL(`${API_BASE_URL}${path}`);
+  const headers = {
+    Accept: 'application/json',
+    ...(body ? { 'Content-Type': 'application/json' } : {}),
+    ...(FRONTEND_API_TOKEN ? { 'X-API-TOKEN': FRONTEND_API_TOKEN } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
 
   Object.entries(query || {}).forEach(([key, value]) => {
     if (value !== '' && value !== null && value !== undefined) {
@@ -12,12 +18,7 @@ export async function apiRequest(path, { method = 'GET', token, body, query } = 
 
   const response = await fetch(url, {
     method,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-API-TOKEN': FRONTEND_API_TOKEN,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers,
     body: body ? JSON.stringify(body) : undefined,
   });
 

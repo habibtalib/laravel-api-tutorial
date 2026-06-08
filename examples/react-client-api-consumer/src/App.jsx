@@ -26,9 +26,7 @@ export default function App() {
   const isAuthenticated = useMemo(() => Boolean(token), [token]);
 
   useEffect(() => {
-    if (token) {
-      loadProfiles();
-    }
+    loadProfiles();
   }, []);
 
   async function run(action, successMessage) {
@@ -141,7 +139,11 @@ export default function App() {
       </header>
 
       <section className="panel">
-        <h2>Login</h2>
+        <h2>Login for Day 3+</h2>
+        <p className="small">
+          Day 1 and Day 2 can load profiles before login. After Day 3 security is added,
+          log in first if the API returns 401.
+        </p>
         <form className="grid-form" onSubmit={login}>
           <label>
             Email
@@ -162,7 +164,7 @@ export default function App() {
       <section className="panel">
         <div className="section-header">
           <h2>User profiles</h2>
-          <button onClick={() => loadProfiles()} disabled={!isAuthenticated || loading}>
+          <button onClick={() => loadProfiles()} disabled={loading}>
             Load profiles
           </button>
         </div>
@@ -178,7 +180,7 @@ export default function App() {
             <option value="1">Active</option>
             <option value="0">Inactive</option>
           </select>
-          <button onClick={() => loadProfiles()} disabled={!isAuthenticated || loading}>
+          <button onClick={() => loadProfiles()} disabled={loading}>
             Apply
           </button>
         </div>
@@ -199,6 +201,9 @@ export default function App() {
 
       <section className="panel">
         <h2>Create profile</h2>
+        <p className="small">
+          Create starts working from Day 2. After Day 3 security is added, log in first if the API returns 401.
+        </p>
         <form className="grid-form" onSubmit={createProfile}>
           <label>
             Full name
@@ -228,7 +233,7 @@ export default function App() {
             />
             Active
           </label>
-          <button disabled={!isAuthenticated || loading}>Create</button>
+          <button disabled={loading}>Create</button>
         </form>
       </section>
 
