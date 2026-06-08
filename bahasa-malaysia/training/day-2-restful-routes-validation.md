@@ -123,6 +123,28 @@ Gunakan rule ini untuk setiap AI prompt:
 - Jangan minta AI overwrite struktur existing project semata-mata untuk ikut tutorial.
 - Minta AI map matlamat tutorial Hari 2 kepada resource existing yang paling dekat, kemudian cadangkan perubahan paling kecil.
 
+### Pilihan Konteks MCP
+
+Jika peserta menggunakan Claude Code, Codex, atau AI tool lain yang ada akses MCP, gunakan MCP sebagai lapisan context-gathering sebelum minta edit.
+
+Konteks MCP yang berguna untuk Hari 2:
+
+| Konteks MCP | Kegunaan |
+| --- | --- |
+| Filesystem/project tools | Baca `routes/api.php`, controllers, requests, models, migrations, dan fail React |
+| Terminal/shell tools | Run `php artisan route:list --path=api`, `php artisan migrate:status`, atau targeted tests |
+| Browser tools | Semak React form, paparan validation, dan API calls dalam browser |
+| Git tools | Semak local changes sebelum patch existing project |
+| Database/schema tools, jika ada | Sahkan table names, columns, indexes, dan unique constraints |
+
+Rule keselamatan MCP:
+
+- Gunakan MCP untuk inspect sebelum edit.
+- Jangan dedahkan `.env` secrets, API tokens, production data, atau customer records.
+- Utamakan MCP tools yang read-only dahulu.
+- Minta AI terangkan fail atau command yang sudah diinspect.
+- Untuk existing project, minta AI kekalkan architecture semasa kecuali trainer approve perubahan.
+
 ### AI Prompt Checkpoint - Setup Local
 
 Gunakan prompt ini sebelum menulis kod CRUD:
@@ -134,6 +156,9 @@ Please check my local setup before I build CRUD.
 
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
+
+MCP context available:
+- [none / filesystem / terminal / browser / git / database schema / other]
 
 My setup:
 - Local stack: [Laragon or XAMPP]
@@ -157,6 +182,7 @@ Rules:
 - Do not ask for database passwords.
 - Do not assume the project uses the tutorial file names.
 - Preserve existing project conventions and identify equivalent files first.
+- If MCP tools are available, inspect the project and summarize what you checked before suggesting edits.
 - Give me a short checklist of what to fix first.
 ```
 
@@ -228,6 +254,9 @@ I need RESTful CRUD routes for the Day 2 resource. In the prepared tutorial this
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
 
+MCP context available:
+- [none / filesystem / terminal / git]
+
 Existing project context if applicable:
 - Current route prefix: [paste]
 - Current resource URI: [paste]
@@ -248,6 +277,7 @@ Return:
 - any issue found,
 - the expected route-list output for my actual route prefix,
 - one corrected routes/api.php example only if my code is wrong,
+- which files or route-list output you used as evidence,
 - no rewrite of unrelated routes.
 ```
 
@@ -325,6 +355,9 @@ Review my Laravel FormRequest validation for Day 2.
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
 
+MCP context available:
+- [none / filesystem / terminal / database schema / git]
+
 Files:
 - StoreUserProfileRequest.php
 - UpdateUserProfileRequest.php
@@ -350,6 +383,7 @@ Return:
 - validation issues,
 - corrected rules if needed,
 - one invalid JSON payload I can use to confirm a 422 response.
+- which migration/model/request files you used as evidence.
 ```
 
 ## Step 3 - Build Controller CRUD
@@ -437,6 +471,9 @@ The controller must implement index, store, show, update, and destroy for the Da
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
 
+MCP context available:
+- [none / filesystem / terminal / git]
+
 Existing project context if applicable:
 - Resource URI: [paste]
 - Controller class: [paste]
@@ -459,6 +496,7 @@ Return:
 - bugs or missing status codes,
 - any risky Laravel behavior,
 - corrected code only for the broken methods.
+- which controller/request/model files you inspected.
 ```
 
 ## Step 4 - Test Create Endpoint
@@ -618,6 +656,9 @@ Expected behavior:
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
 
+MCP context available:
+- [none / terminal / browser / filesystem / database schema]
+
 Actual endpoints used:
 - Collection endpoint: [paste]
 - Member endpoint: [paste]
@@ -629,6 +670,7 @@ Please identify:
 - which endpoint is wrong,
 - whether the issue is route, validation, controller, model fillable, database, or request headers,
 - the next command or file I should check.
+- if MCP browser or terminal tools are available, what you would inspect next.
 ```
 
 ## Step 7 - Connect React Kepada CRUD Endpoints
@@ -677,6 +719,7 @@ Context:
 - Laravel API base URL: [paste URL]
 - VITE_API_BASE_URL: [paste value]
 - Project mode: [Prepared tutorial project / Existing Laravel project]
+- MCP context available: [none / filesystem / browser / terminal / git]
 - Tutorial endpoints: GET /users and POST /users
 - Actual endpoints in this project if different: [paste]
 
@@ -695,6 +738,7 @@ Return:
 - integration issues,
 - corrected JavaScript only where needed,
 - one manual browser test checklist.
+- if browser MCP is available, one browser verification flow.
 ```
 
 ## Prompt GSD Claude Code
@@ -711,6 +755,9 @@ I have a Day 1 Laravel API endpoint. Today I need RESTful CRUD routes, form requ
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
 
+MCP context available:
+- [none / filesystem / terminal / browser / git / database schema / other]
+
 If this is an existing Laravel project:
 - First inspect and summarize the current API routes, model, controller, migration/table, middleware, auth, response format, and naming conventions.
 - Map the Day 2 tutorial resource to the closest existing resource.
@@ -726,6 +773,7 @@ Relevant files:
 
 Constraints:
 - Inspect the current files before editing.
+- If MCP tools are available, use them to inspect files, route-list output, browser behavior, git status, or schema before proposing patches.
 - Preserve the existing route versioning or prefix; for the prepared tutorial project, use /api/v1.
 - Use Route::apiResource unless the existing project has a better local pattern.
 - Keep validation in FormRequest classes.
@@ -745,6 +793,7 @@ Verification:
 - Provide request examples and expected JSON responses for create, validation error, show, update, and delete.
 - If tests exist, run or suggest the targeted API feature tests.
 - If this is an existing project, explain what existing conventions were preserved.
+- State which MCP context, files, or command outputs were used.
 ```
 
 ## Panduan HTTP Status Code
