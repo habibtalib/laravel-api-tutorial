@@ -64,19 +64,19 @@ snippets/tinker-admin-user.php
 Login:
 
 ```bash
-bash examples/day-3-api-security/snippets/curl-login.sh
+bash bahasa-malaysia/examples/day-3-api-security/snippets/curl-login.sh
 ```
 
 Copy token yang dipulangkan dan gunakan dalam:
 
 ```bash
-TOKEN="PASTE_TOKEN_HERE" bash examples/day-3-api-security/snippets/curl-protected-users.sh
+TOKEN="PASTE_TOKEN_HERE" bash bahasa-malaysia/examples/day-3-api-security/snippets/curl-protected-users.sh
 ```
 
 Run CRUD penuh yang secured dengan token yang sama:
 
 ```bash
-TOKEN="PASTE_TOKEN_HERE" bash examples/day-3-api-security/snippets/curl-secured-crud.sh
+TOKEN="PASTE_TOKEN_HERE" bash bahasa-malaysia/examples/day-3-api-security/snippets/curl-secured-crud.sh
 ```
 
 Behavior security yang dijangka:

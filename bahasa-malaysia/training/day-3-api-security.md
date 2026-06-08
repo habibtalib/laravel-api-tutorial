@@ -529,7 +529,7 @@ Relevant files:
 - app/Models/User.php
 - config/services.php
 - config/sanctum.php if relevant
-- examples/day-3-api-security
+- bahasa-malaysia/examples/day-3-api-security
 - examples/react-client-api-consumer/src/api.js
 - examples/react-client-api-consumer/src/App.jsx
 
