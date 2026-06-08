@@ -432,6 +432,55 @@ Teaching point:
 - The browser client talks to Laravel using HTTP, JSON, and headers.
 - If the browser blocks the request, check Laravel CORS settings.
 
+### AI Prompt Checkpoint - React Calls Laravel REST API
+
+Use this prompt after the Laravel endpoint returns JSON and before students move to Day 2 CRUD.
+
+```text
+Help me connect my Day 1 React/Vite client to my Laravel REST API.
+
+Goal:
+React should call the Laravel endpoint and display the JSON response from GET /api/v1/users.
+
+Project mode:
+- [Prepared tutorial project / Existing Laravel project]
+
+Laravel API:
+- Base URL: [example: http://127.0.0.1:8000/api/v1]
+- Test endpoint: [example: GET /users]
+- Expected JSON shape: { "message": "...", "data": [...] }
+
+React context:
+- Vite app folder: [paste path]
+- Current VITE_API_BASE_URL: [paste value]
+- Current files: [paste src/api.js and the component that should load users]
+
+MCP context available:
+- [none / filesystem / terminal / browser / git]
+
+If this is an existing React or Laravel project:
+- Inspect the current API helper, component structure, route prefix, and response shape first.
+- Preserve the existing component style and naming conventions.
+- Do not force the tutorial folder structure if the project already has one.
+
+Please implement or review:
+- a reusable apiRequest helper that builds URLs from VITE_API_BASE_URL.
+- a React component that calls GET /users when the page loads.
+- loading, success, and error states.
+- JSON error handling for failed API requests.
+- no imports from Laravel PHP files into React.
+
+Headers:
+- Send Accept: application/json.
+- Do not add auth yet; Day 3 will cover Sanctum and protected routes.
+
+Verification:
+- Explain the expected browser behavior.
+- If browser MCP is available, inspect the page and confirm the data appears.
+- If terminal MCP is available, suggest the Laravel and Vite commands to run.
+- Tell me the smallest fix if the call fails because of CORS, wrong base URL, or Laravel not running.
+```
+
 ## GSD Claude Code Prompt
 
 Use this prompt if students want Claude Code to help with the Day 1 tutorial. It keeps the assistant focused on inspection, planning, implementation, and verification.
@@ -441,7 +490,7 @@ Goal:
 Help me complete Day 1 of the Laravel API tutorial.
 
 Context:
-I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, MySQL setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a basic React/Vite client shell.
+I am building the ABC Company Profile API in Laravel. Today I need a fresh API project, MySQL setup, api routes enabled, a UserProfile model and migration, a versioned GET /api/v1/users endpoint, and a React/Vite client shell that can call the Laravel REST API.
 
 Relevant files:
 - routes/api.php
@@ -456,6 +505,8 @@ Constraints:
 - Do not change unrelated files.
 - Keep the route versioned under /api/v1.
 - Do not hard-code secrets or local machine paths.
+- React must call Laravel through HTTP using VITE_API_BASE_URL.
+- React must not import Laravel controllers, models, routes, or PHP files.
 - Explain assumptions before editing.
 
 Done criteria:
@@ -463,10 +514,13 @@ Done criteria:
 - php artisan migrate runs successfully.
 - GET /api/v1/users returns JSON.
 - React has VITE_API_BASE_URL configured for the Laravel API.
+- React can call GET /users through the API helper and display the response.
 
 Verification:
 - Run or suggest php artisan route:list --path=api.
 - Provide the request and expected JSON response for GET /api/v1/users.
+- Provide the React API helper call for GET /users.
+- Explain how to verify the browser result in Vite.
 - Explain any failure before fixing it.
 ```
 
