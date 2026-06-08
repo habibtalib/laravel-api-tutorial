@@ -37,6 +37,10 @@ function extractProfile(response) {
   return response?.data || null;
 }
 
+function extractAccessToken(response) {
+  return response?.data?.access_token || response?.access_token || response?.token || '';
+}
+
 function normalizeListResponse(response) {
   const payload = response?.data;
   const records = Array.isArray(payload) ? payload : payload?.data || [];
@@ -125,10 +129,12 @@ export default function App() {
       'Login berjaya.',
     );
 
-    if (data?.token) {
-      localStorage.setItem('abc_api_token', data.token);
-      setToken(data.token);
-      await loadProfiles(data.token, 1);
+    const accessToken = extractAccessToken(data);
+
+    if (accessToken) {
+      localStorage.setItem('abc_api_token', accessToken);
+      setToken(accessToken);
+      await loadProfiles(accessToken, 1);
     }
   }
 

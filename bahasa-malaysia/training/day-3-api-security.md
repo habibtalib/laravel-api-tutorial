@@ -16,7 +16,7 @@ Hari ini merujuk kepada PDF halaman 11-13, buku halaman 8-10. Kandungan utama: `
 | 00:45-01:30 | Sanctum | Confirm install dan prepare user model |
 | 01:30-02:30 | Auth controller | Bina login dan logout endpoint |
 | 02:30-03:30 | Middleware | Bina `VerifyFrontendToken` |
-| 03:30-04:30 | Route protection | Apply `frontend.token`, `auth:sanctum`, dan `throttle` |
+| 03:30-04:30 | Route protection | Lindungi full CRUD user profiles dengan `frontend.token`, `auth:sanctum`, dan `throttle` |
 | 04:30-05:15 | React auth flow | Login dari React, simpan token, call protected routes |
 | 05:15-06:00 | Lab | Test login, protected route, logout, dan invalid-token JSON response dengan API client dan React |
 
@@ -26,6 +26,7 @@ Peserta boleh:
 
 - menggunakan Laravel Sanctum untuk token authentication.
 - membina login/logout API.
+- secure full CRUD Hari 2: list, show, create, update, dan delete.
 - membina middleware untuk `X-API-TOKEN`.
 - apply middleware pada route group.
 - test request yang protected.
@@ -43,6 +44,22 @@ Peserta boleh:
 | Validation | Lindungi data input |
 | HTTPS production | Lindungi token semasa transmission |
 
+## Peraturan Security Route Hari 3
+
+Hari 2 sengaja membenarkan CRUD public supaya peserta fokus pada REST dan validation. Pada akhir Hari 3, tiada route CRUD `/api/v1/users` yang boleh kekal public.
+
+| Endpoint | State Hari 2 | Final state Hari 3 |
+| --- | --- | --- |
+| `GET /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `POST /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `GET /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `PUT/PATCH /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `DELETE /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `POST /api/v1/auth/login` | Belum ada | `frontend.token` + login throttle, tanpa bearer token |
+| `POST /api/v1/auth/logout` | Belum ada | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+
+Final route file mesti ada satu sahaja `Route::apiResource('users', UserProfileController::class)`, dan ia mesti berada dalam protected group. Jika route public Hari 2 masih tertinggal di luar group itu, CRUD belum secured.
+
 ## Diagram Architecture
 
 ```mermaid
@@ -50,7 +67,10 @@ flowchart LR
     React["React login form"] --> FrontendToken["X-API-TOKEN middleware"]
     Client["API client"] --> FrontendToken
     FrontendToken --> Throttle["throttle:60,1"]
-    Throttle --> Sanctum["auth:sanctum"]
+    Throttle --> RouteGroup["/api/v1 routes"]
+    RouteGroup --> Login["POST /auth/login"]
+    RouteGroup --> ProtectedCrud["Protected CRUD routes"]
+    ProtectedCrud --> Sanctum["auth:sanctum"]
     Sanctum --> Controller["API Controller"]
     Controller --> DB["Database"]
     Controller --> JSON["JSON response"]
@@ -114,35 +134,46 @@ php artisan make:controller Api/V1/AuthController
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Invalid credentials.',
-            ], 401);
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
         }
 
-        $user = $request->user();
-        $token = $user->createToken('api-token')->plainTextToken;
+        $token = $user->createToken('training-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
-            'token' => $token,
-            'token_type' => 'Bearer',
+            'data' => [
+                'token_type' => 'Bearer',
+                'access_token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ],
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
 
@@ -160,15 +191,23 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
-    Route::post('/auth/login', [AuthController::class, 'login']);
+Route::prefix('v1')->name('api.v1.')->group(function () {
+    Route::post('/auth/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('auth.login');
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('/auth/logout', [AuthController::class, 'logout'])
+            ->name('auth.logout');
+
         Route::apiResource('users', UserProfileController::class);
     });
 });
 ```
+
+Ini checkpoint bearer-token sebelum frontend token middleware ditambah. Teruskan sehingga Step 10 sebelum menganggap security Hari 3 siap.
+
+Login route public kepada user, tetapi rate-limited. Logout dan semua CRUD user profile memerlukan Sanctum. Jangan tinggalkan `Route::apiResource('users', UserProfileController::class)` public daripada Hari 2 di luar protected group ini.
 
 ## Step 5 - Test Login
 
@@ -304,16 +343,24 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 ```php
 Route::prefix('v1')
+    ->name('api.v1.')
     ->middleware(['frontend.token', 'throttle:60,1'])
     ->group(function () {
-        Route::post('/auth/login', [AuthController::class, 'login']);
+        Route::post('/auth/login', [AuthController::class, 'login'])
+            ->middleware('throttle:5,1')
+            ->name('auth.login');
 
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::middleware(['auth:sanctum'])->group(function () {
+            Route::post('/auth/logout', [AuthController::class, 'logout'])
+                ->name('auth.logout');
+
+            // Final Hari 3: semua CRUD Hari 2 dilindungi.
             Route::apiResource('users', UserProfileController::class);
         });
     });
 ```
+
+Final route file ini menggantikan route public Hari 2. Tidak boleh ada lagi `Route::apiResource('users', UserProfileController::class)` public di mana-mana dalam `routes/api.php`.
 
 ## Step 11 - Test Dengan Dua Token
 
@@ -358,6 +405,54 @@ Jangkaan JSON response:
     }
   ]
 }
+```
+
+Test write endpoint dengan kedua-dua headers:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer 1|your-token" \
+  -d '{
+    "full_name": "Day 3 Secure User",
+    "id_card_number": "DAY3-001",
+    "phone": "+60123334444",
+    "address": "Kuala Lumpur"
+  }'
+```
+
+Kemudian test show, update, dan delete dengan dua headers yang sama:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/users/1 \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer 1|your-token"
+
+curl -X PUT http://127.0.0.1:8000/api/v1/users/1 \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer 1|your-token" \
+  -d '{
+    "full_name": "Day 3 Secure User",
+    "id_card_number": "DAY3-001",
+    "phone": "+60129998888",
+    "address": "Cyberjaya"
+  }'
+
+curl -i -X DELETE http://127.0.0.1:8000/api/v1/users/1 \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer 1|your-token"
+```
+
+Script penuh ada di:
+
+```text
+bahasa-malaysia/examples/day-3-api-security/snippets/curl-secured-crud.sh
 ```
 
 Logout:
@@ -408,7 +503,8 @@ Flow login React:
 1. submit email dan password ke `POST /api/v1/auth/login`.
 2. simpan token dalam state dan `localStorage` untuk lab kelas.
 3. call `GET /api/v1/users` dengan kedua-dua header.
-4. call logout dan clear token.
+4. call create, update, dan delete profile dengan kedua-dua header.
+5. call logout dan clear token.
 
 Point pengajaran:
 
@@ -423,7 +519,7 @@ Goal:
 Help me complete Day 3 of the Laravel API tutorial.
 
 Context:
-The API already has user profile CRUD. Today I need Laravel Sanctum login/logout, protected routes, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/logout flow in React.
+The API already has public user profile CRUD from Day 2. Today I need Laravel Sanctum login/logout, protected full CRUD routes, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/show/create/update/delete/logout flow in React.
 
 Relevant files:
 - routes/api.php
@@ -442,19 +538,22 @@ Constraints:
 - Do not read or print .env secrets.
 - Read frontend token through config, not env() inside runtime code.
 - Do not put auth:sanctum on the login route.
-- Keep protected profile routes behind both frontend token and bearer token checks.
+- Move the Day 2 users apiResource into the protected Day 3 route group.
+- Do not leave or duplicate a public users apiResource outside the protected group.
+- Keep all profile CRUD routes behind both frontend token and bearer token checks.
 - Do not weaken existing validation or route versioning.
 
 Done criteria:
 - POST /api/v1/auth/login returns a Sanctum bearer token.
-- protected /api/v1/users rejects requests without Authorization: Bearer token.
+- GET, POST, GET by ID, PUT/PATCH, and DELETE /api/v1/users reject requests without Authorization: Bearer token.
 - requests without X-API-TOKEN return JSON 401.
 - throttling is applied to login and protected API routes.
-- React can login, store token for the lab, call protected routes, and logout.
+- React can login, store token for the lab, call protected list/show/create/update/delete routes, and logout.
 
 Verification:
-- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, protected list, and logout.
+- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, protected list, protected create, protected update, protected delete, and logout.
 - Run or suggest php artisan route:list --path=api.
+- Confirm there is no public Day 2 users apiResource left in routes/api.php.
 - If tests exist, run or suggest auth and middleware tests.
 ```
 
@@ -474,8 +573,10 @@ Verification:
 2. Login dengan token frontend yang betul.
 3. Call protected route tanpa bearer token.
 4. Call protected route dengan kedua-dua token.
-5. Ulang login, list, dan logout daripada React.
-6. Logout dan cuba guna token lama.
+5. Create, view, update, dan delete `/api/v1/users/{id}` dengan kedua-dua token.
+6. Cuba satu CRUD write tanpa bearer token dan pastikan `401`.
+7. Ulang login, list, create, update, delete, dan logout daripada React.
+8. Logout dan cuba guna token lama.
 
 ## Kesilapan Biasa
 
@@ -484,6 +585,8 @@ Verification:
 - Salah nama header `X-API-TOKEN`.
 - Lupa `php artisan config:clear` selepas edit `.env`.
 - Overwrite `bootstrap/app.php` tanpa merge perubahan sedia ada.
+- Tertinggal route public Hari 2 `Route::apiResource('users', ...)` dalam `routes/api.php`.
+- Test list sahaja dan lupa create, update, delete juga mesti secured.
 
 ## Soalan Review Hari 3
 
@@ -503,5 +606,7 @@ GET /api/v1/auth/me
 ```
 
 Endpoint perlu memulangkan maklumat user authenticated dan hanya boleh diakses dengan kedua-dua token.
+
+Letakkan endpoint ini dalam route group Hari 3 yang sama, iaitu group yang sudah mempunyai `frontend.token` dan throttling. Endpoint ini masih perlu berada di bawah `auth:sanctum`.
 
 Kemudian tambah panel kecil dalam React yang call endpoint ini dan memaparkan nama serta email user yang login.

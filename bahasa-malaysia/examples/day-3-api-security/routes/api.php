@@ -16,7 +16,7 @@ Route::prefix('v1')
             Route::post('/auth/logout', [AuthController::class, 'logout'])
                 ->name('auth.logout');
 
+            // Hari 3 melindungi semua CRUD Hari 2. Jangan tinggalkan users apiResource public di luar group ini.
             Route::apiResource('users', UserProfileController::class);
         });
     });
-
