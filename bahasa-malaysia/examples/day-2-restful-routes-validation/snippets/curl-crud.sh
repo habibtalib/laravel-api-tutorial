@@ -4,7 +4,10 @@ set -e
 
 BASE_URL="http://127.0.0.1:8000/api/v1"
 
-echo "Create profile"
+echo "CRUD Hari 2 public: tiada Authorization atau X-API-TOKEN headers dihantar."
+echo
+
+echo "Cipta profile"
 curl -X POST "$BASE_URL/users" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
@@ -16,12 +19,12 @@ curl -X POST "$BASE_URL/users" \
   }'
 
 echo
-echo "List profiles"
+echo "Senarai profiles"
 curl "$BASE_URL/users" \
   -H "Accept: application/json"
 
 echo
-echo "Show profile 1"
+echo "Papar profile 1"
 curl "$BASE_URL/users/1" \
   -H "Accept: application/json"
 
@@ -36,7 +39,7 @@ curl -X PATCH "$BASE_URL/users/1" \
   }'
 
 echo
-echo "Validation error example"
+echo "Contoh validation error"
 curl -X POST "$BASE_URL/users" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
@@ -45,3 +48,7 @@ curl -X POST "$BASE_URL/users" \
     "phone": ""
   }'
 
+echo
+echo "Padam profile 1"
+curl -X DELETE "$BASE_URL/users/1" \
+  -H "Accept: application/json"

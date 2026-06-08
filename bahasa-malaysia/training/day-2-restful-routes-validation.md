@@ -196,6 +196,14 @@ Rules:
 | PATCH | `/api/v1/users/{id}` | `update` | 200 atau 422 |
 | DELETE | `/api/v1/users/{id}` | `destroy` | 204 |
 
+## Peraturan Auth Hari 2
+
+CRUD Hari 2 mesti berfungsi tanpa login, Sanctum, frontend token middleware, `X-API-TOKEN`, atau `Authorization: Bearer ...`.
+
+Gunakan hanya `Accept: application/json` dan `Content-Type: application/json` untuk write requests. Hari 3 barulah tambah API protection.
+
+Jika mana-mana request CRUD Hari 2 memulangkan `401`, buang middleware Hari 3 daripada route contoh Hari 2 sebelum teruskan.
+
 ## Diagram Architecture
 
 ```mermaid
@@ -224,6 +232,8 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('users', UserProfileController::class);
 });
 ```
+
+Route group ini sengaja tiada auth middleware pada Hari 2. Jangan balut dengan `frontend.token`, `auth:sanctum`, atau syarat login sehingga Hari 3.
 
 Semak route:
 
@@ -271,6 +281,7 @@ Please check:
 - the member URI maps to show, update, and destroy.
 - create and edit web routes are not generated.
 - route grouping keeps API versioning clear.
+- the Day 2 CRUD route is public and has no `auth:sanctum`, `frontend.token`, `X-API-TOKEN`, or bearer-token requirement.
 - existing middleware, route names, and prefixes are not accidentally removed.
 
 Return:
@@ -685,9 +696,14 @@ Untuk Hari 2, fokus kepada browser actions ini:
 
 - load user profiles dengan `GET /api/v1/users`.
 - submit create form dengan `POST /api/v1/users`.
+- klik satu rekod untuk view detail dengan `GET /api/v1/users/{id}`.
+- update rekod dipilih dengan `PUT /api/v1/users/{id}`.
+- delete rekod dipilih dengan `DELETE /api/v1/users/{id}` dan handle `204 No Content`.
 - paparkan validation messages daripada response `422`.
 
-Contoh call daripada React:
+Untuk Hari 2, jangan login dahulu. React CRUD actions mesti berfungsi tanpa bearer token. Login panel Hari 3 boleh diabaikan sehingga hari security.
+
+Contoh create call daripada React:
 
 ```js
 apiRequest('/users', {
@@ -701,26 +717,42 @@ apiRequest('/users', {
 });
 ```
 
+Update dan delete menggunakan resource URL yang sama:
+
+```js
+await apiRequest(`/users/${profile.id}`, {
+  method: 'PUT',
+  body: {
+    ...profile,
+    phone: '+60119998888',
+  },
+});
+
+await apiRequest(`/users/${profile.id}`, {
+  method: 'DELETE',
+});
+```
+
 Point pengajaran:
 
 React form tidak menentukan validation rules. Laravel validate request dan memulangkan JSON errors. React memaparkan errors itu kepada user.
 
 ### AI Prompt Checkpoint - React Integration
 
-Gunakan prompt ini selepas sambung React list dan create form untuk Hari 2:
+Gunakan prompt ini selepas sambung React CRUD UI untuk Hari 2:
 
 ```text
 Review my React client integration for Day 2.
 
 Goal:
-React should call the Laravel REST API to list records and create a record for the Day 2 resource.
+React should call the Laravel REST API to list, show, create, update, and delete records for the Day 2 resource.
 
 Context:
 - Laravel API base URL: [paste URL]
 - VITE_API_BASE_URL: [paste value]
 - Project mode: [Prepared tutorial project / Existing Laravel project]
 - MCP context available: [none / filesystem / browser / terminal / git]
-- Tutorial endpoints: GET /users and POST /users
+- Tutorial endpoints: GET /users, POST /users, GET /users/{id}, PUT /users/{id}, DELETE /users/{id}
 - Actual endpoints in this project if different: [paste]
 
 Code to review:
@@ -729,7 +761,11 @@ Code to review:
 Please check:
 - React uses the same API base URL as Laravel.
 - POST sends JSON and handles 201.
+- GET detail handles 200 and 404.
+- PUT sends JSON and refreshes the edited record.
+- DELETE handles 204 and reloads the list.
 - validation errors from 422 are displayed near the correct fields.
+- Day 2 list, show, create, update, and delete work before login and without bearer token.
 - the form does not hard-code Laravel validation rules beyond basic UI hints.
 - no Laravel controllers, models, or PHP files are imported into React.
 - if this is an existing project, React follows the existing endpoint names and response shape instead of forcing the tutorial /users shape.
@@ -750,7 +786,7 @@ Goal:
 Help me complete Day 2 of the Laravel API tutorial.
 
 Context:
-I have a Day 1 Laravel API endpoint. Today I need RESTful CRUD routes, form request validation, correct HTTP status codes, expected JSON response checks, and React create/list calls. Some students use the prepared tutorial project, while others use an existing Laravel project. Most participants use Laragon or XAMPP, so verify the MySQL service, `.env` database settings, and one consistent API base URL before editing CRUD code.
+I have a Day 1 Laravel API endpoint. Today I need public RESTful CRUD routes, form request validation, correct HTTP status codes, expected JSON response checks, and React list/show/create/update/delete calls. Some students use the prepared tutorial project, while others use an existing Laravel project. Most participants use Laragon or XAMPP, so verify the MySQL service, `.env` database settings, and one consistent API base URL before editing CRUD code.
 
 Project mode:
 - [Prepared tutorial project / Existing Laravel project]
@@ -777,6 +813,7 @@ Constraints:
 - Preserve the existing route versioning or prefix; for the prepared tutorial project, use /api/v1.
 - Use Route::apiResource unless the existing project has a better local pattern.
 - Keep validation in FormRequest classes.
+- For Day 2, do not add auth middleware, Sanctum protection, frontend token middleware, `X-API-TOKEN`, or bearer-token requirements.
 - Do not change unrelated endpoints.
 - Keep the API base URL consistent between Laravel, curl/API client, and React.
 - For existing projects, propose minimal patches that fit the current architecture instead of copying the tutorial structure blindly.
@@ -786,7 +823,8 @@ Done criteria:
 - POST returns 201.
 - DELETE returns 204.
 - invalid input returns 422 JSON with errors.
-- React can create and list records through the same API contract.
+- CRUD works without login or bearer token on Day 2.
+- React can list, show, create, update, and delete records through the same API contract.
 
 Verification:
 - Run or suggest php artisan route:list --path=api.
@@ -814,7 +852,7 @@ Verification:
 4. Update phone number.
 5. Cuba create tanpa `phone`.
 6. Delete profile.
-7. Ulang create/list dalam React.
+7. Ulang list/show/create/update/delete dalam React.
 
 ## Kesilapan Biasa
 
@@ -846,3 +884,81 @@ Tambah field `position` dalam user profile dan update:
 4. update validation.
 5. curl create dan update.
 6. update React form supaya menghantar field `position`.
+
+## Bonus AI Prompt - Redesign React CRUD Dengan shadcn/ui
+
+Gunakan prompt ini selepas CRUD API Hari 2 berfungsi dan React client boleh list, show, create, update, dan delete records.
+
+```text
+Help me redesign my Day 2 React CRUD UI using shadcn/ui.
+
+Goal:
+Keep the existing Laravel API behavior exactly the same, but redesign the React CRUD screen with shadcn/ui components so it looks like a polished admin-style API client.
+
+References:
+- shadcn/ui: https://ui.shadcn.com/
+- Vite setup docs: https://ui.shadcn.com/docs/installation/vite
+
+Project context:
+- React app folder: [paste path, example: examples/react-client-api-consumer or abc-api-client]
+- Laravel API base URL: [paste URL, example: http://127.0.0.1:8000/api/v1]
+- Current React files: [paste src/App.jsx, src/api.js, src/App.css]
+- Project mode: [Prepared tutorial project / Existing project]
+- Package manager: [npm / pnpm / yarn / bun]
+- MCP context available: [none / filesystem / browser / terminal / git]
+
+Laravel API contract:
+- GET /users
+- GET /users/{id}
+- POST /users
+- PUT /users/{id}
+- DELETE /users/{id}
+- Profile fields: full_name, id_card_number, phone, address, is_active
+- Do not add email to the profile form; email is only for auth login.
+
+Before editing:
+- Inspect the current React structure and API helper.
+- Run or suggest shadcn/ui project checks such as shadcn info.
+- If shadcn/ui is not installed, initialize it for the existing Vite React project using the correct package runner.
+- Add only the shadcn/ui components needed for this CRUD screen.
+
+Suggested shadcn/ui components:
+- Button for actions.
+- Card for panels.
+- Input and Textarea for forms.
+- Badge for active/inactive status.
+- Table for the profile list.
+- Dialog or Sheet for detail/edit flows.
+- AlertDialog for delete confirmation.
+- Skeleton for loading state.
+- Alert or sonner toast for success and error feedback.
+- Pagination for page navigation if available.
+
+Design requirements:
+- Keep the first screen as the working CRUD app, not a landing page.
+- Use a compact admin layout suitable for repeated data work.
+- Show clear list, detail, create, update, delete, loading, empty, validation, and error states.
+- Keep the API helper centralized in src/api.js.
+- Do not import Laravel PHP files into React.
+- Do not change endpoint URLs, request methods, or payload fields.
+- Preserve Day 2 behavior where list, show, create, update, and delete all work before login.
+- Preserve Day 3 behavior where protected routes send X-API-TOKEN and Authorization bearer token when available.
+- Use semantic shadcn/Tailwind tokens and component variants instead of custom raw color styling.
+
+Done criteria:
+- shadcn/ui is installed or the required setup steps are clearly listed.
+- The CRUD UI uses shadcn/ui components for the main surface.
+- List calls GET /users.
+- View detail calls GET /users/{id}.
+- Create calls POST /users.
+- Update calls PUT /users/{id}.
+- Delete calls DELETE /users/{id} and handles 204 No Content.
+- 422 validation errors remain visible.
+- npm run dev and npm run build pass.
+
+Verification:
+- Show the commands used.
+- Show the browser test flow.
+- If browser MCP is available, open the Vite app and verify list, view, create, update, and delete.
+- If any shadcn/ui setup step fails, explain the exact cause and smallest fix.
+```

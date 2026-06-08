@@ -4,6 +4,19 @@ Folder ini mengandungi fail Laravel yang boleh disalin untuk Hari 2.
 
 Mulakan daripada projek Laravel Hari 1, kemudian salin fail ini ke dalam `abc-api`.
 
+## Skop Authentication
+
+CRUD Hari 2 sengaja public untuk latihan. Jangan tambah Sanctum, `auth:sanctum`, frontend token middleware, `X-API-TOKEN`, atau `Authorization: Bearer ...` lagi.
+
+Semua contoh `GET`, `POST`, `PUT/PATCH`, dan `DELETE` Hari 2 sepatutnya berfungsi hanya dengan:
+
+```text
+Accept: application/json
+Content-Type: application/json
+```
+
+Hari 3 barulah menambah login dan protected routes.
+
 ## Setup Local Laragon/XAMPP
 
 Kebanyakan peserta boleh terus menggunakan Laragon atau XAMPP untuk MySQL. Untuk folder contoh ini, gunakan satu API base URL yang konsisten:
@@ -72,6 +85,8 @@ Run contoh CRUD curl:
 ```bash
 bash examples/day-2-restful-routes-validation/snippets/curl-crud.sh
 ```
+
+Script curl ini tidak menghantar auth headers. Jika request Hari 2 memulangkan `401`, semak sama ada middleware Hari 3 telah ditambah terlalu awal.
 
 Contoh response JSON dijangka:
 
