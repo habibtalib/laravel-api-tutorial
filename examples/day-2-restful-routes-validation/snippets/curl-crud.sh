@@ -4,6 +4,9 @@ set -e
 
 BASE_URL="http://127.0.0.1:8000/api/v1"
 
+echo "Day 2 CRUD is public: no Authorization or X-API-TOKEN headers are sent."
+echo
+
 echo "Create profile"
 curl -X POST "$BASE_URL/users" \
   -H "Accept: application/json" \
@@ -45,3 +48,7 @@ curl -X POST "$BASE_URL/users" \
     "phone": ""
   }'
 
+echo
+echo "Delete profile 1"
+curl -X DELETE "$BASE_URL/users/1" \
+  -H "Accept: application/json"

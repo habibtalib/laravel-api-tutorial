@@ -4,6 +4,19 @@ This folder contains copyable Laravel files for Day 2.
 
 Start from the Day 1 Laravel project, then copy these files into `abc-api`.
 
+## Authentication Scope
+
+Day 2 CRUD is intentionally public for training. Do not add Sanctum, `auth:sanctum`, frontend token middleware, `X-API-TOKEN`, or `Authorization: Bearer ...` yet.
+
+All Day 2 `GET`, `POST`, `PUT/PATCH`, and `DELETE` examples should work with only:
+
+```text
+Accept: application/json
+Content-Type: application/json
+```
+
+Day 3 adds login and protected routes.
+
 ## Laragon/XAMPP Local Setup
 
 Most learners can keep using Laragon or XAMPP for MySQL. For this example folder, use one consistent API base URL:
@@ -72,6 +85,8 @@ Run the CRUD curl examples:
 ```bash
 bash examples/day-2-restful-routes-validation/snippets/curl-crud.sh
 ```
+
+The curl script does not send auth headers. If a Day 2 request returns `401`, check that Day 3 middleware was not added too early.
 
 Expected JSON response examples:
 

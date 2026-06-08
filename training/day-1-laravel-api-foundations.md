@@ -407,9 +407,16 @@ React browser client -> HTTP request -> Laravel API -> JSON response
 Create a Vite React app:
 
 ```bash
-npm create vite@latest abc-api-client -- --template react
+npm create vite@latest abc-api-client
 cd abc-api-client
 npm install
+```
+
+When prompted by Vite:
+
+```text
+Framework: React
+Variant: JavaScript
 ```
 
 Copy the starter client from:
