@@ -9,7 +9,7 @@ Client ini sengaja dibuat kecil. Ia menunjukkan konsep browser-side yang peserta
 - run full CRUD Hari 2 sebelum authentication.
 - hantar header frontend `X-API-TOKEN` apabila middleware Hari 3 ditambah.
 - login untuk menerima bearer token Laravel Sanctum pada Hari 3.
-- call protected REST endpoints selepas security Hari 3 ditambah.
+- call protected list, view, create, update, dan delete endpoints selepas security Hari 3 ditambah.
 - list, search, view, create, update, dan delete user profiles.
 - handle loading, `401`, `422`, dan error JSON umum.
 
@@ -106,7 +106,8 @@ password
 ```
 
 11. Klik "Load profiles" semula.
-12. Logout dan confirm protected calls gagal.
+12. Ulang view, create, update, dan delete semasa logged in.
+13. Logout dan confirm protected calls gagal.
 
 ## Liputan Endpoint
 
@@ -120,11 +121,14 @@ password
 
 Form profile mengikut field Laravel API: `full_name`, `id_card_number`, `phone`, `address`, dan `is_active`.
 
+Selepas security Hari 3 ditambah, setiap endpoint dalam table ini memerlukan header frontend `X-API-TOKEN` dan Sanctum bearer token.
+
 ## Point Pengajaran Penting
 
 - Browser client tidak call Eloquent atau Laravel services secara langsung.
 - React hanya tahu HTTP contract: method, URL, headers, body, dan JSON response.
 - Profile listing Hari 1 dan full CRUD Hari 2 tidak memerlukan login.
+- Selepas Hari 3, full CRUD secured dan memerlukan login.
 - `X-API-TOKEN` mengenal pasti frontend client selepas middleware Hari 3 ditambah.
 - `Authorization: Bearer ...` mengenal pasti user yang login selepas Sanctum ditambah.
 - Jangan simpan production secrets dalam frontend code. Frontend token di sini ialah kawalan latihan, bukan pengganti user authentication.

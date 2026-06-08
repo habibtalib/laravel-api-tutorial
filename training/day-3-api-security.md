@@ -617,9 +617,10 @@ Authorization: `Bearer ${token}`
 React login flow:
 
 1. submit email and password to `POST /api/v1/auth/login`.
-2. store the returned token in state and `localStorage` for the class lab.
+2. read `data.access_token` from the JSON response and store it in state and `localStorage` for the class lab.
 3. call `GET /api/v1/users` with both headers.
-4. call logout and clear the stored token.
+4. call create, update, and delete profile actions with both headers.
+5. call logout and clear the stored token.
 
 Teaching point:
 

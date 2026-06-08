@@ -501,7 +501,7 @@ Authorization: `Bearer ${token}`
 Flow login React:
 
 1. submit email dan password ke `POST /api/v1/auth/login`.
-2. simpan token dalam state dan `localStorage` untuk lab kelas.
+2. baca `data.access_token` daripada JSON response dan simpan dalam state serta `localStorage` untuk lab kelas.
 3. call `GET /api/v1/users` dengan kedua-dua header.
 4. call create, update, dan delete profile dengan kedua-dua header.
 5. call logout dan clear token.
