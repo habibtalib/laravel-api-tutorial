@@ -5,14 +5,13 @@ This folder contains a copyable React/Vite client for the 5-day Laravel API trai
 The client is intentionally small. It demonstrates the browser-side concepts students need for the course:
 
 - configure an API base URL with Vite environment variables.
-- call the public profile list before authentication on Day 1.
-- run full Day 2 CRUD before authentication.
+- understand that Day 1 list and Day 2 CRUD were public while those lessons were being built.
 - send the frontend `X-API-TOKEN` header when the Day 3 middleware is added.
-- log in to receive a Laravel Sanctum bearer token and `expires_at` timestamp on Day 3.
-- call protected list, view, create, update, and delete endpoints after Day 3 security is added.
-- clear expired auth state when the token expiry passes or Laravel returns `401`.
+- log in to receive a Laravel Sanctum bearer token, `expires_at` timestamp, and token abilities on Day 3.
+- call protected list, view, create, update, and delete endpoints with the correct ability after Day 3 security is added.
+- clear expired auth state when the token expiry passes or Laravel returns `401`, and show `403` when the token is missing an ability.
 - list, search, view, create, update, and delete user profiles.
-- handle loading, `401`, `422`, and general JSON errors.
+- handle loading, `401`, `403`, `422`, and general JSON errors.
 
 ## Where This Fits In The 5 Days
 
@@ -91,25 +90,23 @@ Keep CORS strict in production. Do not use unrestricted origins for private APIs
 ## Test Flow
 
 1. Start Laravel and React.
-2. Click "Load profiles". Day 1 should load profiles before login.
-3. Search by name, phone, or ID card after the Day 4 search endpoint exists.
-4. Click "View" to call `GET /api/v1/users/{id}` after Day 2 CRUD exists.
-5. Create a profile from the form after the Day 2 CRUD endpoint exists.
-6. Click "Edit", update the form, and submit `PUT /api/v1/users/{id}`.
-7. Click "Delete" to call `DELETE /api/v1/users/{id}` and expect `204 No Content`.
-8. Do not log in for Day 2 CRUD. Login is only needed after Day 3 security is added.
-9. After adding Day 3 security, confirm the frontend token in `.env.local`.
-10. Log in with:
+2. Confirm the frontend token in `.env.local`.
+3. Log in with:
 
 ```text
 admin@example.com
 password
 ```
 
-11. Click "Load profiles" again.
-12. Repeat view, create, update, and delete while logged in.
-13. Set a short token lifetime or force expiry in Tinker, then confirm the client clears auth state after expiry.
-14. Logout and confirm protected calls fail.
+4. Click "Load profiles". The button is enabled only when the token has `profiles:read`.
+5. Search by name, phone, or ID card after the Day 4 search endpoint exists.
+6. Click "View" to call `GET /api/v1/users/{id}` with `profiles:read`.
+7. Create a profile from the form with `profiles:create`.
+8. Click "Edit", update the form, and submit `PUT /api/v1/users/{id}` with `profiles:update`.
+9. Click "Delete" to call `DELETE /api/v1/users/{id}` with `profiles:delete` and expect `204 No Content`.
+10. Set a short token lifetime or force expiry in Tinker, then confirm the client clears auth state after expiry.
+11. Test a read-only token and confirm create, update, and delete return `403`.
+12. Logout and confirm protected calls fail.
 
 ## Endpoint Coverage
 
@@ -123,16 +120,17 @@ password
 
 The profile form follows the Laravel API fields: `full_name`, `id_card_number`, `phone`, `address`, and `is_active`.
 
-After Day 3 security is added, every endpoint in this table requires both the frontend `X-API-TOKEN` header and the Sanctum bearer token.
-The login response also includes `expires_at`; the client stores it in `abc_api_token_expires_at` and clears the saved bearer token when it is expired.
+After Day 3 security is added, every endpoint in this table requires the frontend `X-API-TOKEN` header, the Sanctum bearer token, and the matching token ability.
+The login response also includes `expires_at` and `abilities`; the client stores them in `abc_api_token_expires_at` and `abc_api_token_abilities`, then clears the saved bearer token when it is expired.
 
 ## Important Teaching Points
 
 - The browser client does not call Eloquent or Laravel services directly.
 - React only knows the HTTP contract: method, URL, headers, body, and JSON response.
-- Day 1 profile listing and full Day 2 CRUD do not require login.
-- After Day 3, full CRUD is secured and requires login.
+- Day 1 profile listing and full Day 2 CRUD were intentionally public before Day 3 security was added.
+- The current React example is aligned with the final secured API, so it requires login and token abilities for profile CRUD.
 - `X-API-TOKEN` identifies the frontend client after the Day 3 middleware is added.
 - `Authorization: Bearer ...` identifies the logged-in user after Sanctum is added.
 - `expires_at` tells React when the bearer token should stop being used.
+- `abilities` tells React which CRUD controls should be enabled; Laravel still enforces the same abilities on the backend.
 - Never store production secrets in frontend code. The frontend token here is a training control, not a replacement for user authentication.
