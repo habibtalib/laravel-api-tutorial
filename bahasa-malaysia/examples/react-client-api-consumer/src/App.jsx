@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { apiRequest } from './api.js';
 
+const TOKEN_STORAGE_KEY = 'abc_api_token';
+const TOKEN_EXPIRES_AT_STORAGE_KEY = 'abc_api_token_expires_at';
+const TOKEN_ABILITIES_STORAGE_KEY = 'abc_api_token_abilities';
+
 const emptyProfileForm = {
   full_name: '',
   id_card_number: '',
@@ -41,6 +45,65 @@ function extractAccessToken(response) {
   return response?.data?.access_token || response?.access_token || response?.token || '';
 }
 
+function extractTokenExpiresAt(response) {
+  return response?.data?.expires_at || response?.expires_at || '';
+}
+
+function extractTokenAbilities(response) {
+  const abilities = response?.data?.abilities || response?.abilities || [];
+
+  return Array.isArray(abilities) ? abilities : [];
+}
+
+function tokenExpired(expiresAt) {
+  return Boolean(expiresAt) && Date.now() >= new Date(expiresAt).getTime();
+}
+
+function getStoredToken() {
+  const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+  const storedExpiresAt = localStorage.getItem(TOKEN_EXPIRES_AT_STORAGE_KEY) || '';
+
+  if (storedToken && tokenExpired(storedExpiresAt)) {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_EXPIRES_AT_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_ABILITIES_STORAGE_KEY);
+    return '';
+  }
+
+  return storedToken;
+}
+
+function getStoredTokenExpiresAt() {
+  const storedExpiresAt = localStorage.getItem(TOKEN_EXPIRES_AT_STORAGE_KEY) || '';
+
+  return tokenExpired(storedExpiresAt) ? '' : storedExpiresAt;
+}
+
+function getStoredTokenAbilities() {
+  const storedAbilities = localStorage.getItem(TOKEN_ABILITIES_STORAGE_KEY);
+
+  if (!storedAbilities) {
+    return [];
+  }
+
+  try {
+    const abilities = JSON.parse(storedAbilities);
+
+    return Array.isArray(abilities) ? abilities : [];
+  } catch {
+    localStorage.removeItem(TOKEN_ABILITIES_STORAGE_KEY);
+    return [];
+  }
+}
+
+function formatExpiry(expiresAt) {
+  if (!expiresAt) {
+    return '';
+  }
+
+  return new Date(expiresAt).toLocaleString();
+}
+
 function normalizeListResponse(response) {
   const payload = response?.data;
   const records = Array.isArray(payload) ? payload : payload?.data || [];
@@ -71,7 +134,9 @@ function countProjects(profile) {
 export default function App() {
   const [loginEmail, setLoginEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('password');
-  const [token, setToken] = useState(() => localStorage.getItem('abc_api_token') || '');
+  const [token, setToken] = useState(getStoredToken);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState(getStoredTokenExpiresAt);
+  const [tokenAbilities, setTokenAbilities] = useState(getStoredTokenAbilities);
   const [profiles, setProfiles] = useState([]);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [meta, setMeta] = useState(null);
@@ -83,13 +148,44 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
 
-  const isAuthenticated = Boolean(token);
+  const isAuthenticated = Boolean(token) && !tokenExpired(tokenExpiresAt);
+  const hasAbility = (ability) => tokenAbilities.includes('*') || tokenAbilities.includes(ability);
+  const canReadProfiles = isAuthenticated && hasAbility('profiles:read');
+  const canCreateProfiles = isAuthenticated && hasAbility('profiles:create');
+  const canUpdateProfiles = isAuthenticated && hasAbility('profiles:update');
+  const canDeleteProfiles = isAuthenticated && hasAbility('profiles:delete');
   const currentPage = meta?.current_page || page;
   const lastPage = meta?.last_page || currentPage;
 
   useEffect(() => {
-    loadProfiles();
+    if (canReadProfiles) {
+      loadProfiles(token, 1);
+    }
   }, []);
+
+  function clearAuthState() {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_EXPIRES_AT_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_ABILITIES_STORAGE_KEY);
+    setToken('');
+    setTokenExpiresAt('');
+    setTokenAbilities([]);
+    setProfiles([]);
+    setSelectedProfile(null);
+    setMeta(null);
+    setPage(1);
+    resetForm();
+  }
+
+  function ensureTokenIsFresh(nextToken = token) {
+    if (nextToken && tokenExpired(tokenExpiresAt)) {
+      clearAuthState();
+      setError('Sesi tamat tempoh. Login semula.');
+      return false;
+    }
+
+    return true;
+  }
 
   async function run(action, successMessage, { preserveNotice = false } = {}) {
     setLoading(true);
@@ -108,6 +204,17 @@ export default function App() {
 
       return result ?? true;
     } catch (err) {
+      if (err.status === 401 && token) {
+        clearAuthState();
+        setError('401: Sesi tamat tempoh atau belum authenticated. Login semula.');
+        return null;
+      }
+
+      if (err.status === 403) {
+        setError(`403: ${err.message || 'Token tiada ability yang diperlukan.'}`);
+        return null;
+      }
+
       const validation = err.data?.errors
         ? Object.values(err.data.errors).flat().join(' ')
         : '';
@@ -130,10 +237,20 @@ export default function App() {
     );
 
     const accessToken = extractAccessToken(data);
+    const expiresAt = extractTokenExpiresAt(data);
+    const abilities = extractTokenAbilities(data);
 
     if (accessToken) {
-      localStorage.setItem('abc_api_token', accessToken);
+      localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+      if (expiresAt) {
+        localStorage.setItem(TOKEN_EXPIRES_AT_STORAGE_KEY, expiresAt);
+      } else {
+        localStorage.removeItem(TOKEN_EXPIRES_AT_STORAGE_KEY);
+      }
+      localStorage.setItem(TOKEN_ABILITIES_STORAGE_KEY, JSON.stringify(abilities));
       setToken(accessToken);
+      setTokenExpiresAt(expiresAt);
+      setTokenAbilities(abilities);
       await loadProfiles(accessToken, 1);
     }
   }
@@ -147,13 +264,7 @@ export default function App() {
       'Logout berjaya.',
     );
 
-    localStorage.removeItem('abc_api_token');
-    setToken('');
-    setProfiles([]);
-    setSelectedProfile(null);
-    setMeta(null);
-    setPage(1);
-    resetForm();
+    clearAuthState();
   }
 
   async function loadProfiles(
@@ -162,6 +273,10 @@ export default function App() {
     successMessage = 'Profiles dimuatkan.',
     preserveNotice = false,
   ) {
+    if (!ensureTokenIsFresh(nextToken)) {
+      return null;
+    }
+
     const data = await run(
       () => apiRequest('/users', {
         token: nextToken,
@@ -180,6 +295,10 @@ export default function App() {
   }
 
   async function loadProfile(profileId) {
+    if (!ensureTokenIsFresh()) {
+      return null;
+    }
+
     const data = await run(
       () => apiRequest(`/users/${profileId}`, { token }),
       'Detail profile dimuatkan.',
@@ -218,6 +337,10 @@ export default function App() {
   }
 
   async function createProfile() {
+    if (!ensureTokenIsFresh()) {
+      return;
+    }
+
     const data = await run(
       () => apiRequest('/users', {
         method: 'POST',
@@ -237,6 +360,10 @@ export default function App() {
   }
 
   async function updateProfile() {
+    if (!ensureTokenIsFresh()) {
+      return;
+    }
+
     if (!selectedProfile?.id) {
       setError('Pilih profile sebelum update.');
       return;
@@ -260,6 +387,10 @@ export default function App() {
   }
 
   async function deleteProfile(profile) {
+    if (!ensureTokenIsFresh()) {
+      return;
+    }
+
     const confirmed = window.confirm(`Padam ${profile.full_name}?`);
 
     if (!confirmed) {
@@ -311,10 +442,10 @@ export default function App() {
       </header>
 
       <section className="panel">
-        <h2>Login untuk Hari 3+</h2>
+        <h2>Login untuk API secured</h2>
         <p className="small">
-          Hari 1 boleh load profiles dan Hari 2 boleh run full CRUD sebelum login.
-          Selepas security Hari 3 ditambah, login dahulu jika API memulangkan 401.
+          Backend Laravel terkini melindungi CRUD profile dengan frontend token,
+          bearer token Sanctum, token expiry, dan token abilities.
         </p>
         <form className="grid-form" onSubmit={login}>
           <label>
@@ -333,15 +464,23 @@ export default function App() {
             <button type="submit" disabled={loading}>Login</button>
           </div>
         </form>
+        {isAuthenticated && tokenExpiresAt ? (
+          <p className="small">Token tamat tempoh pada {formatExpiry(tokenExpiresAt)}.</p>
+        ) : null}
+        {isAuthenticated ? (
+          <p className="small">
+            Abilities: {tokenAbilities.length ? tokenAbilities.join(', ') : 'tiada dalam response; login semula'}
+          </p>
+        ) : null}
       </section>
 
       <section className="panel">
         <div className="section-header">
           <div>
             <h2>User profiles</h2>
-            <p className="small">List berfungsi dari Hari 1. View, create, update, dan delete bermula dari Hari 2 dan tidak perlukan login sehingga security Hari 3 ditambah.</p>
+            <p className="small">Login sebelum load atau ubah rekod. Laravel masih enforce setiap ability di backend.</p>
           </div>
-          <button type="button" onClick={() => loadProfiles(token, 1)} disabled={loading}>
+          <button type="button" onClick={() => loadProfiles(token, 1)} disabled={loading || !canReadProfiles}>
             Load profiles
           </button>
         </div>
@@ -352,7 +491,7 @@ export default function App() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
-          <button type="button" onClick={() => loadProfiles(token, 1)} disabled={loading}>
+          <button type="button" onClick={() => loadProfiles(token, 1)} disabled={loading || !canReadProfiles}>
             Apply
           </button>
         </div>
@@ -367,7 +506,7 @@ export default function App() {
                 type="button"
                 className="secondary"
                 onClick={() => loadProfiles(token, currentPage - 1)}
-                disabled={loading || currentPage <= 1}
+                disabled={loading || !canReadProfiles || currentPage <= 1}
               >
                 Previous
               </button>
@@ -375,7 +514,7 @@ export default function App() {
                 type="button"
                 className="secondary"
                 onClick={() => loadProfiles(token, currentPage + 1)}
-                disabled={loading || currentPage >= lastPage}
+                disabled={loading || !canReadProfiles || currentPage >= lastPage}
               >
                 Next
               </button>
@@ -399,13 +538,13 @@ export default function App() {
                 {isActive(profile.is_active) ? 'Aktif' : 'Tidak aktif'}
               </span>
               <div className="card-actions">
-                <button type="button" className="secondary" onClick={() => showProfile(profile)} disabled={loading}>
+                <button type="button" className="secondary" onClick={() => showProfile(profile)} disabled={loading || !canReadProfiles}>
                   Lihat
                 </button>
-                <button type="button" className="secondary" onClick={() => editProfile(profile)} disabled={loading}>
+                <button type="button" className="secondary" onClick={() => editProfile(profile)} disabled={loading || !canReadProfiles || !canUpdateProfiles}>
                   Edit
                 </button>
-                <button type="button" className="danger" onClick={() => deleteProfile(profile)} disabled={loading}>
+                <button type="button" className="danger" onClick={() => deleteProfile(profile)} disabled={loading || !canDeleteProfiles}>
                   Padam
                 </button>
               </div>
@@ -437,10 +576,10 @@ export default function App() {
             <div className="wide"><dt>Alamat</dt><dd>{selectedProfile.address || 'Tiada alamat'}</dd></div>
           </dl>
           <div className="button-row">
-            <button type="button" className="secondary" onClick={() => editProfile(selectedProfile)} disabled={loading}>
+            <button type="button" className="secondary" onClick={() => editProfile(selectedProfile)} disabled={loading || !canReadProfiles || !canUpdateProfiles}>
               Edit profile ini
             </button>
-            <button type="button" className="danger" onClick={() => deleteProfile(selectedProfile)} disabled={loading}>
+            <button type="button" className="danger" onClick={() => deleteProfile(selectedProfile)} disabled={loading || !canDeleteProfiles}>
               Padam profile ini
             </button>
           </div>
@@ -452,11 +591,11 @@ export default function App() {
           <div>
             <h2>{formMode === 'edit' ? 'Update profile' : 'Create profile'}</h2>
             <p className="small">
-              Create guna POST /users. Update guna PUT /users/{'{id}'}. Delete guna DELETE /users/{'{id}'}.
+              Create memerlukan profiles:create. Update memerlukan profiles:update. Delete memerlukan profiles:delete.
             </p>
           </div>
           {formMode === 'edit' ? (
-            <button type="button" className="secondary" onClick={startCreate} disabled={loading}>
+            <button type="button" className="secondary" onClick={startCreate} disabled={loading || !canCreateProfiles}>
               Profile baru
             </button>
           ) : null}
@@ -488,7 +627,7 @@ export default function App() {
             Aktif
           </label>
           <div className="form-actions">
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading || (formMode === 'edit' ? !canUpdateProfiles : !canCreateProfiles)}>
               {formMode === 'edit' ? 'Update' : 'Create'}
             </button>
             <button type="button" className="secondary" onClick={resetForm} disabled={loading}>

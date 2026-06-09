@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Building Better APIs with Laravel - 5-Day Training</title>
+  <link rel="stylesheet" href="vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="vendor/reveal/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="vendor/reveal/dist/plugin/highlight/monokai.css">
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #566371;
+      --line: #d9ddd5;
+      --panel: #ffffff;
+      --paper: #f7f7f4;
+      --accent: #0f766e;
+      --red: #b42318;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --amber: #b45309;
+      --code: #111827;
+    }
+
+    .reveal {
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal section {
+      box-sizing: border-box;
+      height: 100%;
+      padding: 34px 52px;
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal p {
+      margin: 0;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .reveal h1 {
+      max-width: 1060px;
+      color: var(--ink);
+      font-size: 72px;
+      line-height: 0.98;
+      font-weight: 850;
+    }
+
+    .reveal h2 {
+      max-width: 1060px;
+      color: var(--ink);
+      font-size: 48px;
+      line-height: 1.05;
+      font-weight: 820;
+    }
+
+    .reveal h3 {
+      color: var(--ink);
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 820;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal td,
+    .reveal th {
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.38;
+    }
+
+    .reveal ul {
+      margin: 0;
+      padding-left: 1.1em;
+    }
+
+    .reveal li + li {
+      margin-top: 8px;
+    }
+
+    .reveal table {
+      margin: 0;
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 20px;
+    }
+
+    .reveal th,
+    .reveal td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    .reveal th {
+      background: #edf3f2;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
+    .reveal td {
+      color: var(--muted);
+    }
+
+    .reveal tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .reveal pre {
+      width: 100%;
+      margin: 0;
+      box-shadow: none;
+      font-size: 17px;
+    }
+
+    .reveal pre code {
+      max-height: none;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      line-height: 1.5;
+    }
+
+    .reveal code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .chapter,
+    .title-slide {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .chapter h1,
+    .chapter h2,
+    .chapter h3,
+    .chapter p,
+    .title-slide h1,
+    .title-slide h2,
+    .title-slide h3,
+    .title-slide p {
+      color: #fff;
+    }
+
+    .chapter .subtitle,
+    .chapter .footer,
+    .title-slide .subtitle,
+    .title-slide .footer {
+      color: #bfccd7;
+    }
+
+    .slide-frame {
+      display: grid;
+      height: 100%;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    .center-stack {
+      display: grid;
+      gap: 20px;
+      align-content: center;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .chapter .eyebrow,
+    .title-slide .eyebrow {
+      color: #99f6e4;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      color: var(--muted);
+      font-size: 27px;
+      line-height: 1.34;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 11px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .chapter .pill,
+    .title-slide .pill {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 740;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(23, 33, 43, 0.06);
+    }
+
+    .panel h3 {
+      margin-bottom: 8px;
+    }
+
+    .panel p,
+    .panel li {
+      font-size: 18px;
+    }
+
+    .metric {
+      display: grid;
+      min-height: 118px;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--accent);
+      font-size: 50px;
+      line-height: 1;
+    }
+
+    .day {
+      min-height: 250px;
+      border-top: 6px solid var(--accent);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 9px;
+    }
+
+    .day:nth-child(2) { border-top-color: var(--blue); }
+    .day:nth-child(3) { border-top-color: var(--red); }
+    .day:nth-child(4) { border-top-color: var(--amber); }
+    .day:nth-child(5) { border-top-color: var(--purple); }
+
+    .day-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .node {
+      min-height: 47px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 13px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 820;
+      text-align: center;
+    }
+
+    .node.accent { background: #e6f4f1; border-color: #9bd2c9; color: #0d5d56; }
+    .node.warn { background: #fff1f0; border-color: #f2aba5; color: #9f1e16; }
+    .node.blue { background: #eaf1ff; border-color: #adc7ff; color: #1d4fb8; }
+    .node.purple { background: #f1e9ff; border-color: #cfb7ff; color: #5b21b6; }
+
+    .arrow {
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .callout {
+      border-left: 6px solid var(--accent);
+      border-radius: 8px;
+      padding: 17px 19px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.38;
+    }
+
+    .tight p,
+    .tight li,
+    .tight td,
+    .tight th {
+      font-size: 18px;
+    }
+
+    .small {
+      font-size: 17px;
+    }
+
+    .reveal .progress {
+      color: var(--accent);
+      height: 5px;
+    }
+
+    .reveal .controls {
+      color: var(--accent);
+    }
+
+    .reveal .slide-number {
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255,255,255,0.85);
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    @media print {
+      .panel {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section class="title-slide" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Laravel API Training</div>
+            <h1>Building Better APIs with Laravel</h1>
+            <p class="subtitle">A 5-day, 30-hour training program with Laravel API code examples, React client calls, architecture diagrams, labs, and bonus modules for TDD, Swagger/OpenAPI, FilamentPHP, and GSD Claude Code prompts.</p>
+            <div class="meta">
+              <span class="pill">Laravel</span>
+              <span class="pill">REST APIs</span>
+              <span class="pill">React Client</span>
+              <span class="pill">Security</span>
+              <span class="pill">Performance</span>
+              <span class="pill">Architecture</span>
+            </div>
+          </div>
+          <div class="footer"><span>ABC Company Profile API</span><span>Use arrows, Space, or Esc overview</span></div>
+        </div>
+        <aside class="notes">
+          Open by explaining that the same project grows every day. The goal is not isolated snippets, but a complete API structure students can explain.
+        </aside>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Outcome</div>
+          <div class="center-stack">
+            <h2>Students finish with a secure, structured Laravel API.</h2>
+            <div class="grid three">
+              <div class="panel metric fragment"><strong>5</strong><p>Core training days</p></div>
+              <div class="panel metric fragment"><strong>30h</strong><p>Class time with labs</p></div>
+              <div class="panel metric fragment"><strong>4</strong><p>Bonus modules</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Expected result</span><span>Versioned API, auth, validation, caching, service layer</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Class rhythm</div>
+          <div class="center-stack tight">
+            <h2>Each 6-hour day moves from concept to working code.</h2>
+            <table>
+              <thead><tr><th>Time block</th><th>Instructor focus</th><th>Participant output</th></tr></thead>
+              <tbody>
+                <tr><td>45 min</td><td>Concept, architecture diagram, and PDF mapping</td><td>Understand the day objective</td></tr>
+                <tr><td>90 min</td><td>Guided Laravel implementation</td><td>Working backend code</td></tr>
+                <tr><td>60 min</td><td>API request and response review</td><td>Verified JSON behavior</td></tr>
+                <tr><td>90 min</td><td>React client integration</td><td>Browser call to the REST API</td></tr>
+                <tr><td>75 min</td><td>Lab variation, review, and Q&amp;A</td><td>Independent change and recap</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Timing guide</span><span>Adjust breaks around the room pace and setup issues</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Roadmap</div>
+          <div class="center-stack">
+            <h2>One project, built progressively.</h2>
+            <div class="grid five">
+              <div class="panel day fragment"><div class="day-label">Day 1</div><h3>Foundations</h3><p>Set up Laravel, first endpoint, JSON response, and React/Vite client shell.</p></div>
+              <div class="panel day fragment"><div class="day-label">Day 2</div><h3>REST CRUD</h3><p>Laragon/XAMPP setup, resource routes, form requests, validation, status codes, and React CRUD form.</p></div>
+              <div class="panel day fragment"><div class="day-label">Day 3</div><h3>Security</h3><p>Sanctum, login/logout, token expiry, token abilities, frontend token middleware, throttling, and React auth.</p></div>
+              <div class="panel day fragment"><div class="day-label">Day 4</div><h3>Performance</h3><p>Pagination, eager loading, cache, JSON exception handling, and React API UX.</p></div>
+              <div class="panel day fragment"><div class="day-label">Day 5</div><h3>Architecture</h3><p>Route model binding, services, API resources, and final React integration.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Course structure</span><span>Each day adds one production concern</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Project artifacts</div>
+          <div class="center-stack">
+            <h2>The same project produces API, client, docs, tests, and admin tools.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Laravel API</h3><p>Routes, controllers, requests, services, resources, models, migrations.</p></div>
+              <div class="panel fragment"><h3>React client</h3><p>Vite app with API helper, login, list, search/filter, create form, and error states.</p></div>
+              <div class="panel fragment"><h3>Operations</h3><p>Feature tests, OpenAPI contract, Swagger UI, throttling, cache, and exception responses.</p></div>
+              <div class="panel fragment"><h3>Admin</h3><p>Filament panel resources for internal users managing the same database records.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Training package</span><span>Every artifact has a matching Markdown tutorial and example folder</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Client-side track</div>
+          <div class="center-stack tight">
+            <h2>React is the API consumer across all 5 days.</h2>
+            <table>
+              <thead><tr><th>Day</th><th>Laravel backend</th><th>React client</th></tr></thead>
+              <tbody>
+                <tr><td>Day 1</td><td>First JSON endpoint</td><td>Vite shell and API environment variables</td></tr>
+                <tr><td>Day 2</td><td>REST CRUD and validation</td><td>List, view, create, update, and delete profiles</td></tr>
+                <tr><td>Day 3</td><td>Sanctum, token expiry, abilities, frontend token, throttling</td><td>Login, store token expiry, call protected routes</td></tr>
+                <tr><td>Day 4</td><td>Pagination, cache, JSON errors</td><td>Search, loading, and error states</td></tr>
+                <tr><td>Day 5</td><td>Service layer and API resources</td><td>Final browser-to-API integration</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Participant request</span><span>The browser client proves the REST contract is usable</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Source mapping</div>
+          <div class="center-stack tight">
+            <h2>The course expands the PDF into a full project.</h2>
+            <table>
+              <thead><tr><th>Training section</th><th>PDF pages</th><th>Expansion</th></tr></thead>
+              <tbody>
+                <tr><td>Day 1</td><td>4-8</td><td>Full setup, MySQL, first endpoint</td></tr>
+                <tr><td>Day 2</td><td>9-12</td><td>Laragon/XAMPP setup, complete CRUD, and form requests</td></tr>
+                <tr><td>Day 3</td><td>11-13</td><td>Full Sanctum login/logout, token expiry, and token abilities flow</td></tr>
+                <tr><td>Day 4</td><td>14-18</td><td>Relationship, cache keys, exception handler</td></tr>
+                <tr><td>Day 5</td><td>16-18</td><td>Final service-layer implementation</td></tr>
+                <tr><td>React client track</td><td>Not in PDF</td><td>Browser client consuming the REST API</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Source</span><span>buildingbetterapiswithlaravel.pdf</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Day 1</div>
+            <h1>Laravel API Foundations And React Client Shell</h1>
+            <p class="subtitle">Students learn the Laravel request lifecycle, create the first versioned JSON endpoint, and prepare the React client shell.</p>
+            <div class="meta"><span class="pill">PDF pages 4-8</span><span class="pill">6 hours</span></div>
+          </div>
+          <div class="footer"><span>Day 1</span><span>Setup to route to controller to model to JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Architecture</div>
+          <div class="center-stack">
+            <h2>Basic Laravel API request lifecycle.</h2>
+            <div class="flow">
+              <span class="node">HTTP request</span><span class="arrow">-&gt;</span>
+              <span class="node blue">GET /api/v1/users</span><span class="arrow">-&gt;</span>
+              <span class="node">routes/api.php</span><span class="arrow">-&gt;</span>
+              <span class="node accent">UserProfileController</span><span class="arrow">-&gt;</span>
+              <span class="node">UserProfile model</span><span class="arrow">-&gt;</span>
+              <span class="node">MySQL database</span><span class="arrow">-&gt;</span>
+              <span class="node accent">JSON response</span>
+            </div>
+          </div>
+          <div class="footer"><span>Teaching point</span><span>Do not include /api manually inside routes/api.php</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 1 deliverables</div>
+          <div class="center-stack">
+            <h2>First endpoint and working database model.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Students build</h3>
+                <ul>
+                  <li class="fragment">fresh Laravel app</li>
+                  <li class="fragment">MySQL local database</li>
+                  <li class="fragment"><code>UserProfile</code> model and migration</li>
+                  <li class="fragment"><code>GET /api/v1/users</code> endpoint</li>
+                  <li class="fragment">React/Vite client shell</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Core commands</h3>
+                <pre><code class="language-bash">composer create-project laravel/laravel abc-api
+php artisan install:api
+php artisan make:model UserProfile -m
+php artisan make:controller Api/V1/UserProfileController</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Day 1 lab</span><span>Add sample records and return JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 1 file map</div>
+          <div class="center-stack tight">
+            <h2>Students should know where each first-day change belongs.</h2>
+            <table>
+              <thead><tr><th>File</th><th>Purpose</th><th>Teaching point</th></tr></thead>
+              <tbody>
+                <tr><td><code>routes/api.php</code></td><td>Register versioned API routes</td><td>Laravel already prefixes this file with <code>/api</code></td></tr>
+                <tr><td><code>database/migrations/*user_profiles*</code></td><td>Define table columns</td><td>The API contract starts with a clear data model</td></tr>
+                <tr><td><code>app/Models/UserProfile.php</code></td><td>Represent profile rows</td><td>Use fillable fields intentionally</td></tr>
+                <tr><td><code>app/Http/Controllers/Api/V1/*</code></td><td>Return JSON from HTTP actions</td><td>Controllers translate requests into responses</td></tr>
+                <tr><td><code>examples/day-1-*</code></td><td>Copyable reference files</td><td>Use examples after explaining the structure</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Day 1 checkpoint</span><span>Route list, migration, seeded rows, first JSON response</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 1 - React setup</div>
+          <div class="center-stack">
+            <h2>Prepare the browser client without mixing frontend and backend code.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Client setup</h3>
+                <pre><code class="language-bash">npm create vite@latest abc-api-client
+# choose React, then JavaScript
+cd abc-api-client
+npm install
+npm run dev</code></pre>
+              </div>
+              <div class="panel">
+                <h3>API environment</h3>
+                <pre><code class="language-dotenv">VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+VITE_FRONTEND_API_TOKEN=abc-training-frontend-token</code></pre>
+              </div>
+            </div>
+            <div class="callout">React calls Laravel through HTTP. It does not import controllers, models, services, or Eloquent code.</div>
+          </div>
+          <div class="footer"><span>Example folder</span><span>examples/react-client-api-consumer</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">React API helper</div>
+          <div class="center-stack">
+            <h2>Centralize API calls so components stay small.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Helper responsibility</h3>
+                <ul>
+                  <li>build the full API URL</li>
+                  <li>attach <code>Accept: application/json</code></li>
+                  <li>attach frontend token when configured</li>
+                  <li>attach bearer token only after login</li>
+                  <li>convert request body to JSON</li>
+                  <li>throw useful errors for React state</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Usage in a component</h3>
+<pre><code class="language-js">const data = await apiRequest('/users', {
+  token,
+  query: { search },
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>React pattern</span><span>Final React flow sends frontend token, bearer token, and respects backend abilities</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 1 - React prompt</div>
+          <div class="center-stack tight">
+            <h2>Ask AI to wire React to the Laravel REST API, not to copy PHP into the frontend.</h2>
+            <table>
+              <thead><tr><th>Prompt part</th><th>What to provide</th><th>Guardrail</th></tr></thead>
+              <tbody>
+                <tr><td>Goal</td><td>Call <code>GET /users</code> from React and display JSON</td><td>Laravel endpoint must already return JSON</td></tr>
+                <tr><td>Context</td><td><code>VITE_API_BASE_URL</code>, <code>src/api.js</code>, component file</td><td>Use existing project structure if there is one</td></tr>
+                <tr><td>MCP</td><td>filesystem, terminal, browser, or git context if available</td><td>Inspect first, then patch</td></tr>
+                <tr><td>Verification</td><td>browser loading, success, and error states</td><td>React calls HTTP only; no Laravel PHP imports</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Day 1 prompt</span><span>React browser client -> HTTP request -> Laravel REST API -> JSON response</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Day 2</div>
+            <h1>RESTful Routes, CRUD, And Validation</h1>
+            <p class="subtitle">Students turn the single endpoint into a full RESTful resource, starting from a Laragon/XAMPP-friendly local setup.</p>
+            <div class="meta"><span class="pill">PDF pages 9-12</span><span class="pill">6 hours</span></div>
+          </div>
+          <div class="footer"><span>Day 2</span><span>GET, POST, PATCH, DELETE</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Local setup checkpoint</div>
+          <div class="center-stack tight">
+            <h2>Most learners use Laragon or XAMPP for MySQL.</h2>
+            <table>
+              <thead><tr><th>Check</th><th>Expected setup</th><th>Why it matters</th></tr></thead>
+              <tbody>
+                <tr><td>MySQL service</td><td>Laragon <code>Start All</code> or XAMPP <code>MySQL</code> started</td><td>Migrations and CRUD writes need a running database</td></tr>
+                <tr><td>Database</td><td><code>abc_api</code> exists in phpMyAdmin, Adminer, or HeidiSQL</td><td><code>DB_DATABASE</code> must match a real schema</td></tr>
+                <tr><td>Laravel URL</td><td><code>php artisan serve</code> gives <code>127.0.0.1:8000</code></td><td>Keeps the API host predictable in class</td></tr>
+                <tr><td>React URL</td><td><code>VITE_API_BASE_URL</code> points to the same Laravel host</td><td>Avoids mixed localhost and virtual-host bugs</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Trainer checkpoint</span><span>Confirm environment before debugging CRUD code</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Choose one base URL</div>
+          <div class="center-stack">
+            <h2>Laravel, API client, and React must agree on the same API base URL.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Recommended class flow</h3>
+                <pre><code class="language-text">Laravel:
+http://127.0.0.1:8000/api/v1
+
+React .env:
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Laragon virtual host option</h3>
+                <pre><code class="language-text">Laravel:
+http://abc-api.test/api/v1
+
+React .env:
+VITE_API_BASE_URL=http://abc-api.test/api/v1</code></pre>
+              </div>
+            </div>
+            <div class="callout">For XAMPP MySQL on port 3307, set <code>DB_PORT=3307</code>, then run <code>php artisan config:clear</code>.</div>
+          </div>
+          <div class="footer"><span>Setup rule</span><span>Do not mix 127.0.0.1:8000, localhost, and abc-api.test in the same lab</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">AI prompt checkpoints</div>
+          <div class="center-stack tight">
+            <h2>The slide prompts match the Day 2 Markdown checkpoints.</h2>
+            <table>
+              <thead><tr><th>Checkpoint</th><th>Prompt goal</th><th>Evidence to paste</th></tr></thead>
+              <tbody>
+                <tr><td>Local setup</td><td>Find Laragon/XAMPP, URL, DB, and React base URL mismatch</td><td><code>.env</code>, Laravel URL, React base URL</td></tr>
+                <tr><td>Resource routes</td><td>Confirm REST route mapping and project mode</td><td><code>routes/api.php</code>, route-list output</td></tr>
+                <tr><td>Validation rules</td><td>Review required, sometimes, unique, and update ignore rules</td><td>FormRequests, migration, model fillable</td></tr>
+                <tr><td>Controller review</td><td>Check index, store, show, update, destroy, and status codes</td><td>Controller, requests, model, response sample</td></tr>
+                <tr><td>API responses</td><td>Diagnose wrong status or JSON shape</td><td>Request URL, status code, response JSON</td></tr>
+                <tr><td>React integration</td><td>Review list/show/create/update/delete calls and 422 field error display</td><td><code>src/api.js</code>, CRUD component, browser behavior</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Prompt habit</span><span>Every prompt declares prepared tutorial project or existing Laravel project mode</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Existing project + MCP</div>
+          <div class="center-stack tight">
+            <h2>Use MCP to gather context before asking AI to patch code.</h2>
+            <table>
+              <thead><tr><th>MCP context</th><th>Evidence to inspect</th><th>Guardrail</th></tr></thead>
+              <tbody>
+                <tr><td>Filesystem</td><td>Routes, controllers, requests, models, migrations, React files</td><td>Preserve namespaces and local structure</td></tr>
+                <tr><td>Terminal</td><td><code>route:list</code>, <code>migrate:status</code>, targeted tests</td><td>Use command output as evidence</td></tr>
+                <tr><td>Browser</td><td>React form behavior, 422 display, API calls</td><td>Verify UI before changing frontend code</td></tr>
+                <tr><td>Git/schema</td><td>Local changes, table columns, unique indexes</td><td>Do not expose secrets or production data</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>MCP rule</span><span>Inspect first, preserve conventions, then request the smallest safe change</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">REST map</div>
+          <div class="center-stack tight">
+            <h2>Resource routes map HTTP verbs to controller actions.</h2>
+            <table>
+              <thead><tr><th>Method</th><th>URI</th><th>Controller action</th><th>Status focus</th></tr></thead>
+              <tbody>
+                <tr><td>GET</td><td>/api/v1/users</td><td>index</td><td>200</td></tr>
+                <tr><td>POST</td><td>/api/v1/users</td><td>store</td><td>201</td></tr>
+                <tr><td>GET</td><td>/api/v1/users/{id}</td><td>show</td><td>200 or 404</td></tr>
+                <tr><td>PATCH</td><td>/api/v1/users/{id}</td><td>update</td><td>200 or 422</td></tr>
+                <tr><td>DELETE</td><td>/api/v1/users/{id}</td><td>destroy</td><td>204</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Route helper</span><span>Route::apiResource('users', UserProfileController::class)</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">HTTP contract</div>
+          <div class="center-stack tight">
+            <h2>Every endpoint should be explained as a contract.</h2>
+            <table>
+              <thead><tr><th>Contract part</th><th>Example</th><th>Why it matters</th></tr></thead>
+              <tbody>
+                <tr><td>Method + URL</td><td><code>POST /api/v1/users</code></td><td>Defines the operation and resource</td></tr>
+                <tr><td>Headers</td><td><code>Accept: application/json</code>, <code>X-API-TOKEN</code></td><td>Controls response type and client identity</td></tr>
+                <tr><td>Body</td><td><code>full_name</code>, <code>phone</code>, <code>id_card_number</code></td><td>Inputs validated by Laravel</td></tr>
+                <tr><td>Status</td><td><code>201</code>, <code>422</code>, <code>401</code></td><td>Frontend behavior depends on status codes</td></tr>
+                <tr><td>JSON shape</td><td><code>{ "data": ... }</code> or <code>{ "message": ... }</code></td><td>Clients need predictable fields</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>REST teaching point</span><span>React, API clients, and Swagger all consume the same JSON contract</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Validation</div>
+          <div class="center-stack">
+            <h2>Form requests keep validation out of controllers.</h2>
+            <div class="flow">
+              <span class="node">POST/PATCH request</span><span class="arrow">-&gt;</span>
+              <span class="node blue">FormRequest rules</span><span class="arrow">-&gt;</span>
+              <span class="node warn">422 if invalid</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Controller action</span><span class="arrow">-&gt;</span>
+              <span class="node">Eloquent write</span>
+            </div>
+            <pre><code class="language-php">'full_name' =&gt; ['required', 'string', 'max:255'],
+'phone' =&gt; ['required', 'string', 'max:30'],
+'id_card_number' =&gt; ['required', 'string', 'unique:user_profiles,id_card_number']</code></pre>
+          </div>
+          <div class="footer"><span>Day 2 lab</span><span>CRUD flow with request JSON and response JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Validation response</div>
+          <div class="center-stack">
+            <h2>React can show field errors when Laravel returns a predictable 422.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Laravel JSON</h3>
+                <pre><code class="language-json">{
+  "message": "The full name field is required.",
+  "errors": {
+    "full_name": ["The full name field is required."]
+  }
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>React display rule</h3>
+                <ul>
+                  <li>if status is <code>422</code>, read <code>errors</code></li>
+                  <li>map field names to form inputs</li>
+                  <li>keep the form data visible</li>
+                  <li>show the general <code>message</code> at the top</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Day 2 detail</span><span>Validation is a user experience feature, not only backend protection</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 2 - React CRUD</div>
+          <div class="center-stack">
+            <h2>The form talks to the same REST contract shown by the JSON response.</h2>
+            <div class="split">
+              <div class="flow">
+                <span class="node">React form</span><span class="arrow">-&gt;</span>
+                <span class="node blue">POST /api/v1/users</span><span class="arrow">-&gt;</span>
+                <span class="node">FormRequest</span><span class="arrow">-&gt;</span>
+                <span class="node warn">422 errors</span><span class="arrow">-&gt;</span>
+                <span class="node accent">Display message</span>
+              </div>
+              <div class="panel">
+                <h3>Client call</h3>
+                <pre><code class="language-js">apiRequest('/users', {
+  method: 'POST',
+  body: form,
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Teaching point</span><span>Laravel owns validation; React displays the JSON result</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Day 3</div>
+            <h1>API Security</h1>
+            <p class="subtitle">Students add authentication, token abilities, frontend token validation, and rate limiting to the route group.</p>
+            <div class="meta"><span class="pill">PDF pages 11-13</span><span class="pill">6 hours</span></div>
+          </div>
+          <div class="footer"><span>Day 3</span><span>Frontend token plus throttling plus expiring Sanctum token plus abilities</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Security pipeline</div>
+          <div class="center-stack">
+            <h2>Every protected request passes through layered checks.</h2>
+            <div class="flow">
+              <span class="node">Client</span><span class="arrow">-&gt;</span>
+              <span class="node warn">X-API-TOKEN?</span><span class="arrow">-&gt;</span>
+              <span class="node">throttle:60,1</span><span class="arrow">-&gt;</span>
+              <span class="node blue">auth:sanctum</span><span class="arrow">-&gt;</span>
+              <span class="node warn">abilities</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Controller</span><span class="arrow">-&gt;</span>
+              <span class="node">JSON</span>
+            </div>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Missing frontend token</h3><p>Return 401 with a clear JSON error.</p></div>
+              <div class="panel fragment"><h3>Too many requests</h3><p>Laravel returns 429 to protect the API.</p></div>
+              <div class="panel fragment"><h3>Token denied</h3><p>Sanctum returns 401 for missing or expired tokens and 403 for missing abilities.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Security rule</span><span>One layer is never the whole security system</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Security route group</div>
+          <div class="center-stack">
+            <h2>Route grouping keeps security rules obvious.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Public route</h3>
+                <pre><code class="language-php">Route::post('/auth/login', [AuthController::class, 'login'])
+    -&gt;middleware(['frontend.token', 'throttle:login']);</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Protected routes</h3>
+                <pre><code class="language-php">Route::middleware([
+    'frontend.token',
+    'auth:sanctum',
+    'throttle:api',
+])-&gt;group(function () {
+    Route::apiResource('users', UserProfileController::class)
+        -&gt;middlewareFor(['index', 'show'], 'abilities:profiles:read')
+        -&gt;middlewareFor('store', 'abilities:profiles:create')
+        -&gt;middlewareFor('update', 'abilities:profiles:update')
+        -&gt;middlewareFor('destroy', 'abilities:profiles:delete');
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Day 3 detail</span><span>Login can be public to users, but not open to unknown frontend clients</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Auth flow</div>
+          <div class="center-stack">
+            <h2>Login issues a short-lived token; protected routes consume it.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Login</h3>
+                <pre><code class="language-http">POST /api/v1/auth/login
+X-API-TOKEN: abc-training-frontend-token
+
+{
+  "email": "admin@example.com",
+  "password": "password"
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Protected request</h3>
+                <pre><code class="language-http">GET /api/v1/users
+X-API-TOKEN: abc-training-frontend-token
+Authorization: Bearer 1|token</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Day 3 lab</span><span>Login, protected CRUD JSON responses, expired-token test, missing-ability test, logout, and failed-token JSON response</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Token abilities</div>
+          <div class="center-stack">
+            <h2>The `abilities` column turns one bearer token into scoped access.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Stored in MySQL</h3>
+<pre><code class="language-sql">SELECT id, name, abilities, expires_at
+FROM personal_access_tokens
+ORDER BY id DESC
+LIMIT 1;</code></pre>
+<pre><code class="language-json">["profiles:read","profiles:create",
+"profiles:update","profiles:delete"]</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Read-only token test</h3>
+<pre><code class="language-php">$user-&gt;createToken(
+    'read-only-training-token',
+    ['profiles:read'],
+    now()-&gt;addMinutes(60)
+);</code></pre>
+<pre><code class="language-text">GET /users  -&gt; 200
+POST /users -&gt; 403 Invalid ability</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Before React</span><span>Backend authorization must be correct before the browser client consumes protected CRUD</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 3 - React auth</div>
+          <div class="center-stack">
+            <h2>Protected browser CRUD calls need both API security headers.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Login response</h3>
+<pre><code class="language-json">{
+  "message": "Login successful.",
+  "data": {
+    "token_type": "Bearer",
+    "access_token": "1|plain-text-token",
+    "expires_at": "2026-06-09T09:30:00Z",
+    "abilities": [
+      "profiles:read",
+      "profiles:create",
+      "profiles:update",
+      "profiles:delete"
+    ]
+  }
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Protected request headers</h3>
+                <pre><code class="language-js">{
+  'X-API-TOKEN': FRONTEND_API_TOKEN,
+  Authorization: `Bearer ${token}`
+}</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Security model</span><span>Frontend token identifies the client; bearer token identifies the user; abilities control allowed actions</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Day 4</div>
+            <h1>Performance And Exception Handling</h1>
+            <p class="subtitle">Students improve query behavior, cache API responses, and standardize JSON errors without weakening Day 3 security.</p>
+            <div class="meta"><span class="pill">PDF pages 14-18</span><span class="pill">6 hours</span></div>
+          </div>
+          <div class="footer"><span>Day 4</span><span>Pagination plus eager loading plus cache plus exceptions</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Performance model</div>
+          <div class="center-stack">
+            <h2>Optimize reads, invalidate on writes.</h2>
+            <div class="split">
+              <div class="grid">
+                <div class="flow"><span class="node">GET users</span><span class="arrow">-&gt;</span><span class="node warn">ability read</span><span class="arrow">-&gt;</span><span class="node blue">cache key</span><span class="arrow">-&gt;</span><span class="node accent">cache hit?</span></div>
+                <div class="flow"><span class="node">cache miss</span><span class="arrow">-&gt;</span><span class="node">UserProfile::with('projects')</span><span class="arrow">-&gt;</span><span class="node accent">store cache</span></div>
+                <div class="flow"><span class="node warn">POST/PATCH/DELETE</span><span class="arrow">-&gt;</span><span class="node">write ability</span><span class="arrow">-&gt;</span><span class="node">write model</span><span class="arrow">-&gt;</span><span class="node warn">clear cache</span></div>
+              </div>
+              <div class="panel">
+                <h3>Key practices</h3>
+                <ul>
+                  <li class="fragment">paginate every list endpoint</li>
+                  <li class="fragment">use eager loading to avoid N+1 queries</li>
+                  <li class="fragment">include page/search filters in cache keys</li>
+                  <li class="fragment">clear stale cache after writes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Performance</span><span>Fast APIs are deliberate about payloads, queries, cache, and frontend UX</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Error handling</div>
+          <div class="center-stack">
+            <h2>Centralize API exception rendering in Laravel.</h2>
+            <div class="grid two">
+              <div class="panel fragment">
+                <h3>Before</h3>
+                <p>Controllers may scatter <code>try/catch</code>, expose raw exceptions, or return inconsistent shapes.</p>
+              </div>
+              <div class="panel fragment">
+                <h3>After</h3>
+                <p><code>bootstrap/app.php</code> renders <code>403</code>, <code>404</code>, <code>422</code>, and API errors as consistent JSON.</p>
+              </div>
+            </div>
+            <pre><code class="language-json">{
+  "message": "Resource not found."
+}</code></pre>
+          </div>
+          <div class="footer"><span>Day 4 lab</span><span>Test 404 and validation JSON responses</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">API response contracts</div>
+          <div class="center-stack tight">
+            <h2>Day 4 standardizes list metadata and error shapes.</h2>
+            <table>
+              <thead><tr><th>Case</th><th>Expected JSON</th><th>React behavior</th></tr></thead>
+              <tbody>
+                <tr><td>Paginated list</td><td><code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records and page totals</td></tr>
+                <tr><td>Search</td><td>same list shape, filtered by query string</td><td>Refresh the same list component</td></tr>
+                <tr><td>Validation error</td><td><code>message</code> plus <code>errors</code></td><td>Show field-level messages</td></tr>
+                <tr><td>Unauthorized</td><td><code>{ "message": "Unauthenticated." }</code></td><td>Clear token or prompt login</td></tr>
+                <tr><td>Forbidden</td><td><code>{ "message": "Invalid ability provided." }</code></td><td>Show missing ability message</td></tr>
+                <tr><td>Not found</td><td><code>{ "message": "Resource not found." }</code></td><td>Show friendly empty/error state</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Day 4 detail</span><span>Consistent contracts reduce frontend branching and support Swagger docs</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 4 - React API UX</div>
+          <div class="center-stack">
+            <h2>Good API responses make the frontend easier to build.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Loading</h3><p>Disable buttons and show request progress.</p></div>
+              <div class="panel fragment"><h3>Search</h3><p>Send query strings such as <code>search</code> with the list request.</p></div>
+              <div class="panel fragment"><h3>Pagination</h3><p>Read totals and page metadata from the API response.</p></div>
+              <div class="panel fragment"><h3>Errors</h3><p>Show useful messages for <code>401</code>, <code>403</code>, <code>422</code>, and <code>404</code>.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Frontend impact</span><span>Consistent JSON shapes reduce client-side guesswork</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Day 5</div>
+            <h1>Final Architecture</h1>
+            <p class="subtitle">Students refactor the API into a maintainable structure using route model binding, services, API resources, and a React client integration.</p>
+            <div class="meta"><span class="pill">PDF pages 16-18</span><span class="pill">6 hours</span></div>
+          </div>
+          <div class="footer"><span>Day 5</span><span>Controller thin, service focused, JSON controlled</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Final architecture</div>
+          <div class="center-stack">
+            <h2>Each layer has a clear job.</h2>
+            <div class="flow">
+              <span class="node">React browser</span><span class="arrow">-&gt;</span>
+              <span class="node blue">fetch + headers</span><span class="arrow">-&gt;</span>
+              <span class="node warn">Middleware</span><span class="arrow">-&gt;</span>
+              <span class="node">Routes</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Controller</span><span class="arrow">-&gt;</span>
+              <span class="node">FormRequest</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Service</span><span class="arrow">-&gt;</span>
+              <span class="node">Model</span><span class="arrow">-&gt;</span>
+              <span class="node">Database</span><span class="arrow">-&gt;</span>
+              <span class="node purple">API Resource</span><span class="arrow">-&gt;</span>
+              <span class="node">JSON</span>
+            </div>
+          </div>
+          <div class="footer"><span>Architecture</span><span>Keep HTTP, validation, business logic, data access, and serialization separate</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 5 backend structure</div>
+          <div class="center-stack tight">
+            <h2>The final refactor gives each class one clear job.</h2>
+            <table>
+              <thead><tr><th>Layer</th><th>Example file</th><th>Responsibility</th></tr></thead>
+              <tbody>
+                <tr><td>Route</td><td><code>routes/api.php</code></td><td>Version, middleware, and endpoint registration</td></tr>
+                <tr><td>Controller</td><td><code>UserProfileController</code></td><td>HTTP input/output orchestration</td></tr>
+                <tr><td>Request</td><td><code>StoreUserProfileRequest</code></td><td>Validation and authorization rules</td></tr>
+                <tr><td>Service</td><td><code>UserProfileService</code></td><td>Business workflow and cache invalidation</td></tr>
+                <tr><td>Resource</td><td><code>UserProfileResource</code></td><td>Stable JSON serialization for clients</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Day 5 detail</span><span>Thin controllers are a result of moving responsibilities to the right layer</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Day 5 - React final integration</div>
+          <div class="center-stack tight">
+            <h2>The final project is a working browser-to-API contract.</h2>
+            <table>
+              <thead><tr><th>Client action</th><th>API endpoint</th><th>Headers</th><th>UI result</th></tr></thead>
+              <tbody>
+                <tr><td>Login</td><td><code>POST /api/v1/auth/login</code></td><td><code>X-API-TOKEN</code></td><td>Store Sanctum token for lab</td></tr>
+                <tr><td>List profiles</td><td><code>GET /api/v1/users</code></td><td>frontend + bearer</td><td>Render cards and pagination total</td></tr>
+                <tr><td>Search</td><td><code>GET /api/v1/users?search=ali</code></td><td>frontend + bearer</td><td>Refresh list without changing API code</td></tr>
+                <tr><td>Create profile</td><td><code>POST /api/v1/users</code></td><td>frontend + bearer</td><td>Show success or validation errors</td></tr>
+                <tr><td>View profile</td><td><code>GET /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Render detail panel</td></tr>
+                <tr><td>Update profile</td><td><code>PUT /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Refresh edited record and list</td></tr>
+                <tr><td>Delete profile</td><td><code>DELETE /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Handle 204 and reload list</td></tr>
+                <tr><td>Logout</td><td><code>POST /api/v1/auth/logout</code></td><td>frontend + bearer</td><td>Clear token and block protected actions</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Final integration</span><span>Method, URL, headers, body, status code, and JSON shape</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Final deliverable</div>
+          <div class="center-stack">
+            <h2>The final system is secure, optimized, maintainable, and consumable from React.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Security</h3><p>Sanctum, token abilities, frontend token, throttling, production debug rules.</p></div>
+              <div class="panel fragment"><h3>Performance</h3><p>Pagination, eager loading, cache, route/config cache awareness.</p></div>
+              <div class="panel fragment"><h3>Architecture</h3><p>Service layer, route model binding, resources, exception handler.</p></div>
+              <div class="panel fragment"><h3>React client</h3><p>Login, full CRUD, search, pagination, loading, and error states.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Final project</span><span>Students should be able to explain every layer</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Bonus modules</div>
+            <h1>TDD, Swagger/OpenAPI, FilamentPHP, And GSD</h1>
+            <p class="subtitle">The bonuses extend the API project with testing discipline, documentation, back-office data management, and AI-assisted delivery prompts.</p>
+          </div>
+          <div class="footer"><span>Bonus</span><span>Not all bonus material is directly covered in the PDF</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - TDD</div>
+          <div class="center-stack">
+            <h2>Write tests before adding behavior.</h2>
+            <div class="flow">
+              <span class="node warn">Red</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Green</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Refactor</span><span class="arrow">-&gt;</span>
+              <span class="node">Repeat</span>
+            </div>
+            <div class="grid two">
+              <div class="panel"><h3>Tests cover</h3><p>Auth, token abilities, frontend token, CRUD, validation, 404, and search.</p></div>
+              <div class="panel"><h3>Command</h3><pre><code class="language-bash">php artisan test --filter=UserProfileApiTest
+php artisan test --filter=AuthApiTest</code></pre></div>
+            </div>
+          </div>
+          <div class="footer"><span>TDD</span><span>If the test never failed, it did not prove much</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - Swagger/OpenAPI</div>
+          <div class="center-stack">
+            <h2>Document the contract, not just the code.</h2>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Paths</h3><p>Login, logout, list, create, show, update, delete.</p></div>
+              <div class="panel fragment"><h3>Schemas</h3><p>UserProfile, Project, validation error, auth response.</p></div>
+              <div class="panel fragment"><h3>Security</h3><p>Bearer token plus <code>X-API-TOKEN</code> API key scheme.</p></div>
+            </div>
+            <pre><code class="language-bash">composer require darkaonline/l5-swagger
+php artisan l5-swagger:generate</code></pre>
+          </div>
+          <div class="footer"><span>Swagger UI</span><span>/api/documentation</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - FilamentPHP</div>
+          <div class="center-stack">
+            <h2>Add an internal admin panel over the same API data.</h2>
+            <div class="flow">
+              <span class="node">Internal admin</span><span class="arrow">-&gt;</span>
+              <span class="node purple">/admin Filament panel</span><span class="arrow">-&gt;</span>
+              <span class="node">UserProfileResource</span><span class="arrow">-&gt;</span>
+              <span class="node">ProjectResource</span><span class="arrow">-&gt;</span>
+              <span class="node accent">same database</span><span class="arrow">-&gt;</span>
+              <span class="node blue">API output</span>
+            </div>
+            <div class="callout">Filament does not replace the JSON API. It gives internal admins a browser UI for managing the same records.</div>
+          </div>
+          <div class="footer"><span>FilamentPHP</span><span>Panel access must be restricted with canAccessPanel and policies</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - GSD Claude Code prompts</div>
+          <div class="center-stack">
+            <h2>Use AI assistance through a disciplined delivery loop.</h2>
+            <div class="flow">
+              <span class="node">Capture task</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Inspect files</span><span class="arrow">-&gt;</span>
+              <span class="node">Plan small change</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Implement</span><span class="arrow">-&gt;</span>
+              <span class="node warn">Verify</span><span class="arrow">-&gt;</span>
+              <span class="node purple">Handoff</span>
+            </div>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Prompt well</h3><p>Give goal, files, constraints, done criteria, and output format.</p></div>
+              <div class="panel fragment"><h3>Control risk</h3><p>Do not paste secrets; ask for a plan before risky edits.</p></div>
+              <div class="panel fragment"><h3>Verify</h3><p>Run tests, inspect JSON responses, check the browser, and review the diff.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Markdown file</span><span>training/bonus-gsd-claude-code-prompts.md</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus comparison</div>
+          <div class="center-stack tight">
+            <h2>Each bonus strengthens a different operating need.</h2>
+            <table>
+              <thead><tr><th>Bonus</th><th>Question it answers</th><th>Deliverable</th></tr></thead>
+              <tbody>
+                <tr><td>TDD</td><td>How do we prove the API still works?</td><td>Feature test suite</td></tr>
+                <tr><td>Swagger/OpenAPI</td><td>How do clients understand the contract?</td><td>Swagger UI and OpenAPI JSON</td></tr>
+                <tr><td>FilamentPHP</td><td>How do internal admins manage API data?</td><td>Admin panel resources</td></tr>
+                <tr><td>GSD Claude Code prompts</td><td>How do we use AI help without losing control?</td><td>Prompt workflow and handoff checklist</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Bonuses</span><span>Test, document, operate, deliver</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus deliverables</div>
+          <div class="center-stack tight">
+            <h2>Each bonus should end with something participants can run.</h2>
+            <table>
+              <thead><tr><th>Bonus</th><th>Run command or URL</th><th>Pass condition</th></tr></thead>
+              <tbody>
+                <tr><td>TDD</td><td><code>php artisan test</code></td><td>Feature tests prove auth, CRUD, validation, filters, and errors</td></tr>
+                <tr><td>Swagger/OpenAPI</td><td><code>/api/documentation</code></td><td>Swagger UI shows paths, schemas, and security schemes</td></tr>
+                <tr><td>OpenAPI JSON</td><td><code>storage/api-docs/api-docs.json</code></td><td>Contract can be shared with frontend or QA teams</td></tr>
+                <tr><td>FilamentPHP</td><td><code>/admin</code></td><td>Authorized admin can manage profiles and projects</td></tr>
+                <tr><td>GSD prompts</td><td><code>training/bonus-gsd-claude-code-prompts.md</code></td><td>Participants can plan, implement, debug, verify, and hand off with prompts</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Bonus detail</span><span>Each module adds confidence, documentation, or operational control</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Assessment</div>
+          <div class="center-stack tight">
+            <h2>Mark the final project against behavior and structure.</h2>
+            <table>
+              <thead><tr><th>Area</th><th>Marks</th></tr></thead>
+              <tbody>
+                <tr><td>Project setup and migrations</td><td>10</td></tr>
+                <tr><td>RESTful CRUD and validation</td><td>25</td></tr>
+                <tr><td>Sanctum, middleware, throttling</td><td>25</td></tr>
+                <tr><td>Performance and exception handling</td><td>15</td></tr>
+                <tr><td>Service layer and resources</td><td>15</td></tr>
+                <tr><td>React client integration</td><td>10</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Assessment</span><span>Working behavior matters more than copied snippets</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Instructor workflow</div>
+          <div class="center-stack">
+            <h2>Use the same rhythm every day.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>1. Explain</h3><p>Start with the concept and the diagram.</p></div>
+              <div class="panel fragment"><h3>2. Build</h3><p>Write or copy the code into Laravel.</p></div>
+              <div class="panel fragment"><h3>3. Run</h3><p>Send the request and inspect the JSON response.</p></div>
+              <div class="panel fragment"><h3>4. Change</h3><p>Students repeat with a small variation.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Teaching pattern</span><span>Concept to code to request to response to variation</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Materials</div>
+          <div class="center-stack">
+            <h2>Training docs and copyable examples are already organized.</h2>
+            <div class="grid two">
+              <div class="panel"><h3>Training</h3><p><code>training/overview.md</code> plus five day files and four bonus modules.</p></div>
+              <div class="panel"><h3>Examples</h3><p><code>examples/day-*</code>, <code>examples/react-client-api-consumer</code>, and <code>examples/bonus-*</code> mirror project file paths.</p></div>
+            </div>
+            <pre><code class="language-text">training/
+examples/
+slides/laravel-api-training.html</code></pre>
+          </div>
+          <div class="footer"><span>Repository</span><span>/Users/habib/Git/laravel-api</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Close</div>
+            <h1>By the end, students can build and explain a production-aware Laravel API.</h1>
+            <p class="subtitle">The project moves from a simple endpoint to a secure, tested, documented, maintainable API architecture with a React client.</p>
+            <div class="meta">
+              <span class="pill">Build</span>
+              <span class="pill">Secure</span>
+              <span class="pill">Optimize</span>
+              <span class="pill">Refactor</span>
+              <span class="pill">Document</span>
+            </div>
+          </div>
+          <div class="footer"><span>Laravel API Training</span><span>End of deck</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="vendor/reveal/dist/reveal.js"></script>
+  <script src="vendor/reveal/dist/plugin/highlight.js"></script>
+  <script src="vendor/reveal/dist/plugin/notes.js"></script>
+  <script src="vendor/reveal/dist/plugin/search.js"></script>
+  <script src="vendor/reveal/dist/plugin/zoom.js"></script>
+  <script>
+    const legacyHash = window.location.hash.match(/^#(\d+)$/);
+    if (legacyHash) {
+      window.history.replaceState(null, '', '#/' + legacyHash[1]);
+    }
+
+    Reveal.initialize({
+      hash: true,
+      hashOneBasedIndex: true,
+      controls: true,
+      progress: true,
+      slideNumber: 'c/t',
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      center: false,
+      transition: 'slide',
+      backgroundTransition: 'fade',
+      plugins: [
+        RevealHighlight,
+        RevealNotes,
+        RevealSearch,
+        RevealZoom
+      ]
+    });
+  </script>
+</body>
+</html>

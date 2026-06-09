@@ -8,13 +8,12 @@ By the end, students can:
 
 - create a React app with Vite.
 - configure the Laravel API base URL.
-- call the public profile list before login on Day 1.
-- run full Day 2 CRUD before login.
+- understand that Day 1 list and Day 2 CRUD are public only while those lessons are being built.
 - send the frontend `X-API-TOKEN` header when Day 3 security is added.
-- login and store a Sanctum bearer token for the local lab on Day 3.
+- login and store a Sanctum bearer token, expiry, and abilities for the local lab on Day 3.
 - call protected API routes after Day 3 security is added.
 - list, search, view, create, update, and delete user profiles.
-- show loading, success, `401`, `422`, and general API errors.
+- show loading, success, `401`, `403`, `422`, and general API errors.
 
 ## Where This Fits In The 5-Day Course
 
@@ -31,11 +30,10 @@ By the end, students can:
 ```mermaid
 flowchart LR
     Browser["React browser app"] --> Fetch["fetch API helper"]
-    Fetch --> Headers["Accept JSON + optional auth headers"]
+    Fetch --> Headers["Accept JSON + X-API-TOKEN + optional Bearer token"]
     Headers --> Laravel["Laravel /api/v1 routes"]
-    Laravel --> PublicOrProtected["Day 1 public list, Day 2 public CRUD, or Day 3+ protected routes"]
-    PublicOrProtected -->|"Day 1 list / Day 2 CRUD public"| Controller["API controller"]
-    PublicOrProtected -->|"Day 3+ protected"| Middleware["frontend.token + throttle + auth:sanctum"]
+    Laravel --> RouteState["Day 1/2 public while building, Day 3+ secured for final app"]
+    RouteState --> Middleware["frontend.token + throttle + auth:sanctum + abilities"]
     Middleware --> Controller["API controller"]
     Controller --> Service["Service layer"]
     Service --> Model["Eloquent models"]
@@ -180,7 +178,7 @@ Teaching points:
 
 ## Step 5 - Login From React
 
-Day 1 does not need login for the profile list, and Day 2 does not need login for list, show, create, update, or delete. Add this login flow after Day 3 security is introduced.
+If students are still on Day 1 or Day 2, the temporary training routes may be public. After Day 3 security is introduced, use this login flow before list, show, create, update, or delete.
 
 The login request does not have a bearer token yet, but it sends the frontend token when `VITE_FRONTEND_API_TOKEN` is configured.
 
@@ -194,7 +192,11 @@ const data = await apiRequest('/auth/login', {
 });
 
 const accessToken = data.data.access_token;
+const expiresAt = data.data.expires_at;
+const abilities = data.data.abilities || [];
 localStorage.setItem('abc_api_token', accessToken);
+localStorage.setItem('abc_api_token_expires_at', expiresAt);
+localStorage.setItem('abc_api_token_abilities', JSON.stringify(abilities));
 ```
 
 Expected API response:
@@ -205,6 +207,13 @@ Expected API response:
   "data": {
     "token_type": "Bearer",
     "access_token": "1|plain-text-token",
+    "expires_at": "2026-06-09T09:30:00.000000Z",
+    "abilities": [
+      "profiles:read",
+      "profiles:create",
+      "profiles:update",
+      "profiles:delete"
+    ],
     "user": {
       "id": 1,
       "name": "Training Admin",
@@ -218,7 +227,7 @@ Local storage is acceptable for this training lab. In production, token storage 
 
 ## Step 6 - Call The Profiles Endpoint
 
-Day 1 can load profiles before login:
+Before Day 3, the temporary training route can load profiles without login:
 
 ```js
 const profiles = await apiRequest('/users', {
@@ -229,7 +238,7 @@ const profiles = await apiRequest('/users', {
 });
 ```
 
-After Day 3 security is added, pass the stored token:
+After Day 3 security is added, pass the stored token. Listing requires `profiles:read`:
 
 ```js
 const token = localStorage.getItem('abc_api_token');
@@ -253,8 +262,7 @@ Authorization: Bearer 1|plain-text-token
 ## Step 7 - Call The CRUD Endpoints
 
 Day 2 adds full RESTful CRUD through `Route::apiResource('users', UserProfileController::class)`.
-These Day 2 CRUD calls should work before login and without a bearer token.
-After Day 3 security is added, include the stored token in the same calls. At that point, list, view, create, update, and delete all require the frontend `X-API-TOKEN` header and the Sanctum bearer token.
+Before Day 3, those temporary training calls can work without a bearer token. After Day 3 security is added, list, view, create, update, and delete all require the frontend `X-API-TOKEN` header, the Sanctum bearer token, and the matching token ability.
 
 Profile payload fields:
 
@@ -273,7 +281,7 @@ Create:
 ```js
 const created = await apiRequest('/users', {
   method: 'POST',
-  token, // required after Day 3 security is added
+  token, // requires profiles:create after Day 3
   body,
 });
 ```
@@ -281,7 +289,7 @@ const created = await apiRequest('/users', {
 View detail:
 
 ```js
-const detail = await apiRequest(`/users/${created.data.id}`, { token });
+const detail = await apiRequest(`/users/${created.data.id}`, { token }); // requires profiles:read
 ```
 
 Update:
@@ -289,7 +297,7 @@ Update:
 ```js
 const updated = await apiRequest(`/users/${created.data.id}`, {
   method: 'PUT',
-  token,
+  token, // requires profiles:update
   body: {
     ...body,
     phone: '+60119998888',
@@ -302,7 +310,7 @@ Delete:
 ```js
 await apiRequest(`/users/${updated.data.id}`, {
   method: 'DELETE',
-  token,
+  token, // requires profiles:delete
 });
 ```
 
@@ -317,6 +325,7 @@ The example client handles these cases:
 | Status | Meaning | React behavior |
 | --- | --- | --- |
 | `401` | Missing/invalid frontend or bearer token after Day 3 | show error and require login |
+| `403` | token is authenticated but missing the required ability | show backend message and keep auth state |
 | `422` | validation failed | show validation details |
 | `404` | resource not found | show resource error |
 | `429` | too many requests | show rate-limit message |
@@ -373,17 +382,17 @@ npm run dev
 Then test:
 
 1. Open `http://localhost:5173`.
-2. Click "Load profiles". Day 1 should work before login.
-3. Search by name.
-4. View one profile detail after the Day 2 CRUD endpoint exists.
-5. Create a profile.
-6. Edit the new profile and submit an update.
-7. Delete the profile and confirm the list reloads.
-8. Do not log in for Day 2 CRUD.
-9. After Day 3 security is added, login with `admin@example.com` and `password`.
-10. Load profiles again with the stored token.
-11. Logout.
-12. Confirm protected calls fail after logout.
+2. Confirm `.env.local` has the correct `VITE_API_BASE_URL` and `VITE_FRONTEND_API_TOKEN`.
+3. Login with `admin@example.com` and `password`.
+4. Confirm the UI shows token expiry and abilities.
+5. Load profiles with `profiles:read`.
+6. Search by name.
+7. View one profile detail with `profiles:read`.
+8. Create a profile with `profiles:create`.
+9. Edit the new profile and submit an update with `profiles:update`.
+10. Delete the profile with `profiles:delete` and confirm the list reloads.
+11. Test a read-only token and confirm write actions return `403`.
+12. Logout and confirm protected calls fail after logout.
 
 ## GSD Claude Code Prompt
 
@@ -394,7 +403,7 @@ Goal:
 Help me set up the React/Vite client so it can call the Laravel API safely.
 
 Context:
-The Laravel API runs at http://127.0.0.1:8000/api/v1 unless the local backend uses a different port. The React client must load the public profile list before login on Day 1, call the full /users CRUD contract before login on Day 2, then support X-API-TOKEN, Sanctum bearer token headers, token expiry, and token abilities after Day 3 security is added. The latest backend login response returns data.access_token, data.expires_at, data.abilities, and data.user. Protected CRUD can return 401 for missing/expired tokens, 403 for missing abilities, 422 for validation errors, 404 for missing resources, and general API errors.
+The Laravel API runs at http://127.0.0.1:8000/api/v1 unless the local backend uses a different port. The latest backend is secured: React must send X-API-TOKEN when configured, login with Sanctum, store token expiry and abilities for the local lab, and call /users CRUD with Authorization: Bearer <token>. The login response returns data.access_token, data.expires_at, data.abilities, and data.user. Protected CRUD can return 401 for missing/expired tokens, 403 for missing abilities, 422 for validation errors, 404 for missing resources, and general API errors.
 
 Relevant files:
 - examples/react-client-api-consumer/package.json
@@ -423,10 +432,9 @@ Constraints:
 
 Done criteria:
 - npm run dev starts the React client.
-- Day 1 profile list loads before login.
-- Day 2 list, show, create, update, and delete work before login.
 - login calls POST /api/v1/auth/login.
-- protected calls send X-API-TOKEN and Authorization: Bearer token after Day 3.
+- protected calls send X-API-TOKEN and Authorization: Bearer token.
+- list, show, create, update, and delete controls respect data.abilities while Laravel remains the source of truth.
 - list, search, view detail, create, update, delete, logout, token expiry handling, 401, 403, 422, and loading states work.
 - CORS instructions are clear if the browser blocks requests.
 
@@ -442,7 +450,7 @@ Verification:
 - Forgetting to restart Vite after editing `.env.local`.
 - Missing `VITE_` prefix on environment variables.
 - Calling `/api/v1` twice because the base URL already includes it.
-- Blocking the Day 1 public list or Day 2 public CRUD behind login too early.
+- Keeping the old public Day 1/2 assumptions after the backend has moved to Day 3+ security.
 - Forgetting `X-API-TOKEN` after Day 3.
 - Sending bearer token without the `Bearer ` prefix after Day 3.
 - Sending profile fields not in the Laravel API contract, such as `email`.
@@ -453,11 +461,10 @@ Verification:
 
 - `.env.local` points to the Laravel API.
 - `src/api.js` always sends `Accept: application/json`.
-- profile list works before login on Day 1.
-- list, show, create, update, and delete work before login on Day 2.
 - `src/api.js` sends the frontend token when configured.
-- login stores the Sanctum token for the local lab.
-- protected routes send `Authorization: Bearer ...` after Day 3.
+- login stores the Sanctum token, expiry, and abilities for the local lab.
+- protected routes send `Authorization: Bearer ...`.
+- UI controls are gated by `data.abilities`, and backend still enforces ability middleware.
 - list screen handles pagination response shape.
 - create/update form preserves input on validation failure.
 - view, update, and delete call `/users/{id}` with the correct HTTP methods.

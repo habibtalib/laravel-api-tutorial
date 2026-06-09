@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Membina API Yang Lebih Baik Dengan Laravel - Latihan 5 Hari</title>
+  <link rel="stylesheet" href="vendor/reveal/dist/reset.css">
+  <link rel="stylesheet" href="vendor/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="vendor/reveal/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="vendor/reveal/dist/plugin/highlight/monokai.css">
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #566371;
+      --line: #d9ddd5;
+      --panel: #ffffff;
+      --paper: #f7f7f4;
+      --accent: #0f766e;
+      --red: #b42318;
+      --blue: #2563eb;
+      --purple: #7c3aed;
+      --amber: #b45309;
+      --code: #111827;
+    }
+
+    .reveal {
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal section {
+      box-sizing: border-box;
+      height: 100%;
+      padding: 34px 52px;
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal p {
+      margin: 0;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .reveal h1 {
+      max-width: 1060px;
+      color: var(--ink);
+      font-size: 72px;
+      line-height: 0.98;
+      font-weight: 850;
+    }
+
+    .reveal h2 {
+      max-width: 1060px;
+      color: var(--ink);
+      font-size: 48px;
+      line-height: 1.05;
+      font-weight: 820;
+    }
+
+    .reveal h3 {
+      color: var(--ink);
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 820;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal td,
+    .reveal th {
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.38;
+    }
+
+    .reveal ul {
+      margin: 0;
+      padding-left: 1.1em;
+    }
+
+    .reveal li + li {
+      margin-top: 8px;
+    }
+
+    .reveal table {
+      margin: 0;
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 20px;
+    }
+
+    .reveal th,
+    .reveal td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    .reveal th {
+      background: #edf3f2;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
+    .reveal td {
+      color: var(--muted);
+    }
+
+    .reveal tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .reveal pre {
+      width: 100%;
+      margin: 0;
+      box-shadow: none;
+      font-size: 17px;
+    }
+
+    .reveal pre code {
+      max-height: none;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--code);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      line-height: 1.5;
+    }
+
+    .reveal code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .chapter,
+    .title-slide {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .chapter h1,
+    .chapter h2,
+    .chapter h3,
+    .chapter p,
+    .title-slide h1,
+    .title-slide h2,
+    .title-slide h3,
+    .title-slide p {
+      color: #fff;
+    }
+
+    .chapter .subtitle,
+    .chapter .footer,
+    .title-slide .subtitle,
+    .title-slide .footer {
+      color: #bfccd7;
+    }
+
+    .slide-frame {
+      display: grid;
+      height: 100%;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    .center-stack {
+      display: grid;
+      gap: 20px;
+      align-content: center;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .chapter .eyebrow,
+    .title-slide .eyebrow {
+      color: #99f6e4;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      color: var(--muted);
+      font-size: 27px;
+      line-height: 1.34;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 34px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 11px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 820;
+      white-space: nowrap;
+    }
+
+    .chapter .pill,
+    .title-slide .pill {
+      border-color: rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 740;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(23, 33, 43, 0.06);
+    }
+
+    .panel h3 {
+      margin-bottom: 8px;
+    }
+
+    .panel p,
+    .panel li {
+      font-size: 18px;
+    }
+
+    .metric {
+      display: grid;
+      min-height: 118px;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--accent);
+      font-size: 50px;
+      line-height: 1;
+    }
+
+    .day {
+      min-height: 250px;
+      border-top: 6px solid var(--accent);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 9px;
+    }
+
+    .day:nth-child(2) { border-top-color: var(--blue); }
+    .day:nth-child(3) { border-top-color: var(--red); }
+    .day:nth-child(4) { border-top-color: var(--amber); }
+    .day:nth-child(5) { border-top-color: var(--purple); }
+
+    .day-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .node {
+      min-height: 47px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 13px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 820;
+      text-align: center;
+    }
+
+    .node.accent { background: #e6f4f1; border-color: #9bd2c9; color: #0d5d56; }
+    .node.warn { background: #fff1f0; border-color: #f2aba5; color: #9f1e16; }
+    .node.blue { background: #eaf1ff; border-color: #adc7ff; color: #1d4fb8; }
+    .node.purple { background: #f1e9ff; border-color: #cfb7ff; color: #5b21b6; }
+
+    .arrow {
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .callout {
+      border-left: 6px solid var(--accent);
+      border-radius: 8px;
+      padding: 17px 19px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 22px;
+      line-height: 1.38;
+    }
+
+    .tight p,
+    .tight li,
+    .tight td,
+    .tight th {
+      font-size: 18px;
+    }
+
+    .small {
+      font-size: 17px;
+    }
+
+    .reveal .progress {
+      color: var(--accent);
+      height: 5px;
+    }
+
+    .reveal .controls {
+      color: var(--accent);
+    }
+
+    .reveal .slide-number {
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255,255,255,0.85);
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    @media print {
+      .panel {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section class="title-slide" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Latihan Laravel API</div>
+            <h1>Membina API Yang Lebih Baik Dengan Laravel</h1>
+            <p class="subtitle">Program latihan 5 hari, 30 jam dengan contoh kod Laravel API, panggilan React client, diagram architecture, lab, dan modul bonus untuk TDD, Swagger/OpenAPI, FilamentPHP, dan prompt GSD Claude Code.</p>
+            <div class="meta">
+              <span class="pill">Laravel</span>
+              <span class="pill">REST API</span>
+              <span class="pill">React Client</span>
+              <span class="pill">Keselamatan</span>
+              <span class="pill">Prestasi</span>
+              <span class="pill">Architecture</span>
+            </div>
+          </div>
+          <div class="footer"><span>ABC Company Profile API</span><span>Guna arrow, Space, atau Esc untuk overview</span></div>
+        </div>
+        <aside class="notes">
+          Mulakan dengan menerangkan bahawa projek yang sama berkembang setiap hari. Matlamatnya bukan snippet terpisah, tetapi struktur API lengkap yang boleh diterangkan oleh peserta.
+        </aside>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hasil</div>
+          <div class="center-stack">
+            <h2>Peserta tamat dengan Laravel API yang selamat dan berstruktur.</h2>
+            <div class="grid three">
+              <div class="panel metric fragment"><strong>5</strong><p>Hari latihan teras</p></div>
+              <div class="panel metric fragment"><strong>30h</strong><p>Masa kelas bersama lab</p></div>
+              <div class="panel metric fragment"><strong>4</strong><p>Modul bonus</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Hasil dijangka</span><span>API versioned, auth, validation, caching, service layer</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Rhythm kelas</div>
+          <div class="center-stack tight">
+            <h2>Setiap hari 6 jam bergerak daripada konsep kepada kod yang berfungsi.</h2>
+            <table>
+              <thead><tr><th>Blok masa</th><th>Fokus instructor</th><th>Output peserta</th></tr></thead>
+              <tbody>
+                <tr><td>45 min</td><td>Konsep, diagram architecture, dan pemetaan PDF</td><td>Faham objektif hari tersebut</td></tr>
+                <tr><td>90 min</td><td>Implementasi Laravel secara berpandu</td><td>Kod backend yang berfungsi</td></tr>
+                <tr><td>60 min</td><td>Review request API dan response</td><td>Behavior JSON disahkan</td></tr>
+                <tr><td>90 min</td><td>Integrasi React client</td><td>Panggilan browser kepada REST API</td></tr>
+                <tr><td>75 min</td><td>Variasi lab, review, dan Q&amp;A</td><td>Perubahan sendiri dan recap</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Panduan masa</span><span>Laraskan rehat mengikut pace kelas dan isu setup</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Pelan latihan</div>
+          <div class="center-stack">
+            <h2>Satu projek, dibina secara berperingkat.</h2>
+            <div class="grid five">
+              <div class="panel day fragment"><div class="day-label">Hari 1</div><h3>Asas</h3><p>Setup Laravel, endpoint pertama, response JSON, dan React/Vite client shell.</p></div>
+              <div class="panel day fragment"><div class="day-label">Hari 2</div><h3>REST CRUD</h3><p>Setup Laragon/XAMPP, resource routes, form requests, validation, status codes, dan React CRUD form.</p></div>
+              <div class="panel day fragment"><div class="day-label">Hari 3</div><h3>Security</h3><p>Sanctum, login/logout, token expiry, token abilities, frontend token middleware, throttling, dan React auth.</p></div>
+              <div class="panel day fragment"><div class="day-label">Hari 4</div><h3>Performance</h3><p>Pagination, eager loading, cache, JSON exception handling, dan React API UX.</p></div>
+              <div class="panel day fragment"><div class="day-label">Hari 5</div><h3>Architecture</h3><p>Route model binding, services, API resources, dan integrasi React akhir.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Struktur kursus</span><span>Setiap hari menambah satu aspek production</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Artifact projek</div>
+          <div class="center-stack">
+            <h2>Projek yang sama menghasilkan API, client, docs, tests, dan admin tools.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Laravel API</h3><p>Routes, controllers, requests, services, resources, models, migrations.</p></div>
+              <div class="panel fragment"><h3>React client</h3><p>Vite app dengan API helper, login, list, search/filter, create form, dan error states.</p></div>
+              <div class="panel fragment"><h3>Operations</h3><p>Feature tests, OpenAPI contract, Swagger UI, throttling, cache, dan exception responses.</p></div>
+              <div class="panel fragment"><h3>Admin</h3><p>Filament panel resources untuk internal users mengurus rekod database yang sama.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Pakej latihan</span><span>Setiap artifact ada tutorial Markdown dan folder contoh</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Track client-side</div>
+          <div class="center-stack tight">
+            <h2>React ialah consumer API sepanjang 5 hari.</h2>
+            <table>
+              <thead><tr><th>Hari</th><th>Backend Laravel</th><th>React client</th></tr></thead>
+              <tbody>
+                <tr><td>Hari 1</td><td>Endpoint JSON pertama</td><td>Vite shell dan API environment variables</td></tr>
+                <tr><td>Hari 2</td><td>REST CRUD dan validation</td><td>List, view, create, update, dan delete profiles</td></tr>
+                <tr><td>Hari 3</td><td>Sanctum, token expiry, abilities, frontend token, throttling</td><td>Login, simpan token expiry, call protected routes</td></tr>
+                <tr><td>Hari 4</td><td>Pagination, cache, JSON errors</td><td>Search, loading, dan error states</td></tr>
+                <tr><td>Hari 5</td><td>Service layer dan API resources</td><td>Integrasi penuh browser-to-API</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Permintaan peserta</span><span>Browser client membuktikan REST contract boleh digunakan</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Pemetaan sumber</div>
+          <div class="center-stack tight">
+            <h2>Kursus ini mengembangkan PDF menjadi projek penuh.</h2>
+            <table>
+              <thead><tr><th>Bahagian latihan</th><th>Halaman PDF</th><th>Pengembangan</th></tr></thead>
+              <tbody>
+                <tr><td>Hari 1</td><td>4-8</td><td>Setup penuh, MySQL, endpoint pertama</td></tr>
+                <tr><td>Hari 2</td><td>9-12</td><td>Setup Laragon/XAMPP, CRUD lengkap, dan form requests</td></tr>
+                <tr><td>Hari 3</td><td>11-13</td><td>Flow login/logout Sanctum, token expiry, dan token abilities lengkap</td></tr>
+                <tr><td>Hari 4</td><td>14-18</td><td>Relationship, cache keys, exception handler</td></tr>
+                <tr><td>Hari 5</td><td>16-18</td><td>Implementasi service layer akhir</td></tr>
+                <tr><td>Track React client</td><td>Tiada dalam PDF</td><td>Browser client yang consume REST API</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Sumber</span><span>buildingbetterapiswithlaravel.pdf</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Hari 1</div>
+            <h1>Asas Laravel API Dan React Client Shell</h1>
+            <p class="subtitle">Peserta mempelajari lifecycle request Laravel, membina endpoint JSON versioned pertama, dan menyediakan React client shell.</p>
+            <div class="meta"><span class="pill">Halaman PDF 4-8</span><span class="pill">6 jam</span></div>
+          </div>
+          <div class="footer"><span>Hari 1</span><span>Setup ke route ke controller ke model ke JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Architecture</div>
+          <div class="center-stack">
+            <h2>Lifecycle request asas Laravel API.</h2>
+            <div class="flow">
+              <span class="node">HTTP request</span><span class="arrow">-&gt;</span>
+              <span class="node blue">GET /api/v1/users</span><span class="arrow">-&gt;</span>
+              <span class="node">routes/api.php</span><span class="arrow">-&gt;</span>
+              <span class="node accent">UserProfileController</span><span class="arrow">-&gt;</span>
+              <span class="node">model UserProfile</span><span class="arrow">-&gt;</span>
+              <span class="node">database MySQL</span><span class="arrow">-&gt;</span>
+              <span class="node accent">response JSON</span>
+            </div>
+          </div>
+          <div class="footer"><span>Point pengajaran</span><span>Jangan masukkan /api secara manual dalam routes/api.php</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Deliverable Hari 1</div>
+          <div class="center-stack">
+            <h2>Endpoint pertama dan model database yang berfungsi.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Peserta bina</h3>
+                <ul>
+                  <li class="fragment">app Laravel baru</li>
+                  <li class="fragment">database local MySQL</li>
+                  <li class="fragment"><code>UserProfile</code> model dan migration</li>
+                  <li class="fragment"><code>GET /api/v1/users</code> endpoint</li>
+                  <li class="fragment">React/Vite client shell</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Command utama</h3>
+                <pre><code class="language-bash">composer create-project laravel/laravel abc-api
+php artisan install:api
+php artisan make:model UserProfile -m
+php artisan make:controller Api/V1/UserProfileController</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Lab Hari 1</span><span>Tambah sample records dan pulangkan JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Peta fail Hari 1</div>
+          <div class="center-stack tight">
+            <h2>Peserta perlu tahu lokasi setiap perubahan hari pertama.</h2>
+            <table>
+              <thead><tr><th>Fail</th><th>Tujuan</th><th>Point pengajaran</th></tr></thead>
+              <tbody>
+                <tr><td><code>routes/api.php</code></td><td>Daftar versioned API routes</td><td>Laravel sudah prefix fail ini dengan <code>/api</code></td></tr>
+                <tr><td><code>database/migrations/*user_profiles*</code></td><td>Tentukan columns table</td><td>API contract bermula dengan data model yang jelas</td></tr>
+                <tr><td><code>app/Models/UserProfile.php</code></td><td>Mewakili rows profile</td><td>Gunakan fillable fields dengan sengaja</td></tr>
+                <tr><td><code>app/Http/Controllers/Api/V1/*</code></td><td>Pulangkan JSON daripada HTTP actions</td><td>Controllers menukar request kepada response</td></tr>
+                <tr><td><code>examples/day-1-*</code></td><td>Fail rujukan yang boleh disalin</td><td>Guna examples selepas struktur diterangkan</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Checkpoint Hari 1</span><span>Route list, migration, seeded rows, response JSON pertama</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 1 - Setup React</div>
+          <div class="center-stack">
+            <h2>Sediakan browser client tanpa campur kod frontend dan backend.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Setup client</h3>
+                <pre><code class="language-bash">npm create vite@latest abc-api-client
+# pilih React, kemudian JavaScript
+cd abc-api-client
+npm install
+npm run dev</code></pre>
+              </div>
+              <div class="panel">
+                <h3>API environment</h3>
+                <pre><code class="language-dotenv">VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+VITE_FRONTEND_API_TOKEN=abc-training-frontend-token</code></pre>
+              </div>
+            </div>
+            <div class="callout">React memanggil Laravel melalui HTTP. Ia tidak import controllers, models, services, atau kod Eloquent.</div>
+          </div>
+          <div class="footer"><span>Folder contoh</span><span>examples/react-client-api-consumer</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">React API helper</div>
+          <div class="center-stack">
+            <h2>Pusatkan panggilan API supaya components kekal kecil.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Tanggungjawab helper</h3>
+                <ul>
+                  <li>bina URL API penuh</li>
+                  <li>attach <code>Accept: application/json</code></li>
+                  <li>attach frontend token apabila dikonfigurasi</li>
+                  <li>attach bearer token hanya selepas login</li>
+                  <li>tukar request body kepada JSON</li>
+                  <li>throw error berguna untuk React state</li>
+                </ul>
+              </div>
+              <div class="panel">
+                <h3>Penggunaan dalam component</h3>
+<pre><code class="language-js">const data = await apiRequest('/users', {
+  token,
+  query: { search },
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Pattern React</span><span>Flow React akhir menghantar frontend token, bearer token, dan ikut backend abilities</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 1 - Prompt React</div>
+          <div class="center-stack tight">
+            <h2>Minta AI sambungkan React kepada Laravel REST API, bukan salin PHP ke frontend.</h2>
+            <table>
+              <thead><tr><th>Bahagian prompt</th><th>Apa perlu diberi</th><th>Guardrail</th></tr></thead>
+              <tbody>
+                <tr><td>Goal</td><td>Call <code>GET /users</code> daripada React dan papar JSON</td><td>Endpoint Laravel mesti sudah pulangkan JSON</td></tr>
+                <tr><td>Context</td><td><code>VITE_API_BASE_URL</code>, <code>src/api.js</code>, fail component</td><td>Guna struktur existing project jika sudah ada</td></tr>
+                <tr><td>MCP</td><td>filesystem, terminal, browser, atau git context jika ada</td><td>Inspect dahulu, kemudian patch</td></tr>
+                <tr><td>Verification</td><td>browser loading, success, dan error states</td><td>React panggil HTTP sahaja; tiada import PHP Laravel</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Prompt Hari 1</span><span>React browser client -> HTTP request -> Laravel REST API -> JSON response</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Hari 2</div>
+            <h1>RESTful Routes, CRUD, Dan Validation</h1>
+            <p class="subtitle">Peserta menukar satu endpoint menjadi RESTful resource lengkap, bermula dengan setup local yang sesuai untuk Laragon/XAMPP.</p>
+            <div class="meta"><span class="pill">Halaman PDF 9-12</span><span class="pill">6 jam</span></div>
+          </div>
+          <div class="footer"><span>Hari 2</span><span>GET, POST, PATCH, DELETE</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Checkpoint setup local</div>
+          <div class="center-stack tight">
+            <h2>Kebanyakan peserta guna Laragon atau XAMPP untuk MySQL.</h2>
+            <table>
+              <thead><tr><th>Semakan</th><th>Setup dijangka</th><th>Kenapa penting</th></tr></thead>
+              <tbody>
+                <tr><td>Service MySQL</td><td>Laragon <code>Start All</code> atau XAMPP <code>MySQL</code> sudah berjalan</td><td>Migrations dan CRUD write perlukan database berjalan</td></tr>
+                <tr><td>Database</td><td><code>abc_api</code> wujud dalam phpMyAdmin, Adminer, atau HeidiSQL</td><td><code>DB_DATABASE</code> mesti padan dengan schema sebenar</td></tr>
+                <tr><td>URL Laravel</td><td><code>php artisan serve</code> beri <code>127.0.0.1:8000</code></td><td>API host lebih predictable semasa kelas</td></tr>
+                <tr><td>URL React</td><td><code>VITE_API_BASE_URL</code> menunjuk kepada host Laravel yang sama</td><td>Elak bug campur localhost dan virtual host</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Checkpoint trainer</span><span>Sahkan environment sebelum debug kod CRUD</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Pilih satu base URL</div>
+          <div class="center-stack">
+            <h2>Laravel, API client, dan React mesti guna API base URL yang sama.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Flow kelas dicadangkan</h3>
+                <pre><code class="language-text">Laravel:
+http://127.0.0.1:8000/api/v1
+
+React .env:
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Option virtual host Laragon</h3>
+                <pre><code class="language-text">Laravel:
+http://abc-api.test/api/v1
+
+React .env:
+VITE_API_BASE_URL=http://abc-api.test/api/v1</code></pre>
+              </div>
+            </div>
+            <div class="callout">Jika XAMPP MySQL guna port 3307, set <code>DB_PORT=3307</code>, kemudian run <code>php artisan config:clear</code>.</div>
+          </div>
+          <div class="footer"><span>Rule setup</span><span>Jangan campur 127.0.0.1:8000, localhost, dan abc-api.test dalam lab yang sama</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">AI prompt checkpoints</div>
+          <div class="center-stack tight">
+            <h2>Prompt slide selari dengan checkpoint dalam Markdown Hari 2.</h2>
+            <table>
+              <thead><tr><th>Checkpoint</th><th>Tujuan prompt</th><th>Evidence untuk paste</th></tr></thead>
+              <tbody>
+                <tr><td>Setup local</td><td>Cari mismatch Laragon/XAMPP, URL, DB, dan React base URL</td><td><code>.env</code>, URL Laravel, React base URL</td></tr>
+                <tr><td>Resource routes</td><td>Sahkan REST route mapping dan project mode</td><td><code>routes/api.php</code>, output route-list</td></tr>
+                <tr><td>Validation rules</td><td>Review required, sometimes, unique, dan update ignore rules</td><td>FormRequests, migration, model fillable</td></tr>
+                <tr><td>Controller review</td><td>Semak index, store, show, update, destroy, dan status codes</td><td>Controller, requests, model, sample response</td></tr>
+                <tr><td>API responses</td><td>Diagnose status atau bentuk JSON yang salah</td><td>Request URL, status code, response JSON</td></tr>
+                <tr><td>React integration</td><td>Review list/show/create/update/delete calls dan paparan 422 field error</td><td><code>src/api.js</code>, CRUD component, browser behavior</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Habit prompt</span><span>Setiap prompt nyatakan mode prepared tutorial project atau existing Laravel project</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Existing project + MCP</div>
+          <div class="center-stack tight">
+            <h2>Gunakan MCP untuk kumpul context sebelum minta AI patch kod.</h2>
+            <table>
+              <thead><tr><th>Konteks MCP</th><th>Evidence untuk inspect</th><th>Guardrail</th></tr></thead>
+              <tbody>
+                <tr><td>Filesystem</td><td>Routes, controllers, requests, models, migrations, fail React</td><td>Kekalkan namespace dan struktur local</td></tr>
+                <tr><td>Terminal</td><td><code>route:list</code>, <code>migrate:status</code>, targeted tests</td><td>Guna command output sebagai evidence</td></tr>
+                <tr><td>Browser</td><td>Behavior React form, paparan 422, API calls</td><td>Verify UI sebelum ubah frontend code</td></tr>
+                <tr><td>Git/schema</td><td>Local changes, table columns, unique indexes</td><td>Jangan dedahkan secrets atau production data</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Rule MCP</span><span>Inspect dahulu, kekalkan convention, kemudian minta perubahan paling kecil</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Peta REST</div>
+          <div class="center-stack tight">
+            <h2>Resource routes memetakan HTTP verbs kepada controller actions.</h2>
+            <table>
+              <thead><tr><th>Method</th><th>URI</th><th>Controller action</th><th>Fokus status</th></tr></thead>
+              <tbody>
+                <tr><td>GET</td><td>/api/v1/users</td><td>index</td><td>200</td></tr>
+                <tr><td>POST</td><td>/api/v1/users</td><td>store</td><td>201</td></tr>
+                <tr><td>GET</td><td>/api/v1/users/{id}</td><td>show</td><td>200 or 404</td></tr>
+                <tr><td>PATCH</td><td>/api/v1/users/{id}</td><td>update</td><td>200 or 422</td></tr>
+                <tr><td>DELETE</td><td>/api/v1/users/{id}</td><td>destroy</td><td>204</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Route helper</span><span>Route::apiResource('users', UserProfileController::class)</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">HTTP contract</div>
+          <div class="center-stack tight">
+            <h2>Setiap endpoint perlu diterangkan sebagai contract.</h2>
+            <table>
+              <thead><tr><th>Bahagian contract</th><th>Contoh</th><th>Kenapa penting</th></tr></thead>
+              <tbody>
+                <tr><td>Method + URL</td><td><code>POST /api/v1/users</code></td><td>Menentukan operation dan resource</td></tr>
+                <tr><td>Headers</td><td><code>Accept: application/json</code>, <code>X-API-TOKEN</code></td><td>Kawal response type dan identiti client</td></tr>
+                <tr><td>Body</td><td><code>full_name</code>, <code>phone</code>, <code>id_card_number</code></td><td>Input yang divalidasi oleh Laravel</td></tr>
+                <tr><td>Status</td><td><code>201</code>, <code>422</code>, <code>401</code></td><td>Behavior frontend bergantung pada status code</td></tr>
+                <tr><td>Bentuk JSON</td><td><code>{ "data": ... }</code> atau <code>{ "message": ... }</code></td><td>Client perlukan fields yang predictable</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Point REST</span><span>React, API clients, dan Swagger consume JSON contract yang sama</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Validation</div>
+          <div class="center-stack">
+            <h2>Form requests mengeluarkan validation daripada controller.</h2>
+            <div class="flow">
+              <span class="node">Request POST/PATCH</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Rules FormRequest</span><span class="arrow">-&gt;</span>
+              <span class="node warn">422 jika tidak sah</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Controller action</span><span class="arrow">-&gt;</span>
+              <span class="node">Eloquent write</span>
+            </div>
+            <pre><code class="language-php">'full_name' =&gt; ['required', 'string', 'max:255'],
+'phone' =&gt; ['required', 'string', 'max:30'],
+'id_card_number' =&gt; ['required', 'string', 'unique:user_profiles,id_card_number']</code></pre>
+          </div>
+          <div class="footer"><span>Lab Hari 2</span><span>Flow CRUD dengan request JSON dan response JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Response validation</div>
+          <div class="center-stack">
+            <h2>React boleh paparkan field errors apabila Laravel pulangkan 422 yang predictable.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>JSON Laravel</h3>
+                <pre><code class="language-json">{
+  "message": "The full name field is required.",
+  "errors": {
+    "full_name": ["The full name field is required."]
+  }
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Rule paparan React</h3>
+                <ul>
+                  <li>jika status <code>422</code>, baca <code>errors</code></li>
+                  <li>map field names kepada form inputs</li>
+                  <li>kekalkan form data yang ditaip</li>
+                  <li>paparkan <code>message</code> umum di bahagian atas</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Detail Hari 2</span><span>Validation ialah ciri user experience, bukan hanya perlindungan backend</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 2 - React CRUD</div>
+          <div class="center-stack">
+            <h2>Form bercakap dengan REST contract yang sama seperti response JSON.</h2>
+            <div class="split">
+              <div class="flow">
+                <span class="node">React form</span><span class="arrow">-&gt;</span>
+                <span class="node blue">POST /api/v1/users</span><span class="arrow">-&gt;</span>
+                <span class="node">FormRequest</span><span class="arrow">-&gt;</span>
+                <span class="node warn">422 errors</span><span class="arrow">-&gt;</span>
+                <span class="node accent">Papar message</span>
+              </div>
+              <div class="panel">
+                <h3>Client call</h3>
+                <pre><code class="language-js">apiRequest('/users', {
+  method: 'POST',
+  body: form,
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Point pengajaran</span><span>Laravel validate; React paparkan hasil JSON</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Hari 3</div>
+            <h1>API Security</h1>
+            <p class="subtitle">Peserta menambah authentication, token abilities, frontend token validation, dan rate limiting pada route group.</p>
+            <div class="meta"><span class="pill">Halaman PDF 11-13</span><span class="pill">6 jam</span></div>
+          </div>
+          <div class="footer"><span>Hari 3</span><span>Frontend token + throttling + expiring Sanctum token + abilities</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Pipeline security</div>
+          <div class="center-stack">
+            <h2>Setiap request protected melalui beberapa lapisan semakan.</h2>
+            <div class="flow">
+              <span class="node">Client</span><span class="arrow">-&gt;</span>
+              <span class="node warn">X-API-TOKEN?</span><span class="arrow">-&gt;</span>
+              <span class="node">throttle:60,1</span><span class="arrow">-&gt;</span>
+              <span class="node blue">auth:sanctum</span><span class="arrow">-&gt;</span>
+              <span class="node warn">abilities</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Controller</span><span class="arrow">-&gt;</span>
+              <span class="node">JSON</span>
+            </div>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Frontend token tiada</h3><p>Pulangkan 401 dengan error JSON yang jelas.</p></div>
+              <div class="panel fragment"><h3>Terlalu banyak request</h3><p>Laravel memulangkan 429 untuk melindungi API.</p></div>
+              <div class="panel fragment"><h3>Token ditolak</h3><p>Sanctum pulangkan 401 untuk token tiada atau expired, dan 403 untuk missing ability.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Peraturan security</span><span>Satu layer sahaja bukan keseluruhan sistem security</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Route group security</div>
+          <div class="center-stack">
+            <h2>Route grouping menjadikan rules security lebih jelas.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Public route</h3>
+                <pre><code class="language-php">Route::post('/auth/login', [AuthController::class, 'login'])
+    -&gt;middleware(['frontend.token', 'throttle:login']);</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Protected routes</h3>
+                <pre><code class="language-php">Route::middleware([
+    'frontend.token',
+    'auth:sanctum',
+    'throttle:api',
+])-&gt;group(function () {
+    Route::apiResource('users', UserProfileController::class)
+        -&gt;middlewareFor(['index', 'show'], 'abilities:profiles:read')
+        -&gt;middlewareFor('store', 'abilities:profiles:create')
+        -&gt;middlewareFor('update', 'abilities:profiles:update')
+        -&gt;middlewareFor('destroy', 'abilities:profiles:delete');
+});</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Detail Hari 3</span><span>Login boleh public kepada user, tetapi bukan terbuka kepada frontend client yang tidak dikenali</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Flow auth</div>
+          <div class="center-stack">
+            <h2>Login mengeluarkan token sementara; protected routes menggunakannya.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Login</h3>
+                <pre><code class="language-http">POST /api/v1/auth/login
+X-API-TOKEN: abc-training-frontend-token
+
+{
+  "email": "admin@example.com",
+  "password": "password"
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Protected request</h3>
+                <pre><code class="language-http">GET /api/v1/users
+X-API-TOKEN: abc-training-frontend-token
+Authorization: Bearer 1|token</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Lab Hari 3</span><span>Login, protected CRUD JSON response, expired-token test, missing-ability test, logout, dan failed-token JSON response</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Token abilities</div>
+          <div class="center-stack">
+            <h2>Column `abilities` menjadikan satu bearer token scoped access.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Disimpan dalam MySQL</h3>
+<pre><code class="language-sql">SELECT id, name, abilities, expires_at
+FROM personal_access_tokens
+ORDER BY id DESC
+LIMIT 1;</code></pre>
+<pre><code class="language-json">["profiles:read","profiles:create",
+"profiles:update","profiles:delete"]</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Test token read-only</h3>
+<pre><code class="language-php">$user-&gt;createToken(
+    'read-only-training-token',
+    ['profiles:read'],
+    now()-&gt;addMinutes(60)
+);</code></pre>
+<pre><code class="language-text">GET /users  -&gt; 200
+POST /users -&gt; 403 Invalid ability</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Sebelum React</span><span>Backend authorization mesti betul sebelum browser client consume protected CRUD</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 3 - React auth</div>
+          <div class="center-stack">
+            <h2>Protected browser CRUD calls perlukan dua API security headers.</h2>
+            <div class="grid two">
+              <div class="panel">
+                <h3>Response login</h3>
+<pre><code class="language-json">{
+  "message": "Login successful.",
+  "data": {
+    "token_type": "Bearer",
+    "access_token": "1|plain-text-token",
+    "expires_at": "2026-06-09T09:30:00Z",
+    "abilities": [
+      "profiles:read",
+      "profiles:create",
+      "profiles:update",
+      "profiles:delete"
+    ]
+  }
+}</code></pre>
+              </div>
+              <div class="panel">
+                <h3>Headers protected request</h3>
+                <pre><code class="language-js">{
+  'X-API-TOKEN': FRONTEND_API_TOKEN,
+  Authorization: `Bearer ${token}`
+}</code></pre>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Model security</span><span>Frontend token kenal pasti client; bearer token kenal pasti user; abilities kawal action dibenarkan</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Hari 4</div>
+            <h1>Performance Dan Exception Handling</h1>
+            <p class="subtitle">Peserta memperbaiki query behavior, cache response API, dan menyeragamkan JSON error tanpa melemahkan security Hari 3.</p>
+            <div class="meta"><span class="pill">Halaman PDF 14-18</span><span class="pill">6 jam</span></div>
+          </div>
+          <div class="footer"><span>Hari 4</span><span>Pagination + eager loading + cache + exceptions</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Model performance</div>
+          <div class="center-stack">
+            <h2>Optimize read, invalidate selepas write.</h2>
+            <div class="split">
+              <div class="grid">
+                <div class="flow"><span class="node">GET users</span><span class="arrow">-&gt;</span><span class="node warn">ability read</span><span class="arrow">-&gt;</span><span class="node blue">cache key</span><span class="arrow">-&gt;</span><span class="node accent">cache hit?</span></div>
+                <div class="flow"><span class="node">cache miss</span><span class="arrow">-&gt;</span><span class="node">UserProfile::with('projects')</span><span class="arrow">-&gt;</span><span class="node accent">simpan cache</span></div>
+                <div class="flow"><span class="node warn">POST/PATCH/DELETE</span><span class="arrow">-&gt;</span><span class="node">write ability</span><span class="arrow">-&gt;</span><span class="node">write model</span><span class="arrow">-&gt;</span><span class="node warn">clear cache</span></div>
+              </div>
+              <div class="panel">
+                <h3>Amalan utama</h3>
+                <ul>
+                  <li class="fragment">paginate setiap list endpoint</li>
+                  <li class="fragment">guna eager loading untuk elak N+1 queries</li>
+                  <li class="fragment">masukkan page/search filters dalam cache keys</li>
+                  <li class="fragment">clear cache lama selepas write</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>Prestasi</span><span>API yang pantas perlu jelas tentang payload, query, cache, dan UX frontend</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Pengendalian error</div>
+          <div class="center-stack">
+            <h2>Pusatkan rendering exception API dalam Laravel.</h2>
+            <div class="grid two">
+              <div class="panel fragment">
+                <h3>Sebelum</h3>
+                <p>Controller mungkin menyelerakkan <code>try/catch</code>, dedahkan raw exceptions, atau pulangkan bentuk response yang tidak konsisten.</p>
+              </div>
+              <div class="panel fragment">
+                <h3>Selepas</h3>
+                <p><code>bootstrap/app.php</code> memaparkan <code>403</code>, <code>404</code>, <code>422</code>, dan error API sebagai JSON yang konsisten.</p>
+              </div>
+            </div>
+            <pre><code class="language-json">{
+  "message": "Resource not found."
+}</code></pre>
+          </div>
+          <div class="footer"><span>Lab Hari 4</span><span>Test response JSON untuk 404 dan validation</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Contract response API</div>
+          <div class="center-stack tight">
+            <h2>Hari 4 menyeragamkan list metadata dan bentuk error.</h2>
+            <table>
+              <thead><tr><th>Case</th><th>JSON dijangka</th><th>Behavior React</th></tr></thead>
+              <tbody>
+                <tr><td>Paginated list</td><td><code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records dan page totals</td></tr>
+                <tr><td>Search</td><td>bentuk list yang sama, ditapis oleh query string</td><td>Refresh component list yang sama</td></tr>
+                <tr><td>Validation error</td><td><code>message</code> bersama <code>errors</code></td><td>Papar mesej field-level</td></tr>
+                <tr><td>Unauthorized</td><td><code>{ "message": "Unauthenticated." }</code></td><td>Clear token atau minta login</td></tr>
+                <tr><td>Forbidden</td><td><code>{ "message": "Invalid ability provided." }</code></td><td>Papar mesej missing ability</td></tr>
+                <tr><td>Not found</td><td><code>{ "message": "Resource not found." }</code></td><td>Papar empty/error state yang mesra</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Detail Hari 4</span><span>Contract konsisten mengurangkan branching frontend dan menyokong Swagger docs</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 4 - React API UX</div>
+          <div class="center-stack">
+            <h2>Response API yang baik memudahkan frontend dibina.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Loading</h3><p>Disable button dan paparkan progress request.</p></div>
+              <div class="panel fragment"><h3>Search</h3><p>Hantar query string seperti <code>search</code> bersama list request.</p></div>
+              <div class="panel fragment"><h3>Pagination</h3><p>Baca total dan metadata page daripada response API.</p></div>
+              <div class="panel fragment"><h3>Errors</h3><p>Paparkan mesej berguna untuk <code>401</code>, <code>403</code>, <code>422</code>, dan <code>404</code>.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Kesan frontend</span><span>Bentuk JSON konsisten mengurangkan teka-teki client-side</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Hari 5</div>
+            <h1>Architecture Akhir</h1>
+            <p class="subtitle">Peserta refactor API kepada struktur yang mudah diselenggara menggunakan route model binding, services, API resources, dan integrasi React client.</p>
+            <div class="meta"><span class="pill">Halaman PDF 16-18</span><span class="pill">6 jam</span></div>
+          </div>
+          <div class="footer"><span>Hari 5</span><span>Controller nipis, service fokus, JSON terkawal</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Architecture akhir</div>
+          <div class="center-stack">
+            <h2>Setiap layer mempunyai tugas yang jelas.</h2>
+            <div class="flow">
+              <span class="node">React browser</span><span class="arrow">-&gt;</span>
+              <span class="node blue">fetch + headers</span><span class="arrow">-&gt;</span>
+              <span class="node warn">Middleware</span><span class="arrow">-&gt;</span>
+              <span class="node">Routes</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Controller</span><span class="arrow">-&gt;</span>
+              <span class="node">FormRequest</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Service</span><span class="arrow">-&gt;</span>
+              <span class="node">Model</span><span class="arrow">-&gt;</span>
+              <span class="node">Database</span><span class="arrow">-&gt;</span>
+              <span class="node purple">API Resource</span><span class="arrow">-&gt;</span>
+              <span class="node">JSON</span>
+            </div>
+          </div>
+          <div class="footer"><span>Architecture</span><span>Pisahkan HTTP, validation, business logic, data access, dan serialization</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Struktur backend Hari 5</div>
+          <div class="center-stack tight">
+            <h2>Refactor akhir memberi setiap class satu tugas yang jelas.</h2>
+            <table>
+              <thead><tr><th>Layer</th><th>Fail contoh</th><th>Tanggungjawab</th></tr></thead>
+              <tbody>
+                <tr><td>Route</td><td><code>routes/api.php</code></td><td>Version, middleware, dan pendaftaran endpoint</td></tr>
+                <tr><td>Controller</td><td><code>UserProfileController</code></td><td>Orchestration input/output HTTP</td></tr>
+                <tr><td>Request</td><td><code>StoreUserProfileRequest</code></td><td>Rules validation dan authorization</td></tr>
+                <tr><td>Service</td><td><code>UserProfileService</code></td><td>Business workflow dan cache invalidation</td></tr>
+                <tr><td>Resource</td><td><code>UserProfileResource</code></td><td>Serialization JSON yang stabil untuk client</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Detail Hari 5</span><span>Controller nipis terhasil apabila tanggungjawab dipindahkan ke layer yang betul</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Hari 5 - Integrasi React akhir</div>
+          <div class="center-stack tight">
+            <h2>Projek akhir ialah contract browser-to-API yang berfungsi.</h2>
+            <table>
+              <thead><tr><th>Client action</th><th>API endpoint</th><th>Headers</th><th>Hasil UI</th></tr></thead>
+              <tbody>
+                <tr><td>Login</td><td><code>POST /api/v1/auth/login</code></td><td><code>X-API-TOKEN</code></td><td>Simpan Sanctum token untuk lab</td></tr>
+                <tr><td>List profiles</td><td><code>GET /api/v1/users</code></td><td>frontend + bearer</td><td>Render cards dan pagination total</td></tr>
+                <tr><td>Search</td><td><code>GET /api/v1/users?search=ali</code></td><td>frontend + bearer</td><td>Refresh list tanpa ubah API code</td></tr>
+                <tr><td>Create profile</td><td><code>POST /api/v1/users</code></td><td>frontend + bearer</td><td>Papar success atau validation errors</td></tr>
+                <tr><td>View profile</td><td><code>GET /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Render detail panel</td></tr>
+                <tr><td>Update profile</td><td><code>PUT /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Refresh record dan list</td></tr>
+                <tr><td>Delete profile</td><td><code>DELETE /api/v1/users/{id}</code></td><td>frontend + bearer</td><td>Handle 204 dan reload list</td></tr>
+                <tr><td>Logout</td><td><code>POST /api/v1/auth/logout</code></td><td>frontend + bearer</td><td>Clear token dan block protected actions</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Integrasi akhir</span><span>Method, URL, headers, body, status code, dan bentuk JSON</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Deliverable akhir</div>
+          <div class="center-stack">
+            <h2>Sistem akhir adalah selamat, optimized, mudah diselenggara, dan boleh digunakan daripada React.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>Security</h3><p>Sanctum, token abilities, frontend token, throttling, peraturan debug production.</p></div>
+              <div class="panel fragment"><h3>Performance</h3><p>Pagination, eager loading, cache, kefahaman route/config cache.</p></div>
+              <div class="panel fragment"><h3>Architecture</h3><p>Service layer, route model binding, resources, exception handler.</p></div>
+              <div class="panel fragment"><h3>React client</h3><p>Login, full CRUD, search, pagination, loading, dan error states.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Projek akhir</span><span>Peserta perlu boleh menerangkan setiap layer</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Modul bonus</div>
+            <h1>TDD, Swagger/OpenAPI, FilamentPHP, Dan GSD</h1>
+            <p class="subtitle">Bonus memperluas projek API dengan disiplin testing, dokumentasi, pengurusan data back-office, dan prompt delivery AI-assisted.</p>
+          </div>
+          <div class="footer"><span>Bonus</span><span>Tidak semua bahan bonus diliputi secara langsung dalam PDF</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - TDD</div>
+          <div class="center-stack">
+            <h2>Tulis test sebelum menambah behavior.</h2>
+            <div class="flow">
+              <span class="node warn">Red</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Green</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Refactor</span><span class="arrow">-&gt;</span>
+              <span class="node">Ulang</span>
+            </div>
+            <div class="grid two">
+              <div class="panel"><h3>Test meliputi</h3><p>Auth, token abilities, frontend token, CRUD, validation, 404, dan search.</p></div>
+              <div class="panel"><h3>Command</h3><pre><code class="language-bash">php artisan test --filter=UserProfileApiTest
+php artisan test --filter=AuthApiTest</code></pre></div>
+            </div>
+          </div>
+          <div class="footer"><span>TDD</span><span>Jika test tidak pernah gagal, ia belum banyak membuktikan apa-apa</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - Swagger/OpenAPI</div>
+          <div class="center-stack">
+            <h2>Dokumentasikan contract, bukan hanya kod.</h2>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Paths</h3><p>Login, logout, list, create, show, update, delete.</p></div>
+              <div class="panel fragment"><h3>Schemas</h3><p>UserProfile, Project, validation error, auth response.</p></div>
+              <div class="panel fragment"><h3>Security</h3><p>Bearer token bersama <code>X-API-TOKEN</code> API key scheme.</p></div>
+            </div>
+            <pre><code class="language-bash">composer require darkaonline/l5-swagger
+php artisan l5-swagger:generate</code></pre>
+          </div>
+          <div class="footer"><span>Swagger UI</span><span>/api/documentation</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - FilamentPHP</div>
+          <div class="center-stack">
+            <h2>Tambah internal admin panel di atas data API yang sama.</h2>
+            <div class="flow">
+              <span class="node">Internal admin</span><span class="arrow">-&gt;</span>
+              <span class="node purple">/admin Filament panel</span><span class="arrow">-&gt;</span>
+              <span class="node">UserProfileResource</span><span class="arrow">-&gt;</span>
+              <span class="node">ProjectResource</span><span class="arrow">-&gt;</span>
+              <span class="node accent">database sama</span><span class="arrow">-&gt;</span>
+              <span class="node blue">output API</span>
+            </div>
+            <div class="callout">Filament tidak menggantikan JSON API. Ia memberi internal admin UI browser untuk mengurus rekod yang sama.</div>
+          </div>
+          <div class="footer"><span>FilamentPHP</span><span>Akses panel mesti dihadkan dengan canAccessPanel dan policies</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bonus - GSD Claude Code prompts</div>
+          <div class="center-stack">
+            <h2>Gunakan bantuan AI melalui delivery loop yang berdisiplin.</h2>
+            <div class="flow">
+              <span class="node">Capture task</span><span class="arrow">-&gt;</span>
+              <span class="node blue">Inspect files</span><span class="arrow">-&gt;</span>
+              <span class="node">Plan small change</span><span class="arrow">-&gt;</span>
+              <span class="node accent">Implement</span><span class="arrow">-&gt;</span>
+              <span class="node warn">Verify</span><span class="arrow">-&gt;</span>
+              <span class="node purple">Handoff</span>
+            </div>
+            <div class="grid three">
+              <div class="panel fragment"><h3>Prompt jelas</h3><p>Beri goal, files, constraints, done criteria, dan output format.</p></div>
+              <div class="panel fragment"><h3>Kawal risiko</h3><p>Jangan paste secrets; minta plan sebelum edit yang berisiko.</p></div>
+              <div class="panel fragment"><h3>Verify</h3><p>Run tests, inspect JSON responses, check browser, dan review diff.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Fail Markdown</span><span>training/bonus-gsd-claude-code-prompts.md</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Perbandingan bonus</div>
+          <div class="center-stack tight">
+            <h2>Setiap bonus menguatkan keperluan operasi yang berbeza.</h2>
+            <table>
+              <thead><tr><th>Bonus</th><th>Soalan yang dijawab</th><th>Deliverable</th></tr></thead>
+              <tbody>
+                <tr><td>TDD</td><td>Bagaimana kita buktikan API masih berfungsi?</td><td>Feature test suite</td></tr>
+                <tr><td>Swagger/OpenAPI</td><td>Bagaimana client memahami contract?</td><td>Swagger UI dan OpenAPI JSON</td></tr>
+                <tr><td>FilamentPHP</td><td>Bagaimana internal admin mengurus data API?</td><td>Admin panel resources</td></tr>
+                <tr><td>GSD Claude Code prompts</td><td>Bagaimana guna bantuan AI tanpa hilang kawalan?</td><td>Prompt workflow dan handoff checklist</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Bonuses</span><span>Test, dokumentasi, operasi, delivery</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Deliverable bonus</div>
+          <div class="center-stack tight">
+            <h2>Setiap bonus perlu berakhir dengan sesuatu yang boleh dijalankan peserta.</h2>
+            <table>
+              <thead><tr><th>Bonus</th><th>Command atau URL</th><th>Syarat lulus</th></tr></thead>
+              <tbody>
+                <tr><td>TDD</td><td><code>php artisan test</code></td><td>Feature tests membuktikan auth, CRUD, validation, filters, dan errors</td></tr>
+                <tr><td>Swagger/OpenAPI</td><td><code>/api/documentation</code></td><td>Swagger UI menunjukkan paths, schemas, dan security schemes</td></tr>
+                <tr><td>OpenAPI JSON</td><td><code>storage/api-docs/api-docs.json</code></td><td>Contract boleh dikongsi dengan frontend atau QA team</td></tr>
+                <tr><td>FilamentPHP</td><td><code>/admin</code></td><td>Admin yang authorized boleh mengurus profiles dan projects</td></tr>
+                <tr><td>GSD prompts</td><td><code>training/bonus-gsd-claude-code-prompts.md</code></td><td>Peserta boleh plan, implement, debug, verify, dan handoff menggunakan prompts</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Detail bonus</span><span>Setiap modul menambah confidence, dokumentasi, atau kawalan operasi</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Penilaian</div>
+          <div class="center-stack tight">
+            <h2>Nilai projek akhir berdasarkan behavior dan struktur.</h2>
+            <table>
+              <thead><tr><th>Area</th><th>Markah</th></tr></thead>
+              <tbody>
+                <tr><td>Setup projek dan migrations</td><td>10</td></tr>
+                <tr><td>RESTful CRUD dan validation</td><td>25</td></tr>
+                <tr><td>Sanctum, middleware, throttling</td><td>25</td></tr>
+                <tr><td>Performance dan exception handling</td><td>15</td></tr>
+                <tr><td>Service layer dan resources</td><td>15</td></tr>
+                <tr><td>Integrasi React client</td><td>10</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer"><span>Penilaian</span><span>Behavior yang berfungsi lebih penting daripada snippet yang disalin</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Workflow instructor</div>
+          <div class="center-stack">
+            <h2>Gunakan rhythm yang sama setiap hari.</h2>
+            <div class="grid four">
+              <div class="panel fragment"><h3>1. Terang</h3><p>Mulakan dengan konsep dan diagram.</p></div>
+              <div class="panel fragment"><h3>2. Bina</h3><p>Tulis atau salin kod ke dalam Laravel.</p></div>
+              <div class="panel fragment"><h3>3. Jalankan</h3><p>Hantar request dan semak response JSON.</p></div>
+              <div class="panel fragment"><h3>4. Ubah</h3><p>Peserta ulang dengan variasi kecil.</p></div>
+            </div>
+          </div>
+          <div class="footer"><span>Pattern pengajaran</span><span>Konsep ke kod ke request ke response ke variasi</span></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="slide-frame">
+          <div class="eyebrow">Bahan</div>
+          <div class="center-stack">
+            <h2>Dokumen latihan dan contoh yang boleh disalin sudah disusun.</h2>
+            <div class="grid two">
+              <div class="panel"><h3>Latihan</h3><p><code>training/overview.md</code> bersama lima fail harian dan empat modul bonus.</p></div>
+              <div class="panel"><h3>Contoh</h3><p><code>examples/day-*</code>, <code>examples/react-client-api-consumer</code>, dan <code>examples/bonus-*</code> mengikut path fail projek.</p></div>
+            </div>
+            <pre><code class="language-text">training/
+examples/
+slides/laravel-api-training.html</code></pre>
+          </div>
+          <div class="footer"><span>Repository</span><span>/Users/habib/Git/laravel-api</span></div>
+        </div>
+      </section>
+
+      <section class="chapter" data-background-color="#17212b">
+        <div class="slide-frame">
+          <div></div>
+          <div class="center-stack">
+            <div class="eyebrow">Penutup</div>
+            <h1>Pada akhir latihan, peserta boleh membina dan menerangkan Laravel API yang production-aware.</h1>
+            <p class="subtitle">Projek bergerak daripada endpoint ringkas kepada architecture API yang selamat, diuji, didokumenkan, mudah diselenggara, dan mempunyai React client.</p>
+            <div class="meta">
+              <span class="pill">Bina</span>
+              <span class="pill">Selamatkan</span>
+              <span class="pill">Optimize</span>
+              <span class="pill">Refactor</span>
+              <span class="pill">Dokumentasi</span>
+            </div>
+          </div>
+          <div class="footer"><span>Latihan Laravel API</span><span>Akhir deck</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="vendor/reveal/dist/reveal.js"></script>
+  <script src="vendor/reveal/dist/plugin/highlight.js"></script>
+  <script src="vendor/reveal/dist/plugin/notes.js"></script>
+  <script src="vendor/reveal/dist/plugin/search.js"></script>
+  <script src="vendor/reveal/dist/plugin/zoom.js"></script>
+  <script>
+    const legacyHash = window.location.hash.match(/^#(\d+)$/);
+    if (legacyHash) {
+      window.history.replaceState(null, '', '#/' + legacyHash[1]);
+    }
+
+    Reveal.initialize({
+      hash: true,
+      hashOneBasedIndex: true,
+      controls: true,
+      progress: true,
+      slideNumber: 'c/t',
+      width: 1280,
+      height: 720,
+      margin: 0.04,
+      center: false,
+      transition: 'slide',
+      backgroundTransition: 'fade',
+      plugins: [
+        RevealHighlight,
+        RevealNotes,
+        RevealSearch,
+        RevealZoom
+      ]
+    });
+  </script>
+</body>
+</html>
