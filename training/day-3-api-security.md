@@ -1,12 +1,12 @@
-# Day 3 - API Security With Sanctum, Middleware, Tokens, And Throttling
+# Day 3 - API Security With Sanctum, Expiring Tokens, Middleware, And Throttling
 
 ## Class Goal
 
-By the end of Day 3, students can secure Laravel API routes with Sanctum, issue personal access tokens, add a frontend token middleware, apply throttling to reduce abuse, and call protected routes from React.
+By the end of Day 3, students can secure Laravel API routes with Sanctum, issue expiring personal access tokens, add a frontend token middleware, apply throttling to reduce abuse, and call protected routes from React.
 
 ## PDF Reference
 
-This day is based on PDF pages 11-13, covering authenticated route middleware, `auth:sanctum`, throttling, frontend `X-API-TOKEN` middleware, and the API security checklist. The complete login/logout implementation and token testing flow are course expansions beyond the PDF.
+This day is based on PDF pages 11-13, covering authenticated route middleware, `auth:sanctum`, throttling, frontend `X-API-TOKEN` middleware, and the API security checklist. The complete login/logout implementation, token expiry, and token testing flow are course expansions beyond the PDF.
 
 ## 6-Hour Class Plan
 
@@ -14,18 +14,19 @@ This day is based on PDF pages 11-13, covering authenticated route middleware, `
 | --- | --- | --- |
 | 00:00-00:30 | Day 2 recap | Review CRUD API and validation |
 | 00:30-01:15 | API security model | Explain authentication, authorization, API keys, and rate limits |
-| 01:15-02:15 | Sanctum login | Create login endpoint and issue token |
+| 01:15-02:15 | Sanctum login | Create login endpoint and issue expiring token |
 | 02:15-02:30 | Break | Short break |
 | 02:30-03:30 | Protected routes | Move the full user profile CRUD resource behind `auth:sanctum` |
 | 03:30-04:30 | Frontend token middleware | Add `X-API-TOKEN` validation |
 | 04:30-05:00 | Throttling | Add request limits and test `429 Too Many Requests` |
-| 05:00-05:35 | React auth flow | Login from React, store token, call protected routes |
-| 05:35-06:00 | Security lab | Students secure the API and verify JSON responses from an API client and React |
+| 05:00-05:35 | React auth flow | Login from React, store token expiry, call protected routes |
+| 05:35-06:00 | Security lab | Students secure the API and verify missing, invalid, expired, and revoked-token JSON responses |
 
 ## Learning Objectives
 
 - Understand token-based API authentication.
 - Create login and logout endpoints.
+- Configure a short-lived bearer token and return `expires_at`.
 - Protect routes with `auth:sanctum`.
 - Secure the full Day 2 CRUD surface: list, show, create, update, and delete.
 - Register a custom middleware alias in `bootstrap/app.php`.
@@ -39,7 +40,7 @@ This day is based on PDF pages 11-13, covering authenticated route middleware, `
 The ABC Company Profile API will use three request checks:
 
 1. `frontend.token` confirms the request came from the expected frontend client.
-2. `auth:sanctum` confirms the user is logged in with a valid token.
+2. `auth:sanctum` confirms the user is logged in with a valid, unexpired token.
 3. `throttle` limits repeated requests.
 
 This is layered security. One layer should not be treated as the whole security system.
@@ -78,7 +79,9 @@ flowchart LR
     RouteGroup --> Protected["Protected CRUD routes"]
     Protected --> Sanctum{"Valid bearer token"}
     Sanctum -- "No" --> Unauthenticated["401 Unauthenticated"]
-    Sanctum -- "Yes" --> UserController["UserProfileController"]
+    Sanctum -- "Yes" --> Expiry{"Token not expired"}
+    Expiry -- "No" --> Expired["401 Expired token"]
+    Expiry -- "Yes" --> UserController["UserProfileController"]
     UserController --> JsonResponse["JSON response"]
     JsonResponse --> React
 ```
@@ -188,13 +191,15 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('training-token')->plainTextToken;
+        $expiresAt = now()->addMinutes((int) config('services.auth.token_expiry_minutes', 60));
+        $token = $user->createToken('training-token', ['*'], $expiresAt)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
             'data' => [
                 'token_type' => 'Bearer',
                 'access_token' => $token,
+                'expires_at' => $expiresAt->toISOString(),
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -266,6 +271,7 @@ Example response shape:
     "data": {
         "token_type": "Bearer",
         "access_token": "1|example-token-value",
+        "expires_at": "2026-06-09T09:30:00.000000Z",
         "user": {
             "id": 1,
             "name": "Training Admin",
@@ -378,6 +384,10 @@ return [
     'frontend' => [
         'api_token' => env('FRONTEND_API_TOKEN'),
     ],
+
+    'auth' => [
+        'token_expiry_minutes' => env('AUTH_TOKEN_EXPIRY_MINUTES', 60),
+    ],
 ];
 ```
 
@@ -385,6 +395,7 @@ Update `.env`:
 
 ```env
 FRONTEND_API_TOKEN=abc-training-frontend-token
+AUTH_TOKEN_EXPIRY_MINUTES=60
 ```
 
 Clear config:
@@ -488,6 +499,7 @@ Expected JSON response:
     "data": {
         "token_type": "Bearer",
         "access_token": "1|example-token-value",
+        "expires_at": "2026-06-09T09:30:00.000000Z",
         "user": {
             "id": 1,
             "name": "Training Admin",
@@ -568,7 +580,58 @@ The full script is available in:
 examples/day-3-api-security/snippets/curl-secured-crud.sh
 ```
 
-## Step 14 - Test Logout
+## Step 14 - Test Token Expiry
+
+The default class token lifetime is 60 minutes:
+
+```env
+AUTH_TOKEN_EXPIRY_MINUTES=60
+```
+
+For a quick lab, force the latest token to expire instead of waiting. Open Tinker:
+
+```bash
+php artisan tinker
+```
+
+Paste:
+
+```php
+$token = Laravel\Sanctum\PersonalAccessToken::latest('id')->first();
+
+$token->forceFill([
+    'expires_at' => now()->subYears(10),
+])->save();
+```
+
+Repeat a protected request with the old bearer token:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer PASTE_EXPIRED_TOKEN_HERE"
+```
+
+Expected status:
+
+```text
+401 Unauthorized
+```
+
+Expected JSON response:
+
+```json
+{
+    "message": "Unauthenticated."
+}
+```
+
+Teaching point:
+
+Token expiry protects the API when a user forgets to logout or when a bearer token is copied from browser storage. Expiry does not replace logout. Logout still revokes the current token immediately.
+
+## Step 15 - Test Logout
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/auth/logout \
@@ -587,7 +650,7 @@ Expected JSON response:
 
 After logout, the same bearer token should no longer work.
 
-## Step 15 - Test The Same Security Flow In React
+## Step 16 - Test The Same Security Flow In React
 
 Use:
 
@@ -617,10 +680,18 @@ Authorization: `Bearer ${token}`
 React login flow:
 
 1. submit email and password to `POST /api/v1/auth/login`.
-2. read `data.access_token` from the JSON response and store it in state and `localStorage` for the class lab.
+2. read `data.access_token` and `data.expires_at` from the JSON response and store them in state and `localStorage` for the class lab.
 3. call `GET /api/v1/users` with both headers.
 4. call create, update, and delete profile actions with both headers.
-5. call logout and clear the stored token.
+5. before protected calls, compare `expires_at` with the current browser time.
+6. if the token is expired or Laravel returns `401`, clear local storage and ask the user to login again.
+7. call logout and clear the stored token and expiry time.
+
+React expiry helper:
+
+```js
+const tokenExpired = (expiresAt) => expiresAt && Date.now() >= new Date(expiresAt).getTime();
+```
 
 Teaching point:
 
@@ -635,7 +706,7 @@ Goal:
 Help me complete Day 3 of the Laravel API tutorial.
 
 Context:
-The API already has public user profile CRUD from Day 2. Today I need Laravel Sanctum login/logout, protected full CRUD routes, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/show/create/update/delete/logout flow in React.
+The API already has public user profile CRUD from Day 2. Today I need Laravel Sanctum login/logout, expiring bearer tokens with expires_at in the login response, protected full CRUD routes, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/show/create/update/delete/logout flow in React.
 
 Relevant files:
 - routes/api.php
@@ -645,6 +716,7 @@ Relevant files:
 - app/Models/User.php
 - config/services.php
 - config/sanctum.php if relevant
+- .env.example or local training env docs
 - examples/day-3-api-security
 - examples/react-client-api-consumer/src/api.js
 - examples/react-client-api-consumer/src/App.jsx
@@ -654,20 +726,22 @@ Constraints:
 - Do not read or print .env secrets.
 - Read frontend token through config, not env() inside runtime code.
 - Do not put auth:sanctum on the login route.
+- Configure token expiry through config, not hardcoded controller magic numbers.
 - Move the Day 2 users apiResource into the protected Day 3 route group.
 - Do not leave or duplicate a public users apiResource outside the protected group.
 - Keep all profile CRUD routes behind both frontend token and bearer token checks.
 - Do not weaken existing validation or route versioning.
 
 Done criteria:
-- POST /api/v1/auth/login returns a Sanctum bearer token.
+- POST /api/v1/auth/login returns a Sanctum bearer token and an expires_at timestamp.
+- Expired bearer tokens reject protected routes with JSON 401.
 - GET, POST, GET by ID, PUT/PATCH, and DELETE /api/v1/users reject requests without Authorization: Bearer token.
 - requests without X-API-TOKEN return JSON 401.
 - throttling is applied to login and protected API routes.
-- React can login, store token for the lab, call protected list/show/create/update/delete routes, and logout.
+- React can login, store token plus expiry for the lab, call protected list/show/create/update/delete routes, clear expired auth state, and logout.
 
 Verification:
-- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, protected list, protected create, protected update, protected delete, and logout.
+- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, expired bearer token, protected list, protected create, protected update, protected delete, and logout.
 - Run or suggest php artisan route:list --path=api.
 - Confirm there is no public Day 2 users apiResource left in routes/api.php.
 - If tests exist, run or suggest auth and middleware tests.
@@ -684,6 +758,7 @@ Apply these rules in real APIs:
 - Validate all input.
 - Return only required fields.
 - Use rate limits on login and sensitive endpoints.
+- Use short token lifetimes and return `expires_at` so clients can react before a failed request.
 - Log suspicious activity.
 - Rotate leaked tokens immediately.
 
@@ -697,9 +772,11 @@ Students must:
 4. Call `/api/v1/users` with bearer token.
 5. Create, view, update, and delete `/api/v1/users/{id}` with both headers.
 6. Try one CRUD write without the bearer token and confirm `401`.
-7. Logout.
-8. Repeat login, list, create, update, delete, and logout from React.
-9. Confirm the old bearer token fails.
+7. Force the latest token to expire and confirm the old bearer token returns `401`.
+8. Login again with a fresh token.
+9. Logout.
+10. Repeat login, list, create, update, delete, expiry handling, and logout from React.
+11. Confirm the old bearer token fails.
 
 ## Common Mistakes
 
@@ -712,6 +789,8 @@ Students must:
 - Putting `auth:sanctum` on login route.
 - Leaving the Day 2 public `Route::apiResource('users', ...)` in `routes/api.php`.
 - Testing only the list endpoint and forgetting that create, update, and delete must also be secured.
+- Changing `AUTH_TOKEN_EXPIRY_MINUTES` but forgetting `php artisan config:clear`.
+- Keeping an expired token in React local storage and repeatedly sending failing requests.
 
 ## Day 3 Review Questions
 
@@ -721,6 +800,7 @@ Students must:
 4. Why should API secrets not be hardcoded?
 5. What status code should Laravel return when too many requests are sent?
 6. Which two headers does React need for protected routes?
+7. What should React do when `expires_at` is already in the past?
 
 ## Homework
 

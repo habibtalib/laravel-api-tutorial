@@ -9,6 +9,7 @@ Mulakan daripada projek Laravel Hari 2, kemudian salin atau merge fail ini ke da
 CRUD Hari 2 sengaja public. Hari 3 menukar final route state:
 
 - `POST /api/v1/auth/login` memerlukan `X-API-TOKEN` dan throttling, tetapi tidak memerlukan bearer token.
+- Login memulangkan Sanctum bearer token bersama `expires_at`. Default lifetime token latihan ialah 60 minit.
 - `POST /api/v1/auth/logout` memerlukan `X-API-TOKEN`, throttling, dan `Authorization: Bearer ...`.
 - Semua endpoint CRUD `/api/v1/users` memerlukan `X-API-TOKEN`, throttling, dan `Authorization: Bearer ...`.
 
@@ -26,6 +27,7 @@ Jangan tinggalkan `Route::apiResource('users', ...)` public daripada Hari 2 di l
 | `config/services.frontend.example.php` | Merge ke dalam `config/services.php` |
 | `config/env.day3.example` | Merge ke dalam `.env` |
 | `snippets/curl-secured-crud.sh` | Run manual dari terminal |
+| `snippets/tinker-expire-latest-token.php` | Optional untuk test expiry dengan cepat dalam Tinker |
 
 ## Artisan Commands
 
@@ -83,4 +85,7 @@ Behavior security yang dijangka:
 
 - `X-API-TOKEN` tiada memulangkan `401`.
 - Bearer token tiada memulangkan `401`.
+- Bearer token expired memulangkan `401`.
 - Full CRUD hanya berfungsi apabila kedua-dua headers dihantar.
+
+Untuk test expiry dengan cepat, paste `snippets/tinker-expire-latest-token.php` ke dalam Tinker selepas login, kemudian ulang protected request menggunakan token lama.
