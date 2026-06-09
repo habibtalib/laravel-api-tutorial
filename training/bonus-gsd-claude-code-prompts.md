@@ -186,36 +186,57 @@ Constraints:
 - Follow existing naming and style.
 ```
 
-## Prompt 4 - Add A React API Call
+## Prompt 4 - Sync React With The Latest Laravel API
 
-Use this when the backend endpoint works and the React client needs to call it.
+Use this when the backend API has changed and the React client needs to match the latest contract.
 
 ```text
-The Laravel API endpoint is ready:
+The Laravel API backend has been updated. Please sync the React/Vite client with the latest backend contract.
 
-Endpoint:
-GET /api/v1/users?search=&active=
+Inspect backend first:
+- routes/api.php
+- app/Http/Controllers/Api/V1/AuthController.php
+- app/Http/Controllers/Api/V1/UserProfileController.php
+- app/Http/Resources if present
+- recent curl examples, tests, or route:list output if present
 
-Security:
-- X-API-TOKEN is required.
-- Authorization: Bearer <token> is required.
+Expected current API:
+- Base URL uses VITE_API_BASE_URL.
+- X-API-TOKEN uses VITE_FRONTEND_API_TOKEN and is sent on every API call when configured.
+- POST /api/v1/auth/login returns data.access_token, data.expires_at, data.abilities, and data.user.
+- Protected CRUD and logout send Authorization: Bearer <token>.
+- GET /users and GET /users/{id} require profiles:read.
+- POST /users requires profiles:create.
+- PUT/PATCH /users/{id} requires profiles:update.
+- DELETE /users/{id} requires profiles:delete.
+- 401 means missing, invalid, expired, or revoked auth and should clear local auth state.
+- 403 means missing ability and should show the backend message.
+- 422 means validation errors and should show field errors.
 
-Please update the React/Vite client to call this endpoint.
-
-Inspect:
+Inspect React:
 - src/api.js
 - src/App.jsx
 - src/App.css if needed
+- .env.example
+- package.json
 
 Requirements:
 - keep API URL and frontend token in Vite environment variables.
 - reuse the existing apiRequest helper if present.
-- support loading state.
-- support 401 and 422 error messages.
-- add search and active filter controls.
+- keep request construction centralized in src/api.js.
+- store access_token, expires_at, user, and optional abilities after login.
+- store token and expires_at in localStorage only for this training lab.
+- clear auth state before protected requests if expires_at has passed.
+- support loading, empty, success, 401, 403, 404, 422, and general error states.
+- support login, logout, list, search, show/detail, create, update, and delete.
+- React may hide buttons based on abilities, but Laravel remains the source of truth.
 - do not hard-code the bearer token.
+- do not change backend files unless you first explain the mismatch and ask for approval.
 
-After editing, summarize changed files and how to test in the browser.
+Verification:
+- run npm run build.
+- explain browser test steps for login, list, create, update, delete, logout, expired token, and missing ability.
+- summarize changed files and any env values required.
 ```
 
 ## Prompt 5 - Debug A Failing API Request

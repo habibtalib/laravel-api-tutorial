@@ -27,7 +27,7 @@ Use the examples while teaching or doing the labs:
 | --- | --- | --- |
 | Day 1 | Laravel API foundations and React client shell | First versioned API endpoint plus basic React setup |
 | Day 2 | RESTful routes, CRUD, validation, and React forms | User profile CRUD API consumed from React |
-| Day 3 | API security and React authentication flow | Sanctum auth, frontend token middleware, throttling, React login |
+| Day 3 | API security and React authentication flow | Sanctum auth, token expiry, token abilities, frontend token middleware, throttling, React login |
 | Day 4 | Performance, exception handling, and React API UX | Cached/eager-loaded API with JSON errors and React loading/search states |
 | Day 5 | Service layer, API resources, and final integration | Production-style API contract consumed by the React client |
 
@@ -71,6 +71,9 @@ Bahasa Malaysia:
 
 Core examples:
 
+- `examples/full-working-laravel-react-app` - complete runnable Laravel backend plus React frontend
+- `examples/complete-laravel-react-project`
+- `bahasa-malaysia/examples/complete-laravel-react-project`
 - `examples/day-1-laravel-api-foundations`
 - `examples/day-2-restful-routes-validation`
 - `examples/day-3-api-security`

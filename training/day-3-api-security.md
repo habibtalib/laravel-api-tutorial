@@ -430,11 +430,14 @@ Update `bootstrap/app.php`:
 <?php
 
 use App\Http\Middleware\VerifyFrontendToken;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -451,11 +454,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (AuthorizationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 403);
+            }
+        });
+
+        $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ], 403);
+            }
+        });
     })->create();
 ```
 
-If your `bootstrap/app.php` already has code inside `withMiddleware`, add only the alias inside the existing closure.
+If your `bootstrap/app.php` already has code inside `withMiddleware`, add only the new aliases inside the existing closure. If it already has code inside `withExceptions`, add only the authorization renderer inside that existing closure.
 
 ## Step 11 - Apply Frontend Token Middleware
 
@@ -847,6 +864,65 @@ const tokenExpired = (expiresAt) => expiresAt && Date.now() >= new Date(expiresA
 Teaching point:
 
 Local storage is acceptable for a small class demo, but production token storage needs a deliberate security decision based on the app threat model.
+
+## React Frontend Update Prompt
+
+Use this prompt when the Laravel backend has already been updated and the React frontend must be aligned with the latest API contract.
+
+```text
+Goal:
+Update the React/Vite frontend to match the latest Laravel API backend.
+
+Backend contract to inspect first:
+- routes/api.php
+- app/Http/Controllers/Api/V1/AuthController.php
+- app/Http/Controllers/Api/V1/UserProfileController.php
+- app/Http/Resources if API resources exist
+- latest curl examples or route:list output if available
+
+Current Laravel API behavior:
+- Base URL: http://127.0.0.1:8000/api/v1 unless the local .env uses a different port.
+- Login: POST /api/v1/auth/login requires X-API-TOKEN and returns data.token_type, data.access_token, data.expires_at, data.abilities, and data.user.
+- Logout: POST /api/v1/auth/logout requires X-API-TOKEN and Authorization: Bearer <token>.
+- User profile CRUD routes require X-API-TOKEN and Authorization: Bearer <token>.
+- GET /users and GET /users/{id} require profiles:read.
+- POST /users requires profiles:create.
+- PUT/PATCH /users/{id} requires profiles:update.
+- DELETE /users/{id} requires profiles:delete.
+- Expired or missing bearer tokens return 401 JSON.
+- A token missing the required ability returns 403 JSON with message "Invalid ability provided."
+- Validation errors return 422 JSON with errors.
+
+React files to inspect and update:
+- package.json
+- .env.example
+- src/api.js
+- src/App.jsx
+- src/App.css if UI states need styling
+
+Requirements:
+- Keep VITE_API_BASE_URL and VITE_FRONTEND_API_TOKEN in environment variables.
+- Keep request construction centralized in src/api.js.
+- Send X-API-TOKEN on every API call when configured.
+- Send Authorization: Bearer <token> only after login.
+- Store access_token, expires_at, user, and optional abilities in React state.
+- Store token and expires_at in localStorage only for this training lab.
+- Before protected requests, check expires_at and clear auth state if expired.
+- On 401, clear auth state and ask the user to login again.
+- On 403, show the backend message and do not retry automatically.
+- On 422, display validation errors near the form.
+- Support login, logout, list, search, show/detail, create, update, and delete.
+- Do not enforce security only in React. React may hide buttons based on abilities, but Laravel remains the source of truth.
+- Do not change backend files unless you first explain the mismatch and ask for approval.
+
+Done criteria:
+- npm install works if dependencies changed.
+- npm run build passes.
+- Browser flow works: login, list, show, create, update, delete, logout.
+- Expired token or 401 clears local auth state.
+- 403 missing ability is displayed clearly.
+- The final response summarizes changed files, env values needed, and manual browser test steps.
+```
 
 ## GSD Claude Code Prompt
 

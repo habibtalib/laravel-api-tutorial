@@ -16,7 +16,7 @@ Page numbers below use the physical PDF page number shown by most PDF viewers. T
 | --- | --- | --- | --- |
 | Day 1 - Laravel API Foundations | PDF pages 4-8, book pages 1-5 | Laravel API overview, Laravel setup, MVC structure, request flow, `routes/api.php` setup | Full project setup, MySQL workflow, first model, migration, controller, and JSON endpoint |
 | Day 2 - RESTful Routes, CRUD, And Validation | PDF pages 9-12, book pages 6-9 | REST methods, route prefixes, versioning, `Route::apiResource`, named routes, route caching notes | Full CRUD controller, form request validation, status codes, and JSON response labs |
-| Day 3 - API Security | PDF pages 11-13, book pages 8-10 | `auth:sanctum`, middleware registration, throttling, frontend `X-API-TOKEN`, API security checklist | Complete Sanctum login/logout flow, token testing, middleware alias implementation |
+| Day 3 - API Security | PDF pages 11-13, book pages 8-10 | `auth:sanctum`, middleware registration, throttling, frontend `X-API-TOKEN`, API security checklist | Complete Sanctum login/logout flow, token expiry testing, token abilities, middleware alias implementation |
 | Day 4 - Performance And Exception Handling | PDF pages 14-18, book pages 11-15 | Redis caching, `Cache::remember`, eager loading, route/config cache, centralized exception handling, pagination | Project relationship example, cache keys, cache clearing after writes, detailed JSON exception responses |
 | Day 5 - Service Layer And Final Project | PDF pages 16-18, book pages 13-15 | service layer pattern, route model binding, API resources/serialization, optimization summary | Full service class, API resources, final architecture, route model binding refactor |
 | React client integration across Days 1-5 | Not directly covered in PDF | Not covered | Added after participant request so students can call the REST API from a browser UI |
@@ -46,6 +46,7 @@ By the end of the training, students should be able to:
 - Build CRUD endpoints with correct HTTP methods and status codes.
 - Validate API requests and return JSON validation errors.
 - Secure APIs with Laravel Sanctum.
+- Enforce named Sanctum token abilities for read and write actions.
 - Add custom middleware for frontend API token validation.
 - Apply throttling to reduce abuse.
 - Use pagination, eager loading, and caching for better performance.
@@ -68,6 +69,7 @@ After completing the core 5-day training, students should be able to build an AP
 - request validation.
 - consistent JSON responses.
 - Sanctum login and logout.
+- named Sanctum token abilities for protected CRUD actions.
 - protected authenticated routes.
 - `X-API-TOKEN` frontend token middleware.
 - rate limiting.
@@ -111,7 +113,7 @@ flowchart LR
 ```mermaid
 flowchart TB
     Browser["React browser client"] --> Fetch["fetch API calls"]
-    Fetch --> Security["Frontend token, throttling, Sanctum"]
+    Fetch --> Security["Frontend token, throttling, Sanctum, abilities"]
     Client["API client"] --> Security
     Security --> Routes["routes/api.php"]
     Routes --> Controllers["API controllers"]
@@ -138,7 +140,7 @@ flowchart TB
 | --- | --- | --- |
 | Day 1 | Laravel setup, API routes, MVC flow, React/Vite shell | First versioned JSON endpoint plus React client setup |
 | Day 2 | RESTful CRUD, validation, React list/create form | Complete user profile CRUD API plus browser CRUD calls |
-| Day 3 | API security and React auth flow | Sanctum auth, frontend token middleware, throttling, React login |
+| Day 3 | API security and React auth flow | Sanctum auth, token expiry, token abilities, frontend token middleware, throttling, React login |
 | Day 4 | Performance, errors, React loading/search/error UX | Cached, eager-loaded API with JSON exception handling and React filters |
 | Day 5 | Architecture refactor and client integration | Final API plus React client consuming the production-style contract |
 
