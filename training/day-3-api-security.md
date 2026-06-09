@@ -2,11 +2,11 @@
 
 ## Class Goal
 
-By the end of Day 3, students can secure Laravel API routes with Sanctum, issue expiring personal access tokens, add a frontend token middleware, apply throttling to reduce abuse, and call protected routes from React.
+By the end of Day 3, students can secure Laravel API routes with Sanctum, issue expiring personal access tokens with named abilities, add a frontend token middleware, apply throttling to reduce abuse, and call protected routes from React.
 
 ## PDF Reference
 
-This day is based on PDF pages 11-13, covering authenticated route middleware, `auth:sanctum`, throttling, frontend `X-API-TOKEN` middleware, and the API security checklist. The complete login/logout implementation, token expiry, and token testing flow are course expansions beyond the PDF.
+This day is based on PDF pages 11-13, covering authenticated route middleware, `auth:sanctum`, throttling, frontend `X-API-TOKEN` middleware, and the API security checklist. The complete login/logout implementation, token expiry, Sanctum token abilities, and token testing flow are course expansions beyond the PDF.
 
 ## 6-Hour Class Plan
 
@@ -18,7 +18,7 @@ This day is based on PDF pages 11-13, covering authenticated route middleware, `
 | 02:15-02:30 | Break | Short break |
 | 02:30-03:30 | Protected routes | Move the full user profile CRUD resource behind `auth:sanctum` |
 | 03:30-04:30 | Frontend token middleware | Add `X-API-TOKEN` validation |
-| 04:30-05:00 | Throttling | Add request limits and test `429 Too Many Requests` |
+| 04:30-05:00 | Token expiry and abilities | Add request limits, inspect `expires_at`, and enforce Sanctum token abilities |
 | 05:00-05:35 | React auth flow | Login from React, store token expiry, call protected routes |
 | 05:35-06:00 | Security lab | Students secure the API and verify missing, invalid, expired, and revoked-token JSON responses |
 
@@ -27,7 +27,9 @@ This day is based on PDF pages 11-13, covering authenticated route middleware, `
 - Understand token-based API authentication.
 - Create login and logout endpoints.
 - Configure a short-lived bearer token and return `expires_at`.
+- Store named token abilities in the `personal_access_tokens.abilities` column.
 - Protect routes with `auth:sanctum`.
+- Require different abilities for read, create, update, and delete profile actions.
 - Secure the full Day 2 CRUD surface: list, show, create, update, and delete.
 - Register a custom middleware alias in `bootstrap/app.php`.
 - Validate a frontend API token from a request header.
@@ -41,7 +43,8 @@ The ABC Company Profile API will use three request checks:
 
 1. `frontend.token` confirms the request came from the expected frontend client.
 2. `auth:sanctum` confirms the user is logged in with a valid, unexpired token.
-3. `throttle` limits repeated requests.
+3. Sanctum token abilities confirm what the authenticated token may do.
+4. `throttle` limits repeated requests.
 
 This is layered security. One layer should not be treated as the whole security system.
 
@@ -51,11 +54,11 @@ Day 2 deliberately allowed public CRUD so students could focus on REST and valid
 
 | Endpoint | Day 2 state | Final Day 3 state |
 | --- | --- | --- |
-| `GET /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
-| `POST /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
-| `GET /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
-| `PUT/PATCH /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
-| `DELETE /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
+| `GET /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` + `abilities:profiles:read` |
+| `POST /api/v1/users` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` + `abilities:profiles:create` |
+| `GET /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` + `abilities:profiles:read` |
+| `PUT/PATCH /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` + `abilities:profiles:update` |
+| `DELETE /api/v1/users/{id}` | Public | `frontend.token` + `throttle:60,1` + `auth:sanctum` + `abilities:profiles:delete` |
 | `POST /api/v1/auth/login` | Not available | `frontend.token` + login throttle, no bearer token |
 | `POST /api/v1/auth/logout` | Not available | `frontend.token` + `throttle:60,1` + `auth:sanctum` |
 
@@ -63,7 +66,7 @@ The final route file must have only one `Route::apiResource('users', UserProfile
 
 ## Architecture Diagram
 
-Day 3 adds a security pipeline in front of the controllers. Public login still requires the frontend token and rate limit, while profile CRUD routes require all three layers.
+Day 3 adds a security pipeline in front of the controllers. Public login still requires the frontend token and rate limit, while profile CRUD routes require every security layer.
 
 ```mermaid
 flowchart LR
@@ -81,7 +84,9 @@ flowchart LR
     Sanctum -- "No" --> Unauthenticated["401 Unauthenticated"]
     Sanctum -- "Yes" --> Expiry{"Token not expired"}
     Expiry -- "No" --> Expired["401 Expired token"]
-    Expiry -- "Yes" --> UserController["UserProfileController"]
+    Expiry -- "Yes" --> Ability{"Token has required ability"}
+    Ability -- "No" --> Forbidden["403 Invalid ability"]
+    Ability -- "Yes" --> UserController["UserProfileController"]
     UserController --> JsonResponse["JSON response"]
     JsonResponse --> React
 ```
@@ -192,7 +197,13 @@ class AuthController extends Controller
         }
 
         $expiresAt = now()->addMinutes((int) config('services.auth.token_expiry_minutes', 60));
-        $token = $user->createToken('training-token', ['*'], $expiresAt)->plainTextToken;
+        $abilities = [
+            'profiles:read',
+            'profiles:create',
+            'profiles:update',
+            'profiles:delete',
+        ];
+        $token = $user->createToken('training-token', $abilities, $expiresAt)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
@@ -200,6 +211,7 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
                 'access_token' => $token,
                 'expires_at' => $expiresAt->toISOString(),
+                'abilities' => $abilities,
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -272,6 +284,12 @@ Example response shape:
         "token_type": "Bearer",
         "access_token": "1|example-token-value",
         "expires_at": "2026-06-09T09:30:00.000000Z",
+        "abilities": [
+            "profiles:read",
+            "profiles:create",
+            "profiles:update",
+            "profiles:delete"
+        ],
         "user": {
             "id": 1,
             "name": "Training Admin",
@@ -415,6 +433,8 @@ use App\Http\Middleware\VerifyFrontendToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -425,6 +445,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'abilities' => CheckAbilities::class,
+            'ability' => CheckForAnyAbility::class,
             'frontend.token' => VerifyFrontendToken::class,
         ]);
     })
@@ -459,7 +481,11 @@ Route::prefix('v1')
                 ->name('auth.logout');
 
             // Final Day 3 state: all Day 2 CRUD actions are protected.
-            Route::apiResource('users', UserProfileController::class);
+            Route::apiResource('users', UserProfileController::class)
+                ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+                ->middlewareFor('store', 'abilities:profiles:create')
+                ->middlewareFor('update', 'abilities:profiles:update')
+                ->middlewareFor('destroy', 'abilities:profiles:delete');
         });
     });
 ```
@@ -500,6 +526,12 @@ Expected JSON response:
         "token_type": "Bearer",
         "access_token": "1|example-token-value",
         "expires_at": "2026-06-09T09:30:00.000000Z",
+        "abilities": [
+            "profiles:read",
+            "profiles:create",
+            "profiles:update",
+            "profiles:delete"
+        ],
         "user": {
             "id": 1,
             "name": "Training Admin",
@@ -650,7 +682,126 @@ Expected JSON response:
 
 After logout, the same bearer token should no longer work.
 
-## Step 16 - Test The Same Security Flow In React
+## Step 16 - Inspect And Test The Token Abilities Column
+
+Sanctum stores token permissions in the `personal_access_tokens.abilities` column. The column is JSON text, so a token can carry a small list of abilities:
+
+```json
+[
+    "profiles:read",
+    "profiles:create",
+    "profiles:update",
+    "profiles:delete"
+]
+```
+
+The shortcut `['*']` means the token can perform all abilities. For this training, use named abilities because students can see how each CRUD action is authorized.
+
+Inspect the latest token in MySQL:
+
+```sql
+SELECT id, name, abilities, expires_at
+FROM personal_access_tokens
+ORDER BY id DESC
+LIMIT 1;
+```
+
+The `abilities` value should look similar to:
+
+```json
+["profiles:read","profiles:create","profiles:update","profiles:delete"]
+```
+
+The final Day 3 route maps each API resource action to a matching ability:
+
+```php
+Route::apiResource('users', UserProfileController::class)
+    ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+    ->middlewareFor('store', 'abilities:profiles:create')
+    ->middlewareFor('update', 'abilities:profiles:update')
+    ->middlewareFor('destroy', 'abilities:profiles:delete');
+```
+
+Create a read-only token in Tinker:
+
+```bash
+php artisan tinker
+```
+
+```php
+$user = App\Models\User::where('email', 'admin@example.com')->first();
+
+$token = $user->createToken(
+    'read-only-training-token',
+    ['profiles:read'],
+    now()->addMinutes(60)
+)->plainTextToken;
+
+$token;
+```
+
+The same snippet is available in:
+
+```text
+examples/day-3-api-security/snippets/tinker-read-only-token.php
+```
+
+Test a read action with the read-only token:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer PASTE_READ_ONLY_TOKEN_HERE"
+```
+
+Expected status:
+
+```text
+200 OK
+```
+
+Test a create action with the same read-only token:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/users \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer PASTE_READ_ONLY_TOKEN_HERE" \
+  -d '{
+    "full_name": "Read Only Should Fail",
+    "id_card_number": "READONLY-001",
+    "phone": "+60120000000",
+    "address": "Kuala Lumpur"
+  }'
+```
+
+Expected status:
+
+```text
+403 Forbidden
+```
+
+Expected JSON response:
+
+```json
+{
+    "message": "Invalid ability provided."
+}
+```
+
+The read-only ability test script is available in:
+
+```text
+examples/day-3-api-security/snippets/curl-read-only-ability-test.sh
+```
+
+Teaching point:
+
+`auth:sanctum` answers "who is this user?" Token abilities answer "what may this token do?" React does not need to understand every ability for this class lab, but the backend should enforce abilities before running controller code.
+
+## Step 17 - Test The Same Security Flow In React
 
 Use:
 
@@ -680,7 +831,7 @@ Authorization: `Bearer ${token}`
 React login flow:
 
 1. submit email and password to `POST /api/v1/auth/login`.
-2. read `data.access_token` and `data.expires_at` from the JSON response and store them in state and `localStorage` for the class lab.
+2. read `data.access_token`, `data.expires_at`, and optional `data.abilities` from the JSON response and store the token plus expiry in state and `localStorage` for the class lab.
 3. call `GET /api/v1/users` with both headers.
 4. call create, update, and delete profile actions with both headers.
 5. before protected calls, compare `expires_at` with the current browser time.
@@ -706,7 +857,7 @@ Goal:
 Help me complete Day 3 of the Laravel API tutorial.
 
 Context:
-The API already has public user profile CRUD from Day 2. Today I need Laravel Sanctum login/logout, expiring bearer tokens with expires_at in the login response, protected full CRUD routes, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/show/create/update/delete/logout flow in React.
+The API already has public user profile CRUD from Day 2. Today I need Laravel Sanctum login/logout, expiring bearer tokens with expires_at in the login response, named Sanctum token abilities stored in personal_access_tokens.abilities, protected full CRUD routes with ability middleware, frontend X-API-TOKEN middleware, throttling, expected security JSON responses, and the same login/list/show/create/update/delete/logout flow in React.
 
 Relevant files:
 - routes/api.php
@@ -727,21 +878,26 @@ Constraints:
 - Read frontend token through config, not env() inside runtime code.
 - Do not put auth:sanctum on the login route.
 - Configure token expiry through config, not hardcoded controller magic numbers.
+- Issue tokens with named abilities: profiles:read, profiles:create, profiles:update, and profiles:delete.
+- Register Sanctum ability middleware aliases in bootstrap/app.php if they are not already registered.
 - Move the Day 2 users apiResource into the protected Day 3 route group.
 - Do not leave or duplicate a public users apiResource outside the protected group.
-- Keep all profile CRUD routes behind both frontend token and bearer token checks.
+- Keep all profile CRUD routes behind frontend token, bearer token, and the correct ability checks.
 - Do not weaken existing validation or route versioning.
 
 Done criteria:
-- POST /api/v1/auth/login returns a Sanctum bearer token and an expires_at timestamp.
+- POST /api/v1/auth/login returns a Sanctum bearer token, an expires_at timestamp, and the token abilities used in the lab.
 - Expired bearer tokens reject protected routes with JSON 401.
 - GET, POST, GET by ID, PUT/PATCH, and DELETE /api/v1/users reject requests without Authorization: Bearer token.
+- A read-only token with profiles:read can list/show profiles but cannot create, update, or delete profiles.
+- Write requests with a token missing the required ability return JSON 403.
 - requests without X-API-TOKEN return JSON 401.
 - throttling is applied to login and protected API routes.
 - React can login, store token plus expiry for the lab, call protected list/show/create/update/delete routes, clear expired auth state, and logout.
 
 Verification:
-- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, expired bearer token, protected list, protected create, protected update, protected delete, and logout.
+- Provide request examples and expected JSON responses for login, missing frontend token, missing bearer token, expired bearer token, missing ability, protected list, protected create, protected update, protected delete, and logout.
+- Show how to inspect the personal_access_tokens abilities column in MySQL.
 - Run or suggest php artisan route:list --path=api.
 - Confirm there is no public Day 2 users apiResource left in routes/api.php.
 - If tests exist, run or suggest auth and middleware tests.
@@ -759,6 +915,7 @@ Apply these rules in real APIs:
 - Return only required fields.
 - Use rate limits on login and sensitive endpoints.
 - Use short token lifetimes and return `expires_at` so clients can react before a failed request.
+- Prefer named Sanctum token abilities over `['*']` once routes need different permissions.
 - Log suspicious activity.
 - Rotate leaked tokens immediately.
 
@@ -773,10 +930,11 @@ Students must:
 5. Create, view, update, and delete `/api/v1/users/{id}` with both headers.
 6. Try one CRUD write without the bearer token and confirm `401`.
 7. Force the latest token to expire and confirm the old bearer token returns `401`.
-8. Login again with a fresh token.
-9. Logout.
-10. Repeat login, list, create, update, delete, expiry handling, and logout from React.
-11. Confirm the old bearer token fails.
+8. Create a read-only token and confirm list works but create returns `403`.
+9. Login again with a fresh full-ability token.
+10. Logout.
+11. Repeat login, list, create, update, delete, expiry handling, and logout from React.
+12. Confirm the old bearer token fails.
 
 ## Common Mistakes
 
@@ -790,6 +948,8 @@ Students must:
 - Leaving the Day 2 public `Route::apiResource('users', ...)` in `routes/api.php`.
 - Testing only the list endpoint and forgetting that create, update, and delete must also be secured.
 - Changing `AUTH_TOKEN_EXPIRY_MINUTES` but forgetting `php artisan config:clear`.
+- Creating every token with `['*']` and never testing route-specific abilities.
+- Adding ability middleware before `auth:sanctum`, then debugging confusing unauthenticated requests.
 - Keeping an expired token in React local storage and repeatedly sending failing requests.
 
 ## Day 3 Review Questions
@@ -801,6 +961,8 @@ Students must:
 5. What status code should Laravel return when too many requests are sent?
 6. Which two headers does React need for protected routes?
 7. What should React do when `expires_at` is already in the past?
+8. What is stored in the `personal_access_tokens.abilities` column?
+9. Why should `POST /api/v1/users` require a different ability from `GET /api/v1/users`?
 
 ## Homework
 
