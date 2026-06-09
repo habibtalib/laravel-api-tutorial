@@ -8,8 +8,9 @@ The client is intentionally small. It demonstrates the browser-side concepts stu
 - call the public profile list before authentication on Day 1.
 - run full Day 2 CRUD before authentication.
 - send the frontend `X-API-TOKEN` header when the Day 3 middleware is added.
-- log in to receive a Laravel Sanctum bearer token on Day 3.
-- call protected REST endpoints after Day 3 security is added.
+- log in to receive a Laravel Sanctum bearer token and `expires_at` timestamp on Day 3.
+- call protected list, view, create, update, and delete endpoints after Day 3 security is added.
+- clear expired auth state when the token expiry passes or Laravel returns `401`.
 - list, search, view, create, update, and delete user profiles.
 - handle loading, `401`, `422`, and general JSON errors.
 
@@ -19,7 +20,7 @@ The client is intentionally small. It demonstrates the browser-side concepts stu
 | --- | --- |
 | Day 1 | Create Vite app, configure `.env`, call a simple API endpoint |
 | Day 2 | Build list, detail, create, update, and delete actions for REST CRUD |
-| Day 3 | Add login, bearer token storage, protected API calls |
+| Day 3 | Add login, bearer token expiry storage, protected API calls |
 | Day 4 | Add search/filter, pagination awareness, loading and error states |
 | Day 5 | Use the final API contract and explain full client-to-API architecture |
 
@@ -106,7 +107,9 @@ password
 ```
 
 11. Click "Load profiles" again.
-12. Logout and confirm protected calls fail.
+12. Repeat view, create, update, and delete while logged in.
+13. Set a short token lifetime or force expiry in Tinker, then confirm the client clears auth state after expiry.
+14. Logout and confirm protected calls fail.
 
 ## Endpoint Coverage
 
@@ -120,11 +123,16 @@ password
 
 The profile form follows the Laravel API fields: `full_name`, `id_card_number`, `phone`, `address`, and `is_active`.
 
+After Day 3 security is added, every endpoint in this table requires both the frontend `X-API-TOKEN` header and the Sanctum bearer token.
+The login response also includes `expires_at`; the client stores it in `abc_api_token_expires_at` and clears the saved bearer token when it is expired.
+
 ## Important Teaching Points
 
 - The browser client does not call Eloquent or Laravel services directly.
 - React only knows the HTTP contract: method, URL, headers, body, and JSON response.
 - Day 1 profile listing and full Day 2 CRUD do not require login.
+- After Day 3, full CRUD is secured and requires login.
 - `X-API-TOKEN` identifies the frontend client after the Day 3 middleware is added.
 - `Authorization: Bearer ...` identifies the logged-in user after Sanctum is added.
+- `expires_at` tells React when the bearer token should stop being used.
 - Never store production secrets in frontend code. The frontend token here is a training control, not a replacement for user authentication.

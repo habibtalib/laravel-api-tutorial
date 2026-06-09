@@ -16,7 +16,11 @@ Route::prefix('v1')
             Route::post('/auth/logout', [AuthController::class, 'logout'])
                 ->name('auth.logout');
 
-            Route::apiResource('users', UserProfileController::class);
+            // Day 3 secures the full Day 2 CRUD surface. Do not leave a public users apiResource outside this group.
+            Route::apiResource('users', UserProfileController::class)
+                ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+                ->middlewareFor('store', 'abilities:profiles:create')
+                ->middlewareFor('update', 'abilities:profiles:update')
+                ->middlewareFor('destroy', 'abilities:profiles:delete');
         });
     });
-
