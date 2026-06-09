@@ -8,6 +8,17 @@ Route::prefix('v1')
     ->name('api.v1.')
     ->middleware(['frontend.token', 'throttle:60,1'])
     ->group(function () {
+        Route::get('/health', function () {
+            return response()->json([
+                'message' => 'ABC API is healthy.',
+                'data' => [
+                    'app' => config('app.name'),
+                    'environment' => app()->environment(),
+                    'time' => now()->toISOString(),
+                ],
+            ]);
+        })->name('health');
+
         Route::post('/auth/login', [AuthController::class, 'login'])
             ->middleware('throttle:5,1')
             ->name('auth.login');
@@ -16,7 +27,7 @@ Route::prefix('v1')
             Route::post('/auth/logout', [AuthController::class, 'logout'])
                 ->name('auth.logout');
 
-            // Hari 3 melindungi semua CRUD Hari 2. Jangan tinggalkan users apiResource public di luar group ini.
+            // Day 4 keeps the Day 3 security contract while adding pagination, cache, and JSON errors.
             Route::apiResource('users', UserProfileController::class)
                 ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
                 ->middlewareFor('store', 'abilities:profiles:create')

@@ -9,11 +9,11 @@ Mulakan daripada projek Laravel Hari 2, kemudian salin atau merge fail ini ke da
 CRUD Hari 2 sengaja public. Hari 3 menukar final route state:
 
 - `POST /api/v1/auth/login` memerlukan `X-API-TOKEN` dan throttling, tetapi tidak memerlukan bearer token.
-- Login memulangkan Sanctum bearer token bersama `expires_at`. Default lifetime token latihan ialah 60 minit.
+- Login memulangkan Sanctum bearer token bersama `expires_at` dan named abilities. Default lifetime token latihan ialah 60 minit.
 - `POST /api/v1/auth/logout` memerlukan `X-API-TOKEN`, throttling, dan `Authorization: Bearer ...`.
-- Semua endpoint CRUD `/api/v1/users` memerlukan `X-API-TOKEN`, throttling, dan `Authorization: Bearer ...`.
+- Semua endpoint CRUD `/api/v1/users` memerlukan `X-API-TOKEN`, throttling, `Authorization: Bearer ...`, dan Sanctum ability yang sesuai.
 
-Jangan tinggalkan `Route::apiResource('users', ...)` public daripada Hari 2 di luar protected group. Jika mana-mana CRUD Hari 3 berfungsi tanpa kedua-dua security headers, fail route masih salah.
+Jangan tinggalkan `Route::apiResource('users', ...)` public daripada Hari 2 di luar protected group. Jika mana-mana CRUD Hari 3 berfungsi tanpa kedua-dua security headers dan token ability yang diperlukan, fail route masih salah.
 
 ## Fail
 
@@ -27,7 +27,9 @@ Jangan tinggalkan `Route::apiResource('users', ...)` public daripada Hari 2 di l
 | `config/services.frontend.example.php` | Merge ke dalam `config/services.php` |
 | `config/env.day3.example` | Merge ke dalam `.env` |
 | `snippets/curl-secured-crud.sh` | Run manual dari terminal |
+| `snippets/curl-read-only-ability-test.sh` | Optional ability check dengan read-only token |
 | `snippets/tinker-expire-latest-token.php` | Optional untuk test expiry dengan cepat dalam Tinker |
+| `snippets/tinker-read-only-token.php` | Optional read-only token setup dalam Tinker |
 
 ## Artisan Commands
 
@@ -47,7 +49,7 @@ Jangan overwrite `config/services.php` jika app Laravel anda sudah mempunyai set
 ],
 ```
 
-Jika `bootstrap/app.php` sudah mempunyai closure `withMiddleware`, tambah alias `frontend.token` sahaja di dalam closure sedia ada.
+Jika `bootstrap/app.php` sudah mempunyai closure `withMiddleware`, tambah alias baru sahaja di dalam closure sedia ada. Hari 3 memerlukan `frontend.token`, `abilities`, dan `ability`.
 
 ## Seed Test User
 
@@ -81,11 +83,18 @@ Run CRUD penuh yang secured dengan token yang sama:
 TOKEN="PASTE_TOKEN_HERE" bash bahasa-malaysia/examples/day-3-api-security/snippets/curl-secured-crud.sh
 ```
 
+Untuk test token abilities, paste `snippets/tinker-read-only-token.php` ke dalam Tinker, kemudian run:
+
+```bash
+TOKEN="PASTE_READ_ONLY_TOKEN_HERE" bash bahasa-malaysia/examples/day-3-api-security/snippets/curl-read-only-ability-test.sh
+```
+
 Behavior security yang dijangka:
 
 - `X-API-TOKEN` tiada memulangkan `401`.
 - Bearer token tiada memulangkan `401`.
 - Bearer token expired memulangkan `401`.
-- Full CRUD hanya berfungsi apabila kedua-dua headers dihantar.
+- Token yang tiada ability diperlukan memulangkan `403`.
+- Full CRUD hanya berfungsi apabila kedua-dua headers dihantar dan bearer token ada ability yang diperlukan.
 
 Untuk test expiry dengan cepat, paste `snippets/tinker-expire-latest-token.php` ke dalam Tinker selepas login, kemudian ulang protected request menggunakan token lama.

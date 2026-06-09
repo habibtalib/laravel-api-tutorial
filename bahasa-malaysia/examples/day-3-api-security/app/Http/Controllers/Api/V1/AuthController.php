@@ -27,7 +27,13 @@ class AuthController extends Controller
         }
 
         $expiresAt = now()->addMinutes((int) config('services.auth.token_expiry_minutes', 60));
-        $token = $user->createToken('training-token', ['*'], $expiresAt)->plainTextToken;
+        $abilities = [
+            'profiles:read',
+            'profiles:create',
+            'profiles:update',
+            'profiles:delete',
+        ];
+        $token = $user->createToken('training-token', $abilities, $expiresAt)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
@@ -35,6 +41,7 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
                 'access_token' => $token,
                 'expires_at' => $expiresAt->toISOString(),
+                'abilities' => $abilities,
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
