@@ -145,7 +145,7 @@ Schema::create('projects', function (Blueprint $table) {
     $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
     $table->string('name');
     $table->string('status')->default('active');
-    $table->date('started_at')->nullable();
+    $table->date('starts_at')->nullable();
     $table->timestamps();
 });
 ```
@@ -180,6 +180,68 @@ public function userProfile(): BelongsTo
 }
 ```
 
+### Fail Resource Untuk Response Pagination
+
+Jika resource belum wujud, cipta dahulu:
+
+```bash
+php artisan make:resource ProjectResource
+php artisan make:resource UserProfileResource
+```
+
+`app/Http/Resources/ProjectResource.php`:
+
+```php
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ProjectResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'status' => $this->status,
+            'starts_at' => $this->starts_at?->toDateString(),
+        ];
+    }
+}
+```
+
+`app/Http/Resources/UserProfileResource.php`:
+
+```php
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class UserProfileResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'full_name' => $this->full_name,
+            'phone' => $this->phone,
+            'id_card_number' => $this->id_card_number,
+            'address' => $this->address,
+            'is_active' => $this->is_active,
+            'projects' => ProjectResource::collection($this->whenLoaded('projects')),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+        ];
+    }
+}
+```
+
 ## Step 4 - Seed Sample Projects
 
 ```bash
@@ -192,7 +254,7 @@ $profile = App\Models\UserProfile::first();
 $profile->projects()->create([
     'name' => 'Company Website',
     'status' => 'active',
-    'started_at' => now()->toDateString(),
+    'starts_at' => now()->toDateString(),
 ]);
 ```
 
