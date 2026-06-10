@@ -1121,7 +1121,7 @@ POST /users -&gt; 403 Invalid ability</code></pre>
             <table>
               <thead><tr><th>Case</th><th>Expected JSON</th><th>React behavior</th></tr></thead>
               <tbody>
-                <tr><td>Paginated list</td><td><code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records and page totals</td></tr>
+                <tr><td>Paginated list</td><td><code>message</code>, <code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records and page totals</td></tr>
                 <tr><td>Search</td><td>same list shape, filtered by query string</td><td>Refresh the same list component</td></tr>
                 <tr><td>Validation error</td><td><code>message</code> plus <code>errors</code></td><td>Show field-level messages</td></tr>
                 <tr><td>Unauthorized</td><td><code>{ "message": "Unauthenticated." }</code></td><td>Clear token or prompt login</td></tr>

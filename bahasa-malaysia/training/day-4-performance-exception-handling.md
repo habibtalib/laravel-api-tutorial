@@ -65,6 +65,14 @@ Route::apiResource('users', UserProfileController::class)
 
 JSON exception handling Hari 4 perlu menambah konsistensi `404` dan `422` tanpa membuang response `403` missing ability daripada Hari 3.
 
+## Konvensyen Code Snippet
+
+Untuk snippet PHP dalam hari ini:
+
+- `COPY WHOLE FILE` bermaksud gantikan fail sasaran dengan snippet tersebut.
+- `PARTIAL PATCH` bermaksud salin bahagian yang ditunjukkan sahaja ke dalam fail sedia ada.
+- Baris seperti `// ... existing code before` dan `// ... existing code after` ialah penanda context. Jangan padam code sebenar yang sudah ada di sekeliling bahagian itu.
+
 ## Diagram Architecture
 
 ```mermaid
@@ -92,12 +100,24 @@ Jika resource belum wujud, cipta dahulu:
 php artisan make:resource UserProfileResource
 ```
 
-```php
-use App\Http\Resources\UserProfileResource;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-```
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - tambah import ini berdekatan `use` statements lain.
 
 ```php
+// ... existing imports before
+use App\Http\Resources\UserProfileResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+// ... existing imports after
+```
+
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - gantikan method `index()` sahaja.
+
+```php
+// ... existing controller class code before
+
 public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
@@ -109,11 +129,14 @@ public function index(): AnonymousResourceCollection
             'message' => 'User profiles retrieved successfully.',
         ]);
 }
+
+// ... existing store/show/update/destroy methods after
 ```
 
 Jangan wrap collection seperti ini:
 
 ```php
+// JANGAN COPY: ini bentuk response resource yang salah kerana nested.
 return response()->json([
     'message' => 'User profiles retrieved successfully.',
     'data' => UserProfileResource::collection($profiles),
@@ -137,9 +160,12 @@ curl "http://127.0.0.1:8000/api/v1/users?page=1" \
 php artisan make:model Project -m
 ```
 
-Migration:
+Fail: `database/migrations/YYYY_MM_DD_HHMMSS_create_projects_table.php`
+
+Jenis copy: `PARTIAL PATCH` - gantikan kandungan closure `Schema::create('projects', ...)` dalam migration yang dijana.
 
 ```php
+// ... existing migration up() method before
 Schema::create('projects', function (Blueprint $table) {
     $table->id();
     $table->foreignId('user_profile_id')->constrained()->cascadeOnDelete();
@@ -148,6 +174,7 @@ Schema::create('projects', function (Blueprint $table) {
     $table->date('starts_at')->nullable();
     $table->timestamps();
 });
+// ... existing migration down() method after
 ```
 
 Run:
@@ -158,26 +185,42 @@ php artisan migrate
 
 ## Step 3 - Define Relationship
 
-Dalam `UserProfile`:
+Dalam `UserProfile`.
+
+Fail: `app/Models/UserProfile.php`
+
+Jenis copy: `PARTIAL PATCH` - tambah import dan method relationship sahaja.
 
 ```php
+// ... existing imports before
 use Illuminate\Database\Eloquent\Relations\HasMany;
+// ... existing imports after
 
+// ... existing model methods before
 public function projects(): HasMany
 {
     return $this->hasMany(Project::class);
 }
+// ... existing model methods after
 ```
 
-Dalam `Project`:
+Dalam `Project`.
+
+Fail: `app/Models/Project.php`
+
+Jenis copy: `PARTIAL PATCH` - tambah import dan method relationship sahaja.
 
 ```php
+// ... existing imports before
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+// ... existing imports after
 
+// ... existing model methods before
 public function userProfile(): BelongsTo
 {
     return $this->belongsTo(UserProfile::class);
 }
+// ... existing model methods after
 ```
 
 ### Fail Resource Untuk Response Pagination
@@ -189,7 +232,9 @@ php artisan make:resource ProjectResource
 php artisan make:resource UserProfileResource
 ```
 
-`app/Http/Resources/ProjectResource.php`:
+Fail: `app/Http/Resources/ProjectResource.php`
+
+Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -213,7 +258,9 @@ class ProjectResource extends JsonResource
 }
 ```
 
-`app/Http/Resources/UserProfileResource.php`:
+Fail: `app/Http/Resources/UserProfileResource.php`
+
+Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -254,7 +301,7 @@ $profile = App\Models\UserProfile::first();
 $profile->projects()->create([
     'name' => 'Company Website',
     'status' => 'active',
-    'started_at' => now()->toDateString(),
+    'starts_at' => now()->toDateString(),
 ]);
 ```
 
@@ -279,10 +326,18 @@ Gunakan eager loading apabila response perlu memaparkan relationship.
 
 ## Step 6 - Tambah Cache Pada Index Endpoint
 
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - tambah imports dan gantikan method `index()` sahaja.
+
 ```php
+// ... existing imports before
 use App\Http\Resources\UserProfileResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Cache;
+// ... existing imports after
+
+// ... existing controller class code before
 
 public function index(): AnonymousResourceCollection
 {
@@ -307,6 +362,8 @@ public function index(): AnonymousResourceCollection
             'message' => 'User profiles retrieved successfully.',
         ]);
 }
+
+// ... existing store/show/update/destroy methods after
 ```
 
 Cache key mesti memasukkan page dan search supaya result filter tidak bercampur.
@@ -315,18 +372,28 @@ Cache key mesti memasukkan page dan search supaya result filter tidak bercampur.
 
 Untuk kelas, gunakan helper ringkas:
 
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - tambah private helper dalam controller.
+
 ```php
+// ... existing controller methods before
 private function clearUserProfileCache(): void
 {
     Cache::flush();
 }
+// ... existing controller methods after
 ```
 
 Panggil selepas create, update, dan delete:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// PARTIAL PATCH: panggil helper selepas create/update/delete berjaya.
+// ... existing write method before
 $profile = UserProfile::create($request->validated());
 $this->clearUserProfileCache();
+// ... existing write method response after
 ```
 
 Nota production: elakkan `Cache::flush()` jika cache digunakan oleh banyak module. Guna cache tags atau key strategy yang lebih spesifik jika driver menyokong.
@@ -339,7 +406,9 @@ Jika guna Redis:
 composer require predis/predis
 ```
 
-`.env`:
+Fail: `.env`
+
+Jenis copy: `PARTIAL PATCH` - tambah atau ubah key ini sahaja.
 
 ```dotenv
 CACHE_STORE=redis
@@ -370,9 +439,14 @@ php artisan optimize:clear
 
 ## Step 10 - JSON Exception Handling Laravel
 
-Dalam `bootstrap/app.php`:
+Dalam `bootstrap/app.php`.
+
+Fail: `bootstrap/app.php`
+
+Jenis copy: `PARTIAL PATCH` - merge imports dan gantikan bahagian `withExceptions(...)` sahaja jika project sudah ada routing/middleware.
 
 ```php
+// ... existing imports before
 use App\Http\Middleware\VerifyFrontendToken;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -385,6 +459,8 @@ use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
+// ... existing imports after
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -394,13 +470,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // ... existing middleware aliases before
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
             'frontend.token' => VerifyFrontendToken::class,
         ]);
+        // ... existing middleware aliases after
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // ... existing exception configuration before
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
             return $request->is('api/*') || $request->expectsJson();
         });
@@ -445,6 +524,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 422);
             }
         });
+        // ... existing exception configuration after
     })->create();
 ```
 
@@ -508,7 +588,12 @@ Untuk Hari 4, fokus kepada UI behavior ini:
 
 Contoh query call:
 
+Fail: `examples/react-client-api-consumer/src/App.jsx`
+
+Jenis copy: `PARTIAL PATCH` - gunakan dalam function yang load senarai profile.
+
 ```js
+// ... existing list-loading function before
 apiRequest('/users', {
   token,
   query: {
@@ -517,6 +602,7 @@ apiRequest('/users', {
     active,
   },
 });
+// ... existing list-loading function after
 ```
 
 Point pengajaran:

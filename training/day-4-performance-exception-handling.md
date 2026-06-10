@@ -66,6 +66,14 @@ Route::apiResource('users', UserProfileController::class)
 
 Day 4 JSON exception handling should add `404` and `422` consistency without removing the Day 3 `403` ability response.
 
+## Code Snippet Convention
+
+For PHP snippets in this day:
+
+- `COPY WHOLE FILE` means replace the target file with the snippet.
+- `PARTIAL PATCH` means paste only the shown section into the existing file.
+- Lines such as `// ... existing code before` and `// ... existing code after` are context markers. Do not delete the real code that already exists around that section.
+
 ## Architecture Diagram
 
 Day 4 adds performance and error handling around the same API. Read requests should prefer cached data when available, while write requests must clear stale cache. Exceptions are centralized in `bootstrap/app.php`.
@@ -105,12 +113,24 @@ If the resource does not exist yet, create it first:
 php artisan make:resource UserProfileResource
 ```
 
-```php
-use App\Http\Resources\UserProfileResource;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-```
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - add these imports near the other `use` statements.
 
 ```php
+// ... existing imports before
+use App\Http\Resources\UserProfileResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+// ... existing imports after
+```
+
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - replace only the `index()` method.
+
+```php
+// ... existing controller class code before
+
 public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
@@ -122,11 +142,14 @@ public function index(): AnonymousResourceCollection
             'message' => 'User profiles retrieved successfully.',
         ]);
 }
+
+// ... existing store/show/update/destroy methods after
 ```
 
 Do not wrap the collection like this:
 
 ```php
+// DO NOT COPY: this is the wrong nested resource response shape.
 return response()->json([
     'message' => 'User profiles retrieved successfully.',
     'data' => UserProfileResource::collection($profiles),
@@ -159,7 +182,11 @@ Run:
 php artisan make:model Project -m
 ```
 
-Update the generated migration:
+Update the generated migration.
+
+File: `database/migrations/YYYY_MM_DD_HHMMSS_create_projects_table.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -199,7 +226,9 @@ Run:
 php artisan migrate
 ```
 
-Update `app/Models/Project.php`:
+File: `app/Models/Project.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -226,7 +255,9 @@ class Project extends Model
 }
 ```
 
-Update `app/Models/UserProfile.php`:
+File: `app/Models/UserProfile.php`
+
+Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge only the `HasMany` import and `projects()` method.
 
 ```php
 <?php
@@ -257,6 +288,8 @@ class UserProfile extends Model
     {
         return $this->hasMany(Project::class);
     }
+
+    // ... existing methods after
 }
 ```
 
@@ -269,7 +302,9 @@ php artisan make:resource ProjectResource
 php artisan make:resource UserProfileResource
 ```
 
-`app/Http/Resources/ProjectResource.php`:
+File: `app/Http/Resources/ProjectResource.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -293,7 +328,9 @@ class ProjectResource extends JsonResource
 }
 ```
 
-`app/Http/Resources/UserProfileResource.php`:
+File: `app/Http/Resources/UserProfileResource.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -374,9 +411,15 @@ Better pattern:
 $profiles = UserProfile::with('projects')->paginate(15);
 ```
 
-Update the controller:
+Update the controller.
+
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
+// ... existing imports and controller class before
+
 public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
@@ -389,19 +432,33 @@ public function index(): AnonymousResourceCollection
             'message' => 'User profiles retrieved successfully.',
         ]);
 }
+
+// ... existing store/show/update/destroy methods after
 ```
 
 ## Step 5 - Add Cache To The Index Endpoint
 
-Import cache:
+Import cache.
+
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - add this near the other `use` statements.
 
 ```php
+// ... existing imports before
 use Illuminate\Support\Facades\Cache;
+// ... existing imports after
 ```
 
-Update `index`:
+Update `index`.
+
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
+// ... existing imports and controller class before
+
 public function index(): AnonymousResourceCollection
 {
     $page = request()->integer('page', 1);
@@ -426,6 +483,8 @@ public function index(): AnonymousResourceCollection
             'message' => 'User profiles retrieved successfully.',
         ]);
 }
+
+// ... existing store/show/update/destroy methods after
 ```
 
 This caches each page and search combination separately.
@@ -435,28 +494,44 @@ This caches each page and search combination separately.
 The simple class example is to clear all cache after create, update, or delete:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// PARTIAL PATCH: add this import near the other use statements.
+// ... existing imports before
 use Illuminate\Support\Facades\Cache;
+// ... existing imports after
 ```
 
 In `store`:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// PARTIAL PATCH: add Cache::flush() after successful create.
+// ... existing store() code before
 $profile = UserProfile::create($request->validated());
 Cache::flush();
+// ... existing store() response after
 ```
 
 In `update`:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// PARTIAL PATCH: add Cache::flush() after successful update.
+// ... existing update() code before
 $profile->update($request->validated());
 Cache::flush();
+// ... existing update() response after
 ```
 
 In `destroy`:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// PARTIAL PATCH: add Cache::flush() after successful delete.
+// ... existing destroy() code before
 $profile->delete();
 Cache::flush();
+// ... existing destroy() response after
 ```
 
 Trainer note:
@@ -471,7 +546,11 @@ For class, file cache is acceptable. For Redis, install Predis:
 composer require predis/predis
 ```
 
-Update `.env`:
+Update `.env`.
+
+File: `.env`
+
+Copy type: `PARTIAL PATCH` - update or add only these keys.
 
 ```env
 CACHE_STORE=redis
@@ -487,6 +566,10 @@ php artisan config:clear
 ```
 
 If Redis is not installed locally, keep:
+
+File: `.env`
+
+Copy type: `PARTIAL PATCH` - keep or set this single key for local class machines without Redis.
 
 ```env
 CACHE_STORE=file
@@ -521,7 +604,11 @@ Important:
 
 In Laravel, exception rendering is configured in `bootstrap/app.php`.
 
-Update the `withExceptions` section:
+Update the `withExceptions` section.
+
+File: `bootstrap/app.php`
+
+Copy type: `PARTIAL PATCH` - merge the imports and replace only the `withExceptions(...)` block if the project already has routing and middleware configured.
 
 ```php
 <?php
@@ -538,6 +625,7 @@ use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -547,13 +635,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // ... existing middleware aliases before
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
             'frontend.token' => VerifyFrontendToken::class,
         ]);
+        // ... existing middleware aliases after
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // ... existing exception configuration before
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
             return $request->is('api/*') || $request->expectsJson();
         });
@@ -598,6 +689,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 422);
             }
         });
+        // ... existing exception configuration after
     })->create();
 ```
 
@@ -666,7 +758,12 @@ For Day 4, focus on these UI behaviors:
 
 Example query call:
 
+File: `examples/react-client-api-consumer/src/App.jsx`
+
+Copy type: `PARTIAL PATCH` - use this inside the list-loading function.
+
 ```js
+// ... existing list-loading function before
 apiRequest('/users', {
   token,
   query: {
@@ -675,6 +772,7 @@ apiRequest('/users', {
     active,
   },
 });
+// ... existing list-loading function after
 ```
 
 Teaching point:
@@ -772,7 +870,12 @@ GET /api/v1/health
 
 Example route:
 
+File: `routes/api.php`
+
+Copy type: `PARTIAL PATCH` - add this inside the secured `/api/v1` route group if the endpoint should require `X-API-TOKEN`.
+
 ```php
+// ... existing v1 route group before
 Route::get('/health', function () {
     return response()->json([
         'message' => 'ABC API is healthy.',
@@ -783,6 +886,7 @@ Route::get('/health', function () {
         ],
     ]);
 })->name('health');
+// ... existing v1 route group after
 ```
 
 Then test it with and without cache enabled. Add a small React status panel that calls `/health` and displays the API time.

@@ -19,6 +19,10 @@ Route::prefix('v1')
             Route::apiResource('users', UserProfileController::class)
                 ->parameters([
                     'users' => 'userProfile',
-                ]);
+                ])
+                ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+                ->middlewareFor('store', 'abilities:profiles:create')
+                ->middlewareFor('update', 'abilities:profiles:update')
+                ->middlewareFor('destroy', 'abilities:profiles:delete');
         });
     });

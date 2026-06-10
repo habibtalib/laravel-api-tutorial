@@ -1121,7 +1121,7 @@ POST /users -&gt; 403 Invalid ability</code></pre>
             <table>
               <thead><tr><th>Case</th><th>JSON dijangka</th><th>Behavior React</th></tr></thead>
               <tbody>
-                <tr><td>Paginated list</td><td><code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records dan page totals</td></tr>
+                <tr><td>Paginated list</td><td><code>message</code>, <code>data</code>, <code>links</code>, <code>meta.total</code>, <code>meta.current_page</code></td><td>Render records dan page totals</td></tr>
                 <tr><td>Search</td><td>bentuk list yang sama, ditapis oleh query string</td><td>Refresh component list yang sama</td></tr>
                 <tr><td>Validation error</td><td><code>message</code> bersama <code>errors</code></td><td>Papar mesej field-level</td></tr>
                 <tr><td>Unauthorized</td><td><code>{ "message": "Unauthenticated." }</code></td><td>Clear token atau minta login</td></tr>

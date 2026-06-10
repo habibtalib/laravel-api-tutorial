@@ -93,17 +93,29 @@ flowchart LR
     Json --> Client
 ```
 
+## Code Snippet Convention
+
+For PHP snippets in this day:
+
+- `COPY WHOLE FILE` means replace the target file with the snippet.
+- `PARTIAL PATCH` means paste only the shown section into the existing file.
+- Lines such as `// ... existing code before` and `// ... existing code after` are context markers. Keep your real surrounding code.
+
 ## Step 1 - Use Route Model Binding
 
 Day 2 used manual lookup:
 
 ```php
+// app/Http/Controllers/Api/V1/UserProfileController.php
+// OLD PARTIAL: Day 2 manual lookup pattern.
 $profile = UserProfile::findOrFail($id);
 ```
 
 Laravel can do this automatically if the route parameter and controller argument match.
 
-Update `routes/api.php`:
+File: `routes/api.php`
+
+Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge the `->parameters(...)` mapping into the existing secured route group.
 
 ```php
 <?php
@@ -127,7 +139,12 @@ Route::prefix('v1')
             Route::apiResource('users', UserProfileController::class)
                 ->parameters([
                     'users' => 'userProfile',
-                ]);
+                ])
+                ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+                ->middlewareFor('store', 'abilities:profiles:create')
+                ->middlewareFor('update', 'abilities:profiles:update')
+                ->middlewareFor('destroy', 'abilities:profiles:delete');
+            // ... keep any existing secured v1 routes after
         });
     });
 ```
@@ -148,7 +165,9 @@ Run:
 php artisan make:resource UserProfileResource
 ```
 
-Update `app/Http/Resources/UserProfileResource.php`:
+File: `app/Http/Resources/UserProfileResource.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -183,7 +202,9 @@ Create a project resource:
 php artisan make:resource ProjectResource
 ```
 
-Update `app/Http/Resources/ProjectResource.php`:
+File: `app/Http/Resources/ProjectResource.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -224,7 +245,9 @@ Create:
 app/Services/UserProfileService.php
 ```
 
-Add:
+File: `app/Services/UserProfileService.php`
+
+Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -290,7 +313,9 @@ Trainer note:
 
 ## Step 4 - Refactor The Controller
 
-Update `app/Http/Controllers/Api/V1/UserProfileController.php`:
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge the constructor plus CRUD methods without removing security middleware from `routes/api.php`.
 
 ```php
 <?php
@@ -388,12 +413,16 @@ Service responsibility:
 Day 2 used:
 
 ```php
+// app/Http/Requests/UpdateUserProfileRequest.php
+// OLD PARTIAL: route parameter name before route model binding refactor.
 $profileId = $this->route('user');
 ```
 
 After route model binding, the parameter is now `userProfile`.
 
-Update `app/Http/Requests/UpdateUserProfileRequest.php`:
+File: `app/Http/Requests/UpdateUserProfileRequest.php`
+
+Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and update only the route-parameter lookup inside `rules()`.
 
 ```php
 <?php

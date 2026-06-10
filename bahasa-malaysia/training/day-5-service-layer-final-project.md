@@ -67,22 +67,41 @@ flowchart LR
     JSON --> React
 ```
 
+## Konvensyen Code Snippet
+
+Untuk snippet PHP dalam hari ini:
+
+- `COPY WHOLE FILE` bermaksud gantikan fail sasaran dengan snippet tersebut.
+- `PARTIAL PATCH` bermaksud salin bahagian yang ditunjukkan sahaja ke dalam fail sedia ada.
+- Baris seperti `// ... existing code before` dan `// ... existing code after` ialah penanda context. Kekalkan code sebenar yang sudah ada di sekeliling bahagian itu.
+
 ## Step 1 - Gunakan Route Model Binding
 
 Laravel boleh inject model terus berdasarkan route parameter.
 
 Sebelum:
 
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `OLD PARTIAL` - ini pattern lama untuk dibandingkan, jangan copy untuk hasil akhir.
+
 ```php
+// ... existing controller method before
 public function show(string $id)
 {
     $profile = UserProfile::findOrFail($id);
 }
+// ... existing controller method after
 ```
 
 Selepas:
 
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - tukar signature method supaya parameter model sepadan dengan route.
+
 ```php
+// ... existing controller method before
 public function show(UserProfile $user)
 {
     return response()->json([
@@ -90,15 +109,26 @@ public function show(UserProfile $user)
         'data' => $user,
     ]);
 }
+// ... existing controller method after
 ```
 
 Jika route ialah:
 
+Fail: `routes/api.php`
+
+Jenis copy: `PARTIAL PATCH` - route parameter default ialah `{user}` jika tiada custom `parameters(...)`.
+
 ```php
-Route::apiResource('users', UserProfileController::class);
+// ... existing v1 route group before
+Route::apiResource('users', UserProfileController::class)
+    ->middlewareFor(['index', 'show'], 'abilities:profiles:read')
+    ->middlewareFor('store', 'abilities:profiles:create')
+    ->middlewareFor('update', 'abilities:profiles:update')
+    ->middlewareFor('destroy', 'abilities:profiles:delete');
+// ... existing v1 route group after
 ```
 
-Parameter method perlu bernama `$user` kerana route parameter ialah `{user}`.
+Parameter method perlu bernama `$user` kerana route parameter default ialah `{user}`. Jika anda guna `->parameters(['users' => 'userProfile'])`, nama parameter controller perlu menjadi `UserProfile $userProfile`.
 
 ## Step 2 - Create API Resource
 
@@ -107,9 +137,13 @@ php artisan make:resource UserProfileResource
 php artisan make:resource ProjectResource
 ```
 
-`ProjectResource`:
+Fail: `app/Http/Resources/ProjectResource.php`
+
+Jenis copy: `COPY WHOLE FILE`.
 
 ```php
+<?php
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -123,15 +157,19 @@ class ProjectResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'status' => $this->status,
-            'started_at' => $this->started_at,
+            'starts_at' => $this->starts_at?->toDateString(),
         ];
     }
 }
 ```
 
-`UserProfileResource`:
+Fail: `app/Http/Resources/UserProfileResource.php`
+
+Jenis copy: `COPY WHOLE FILE`.
 
 ```php
+<?php
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -146,7 +184,6 @@ class UserProfileResource extends JsonResource
             'full_name' => $this->full_name,
             'id_card_number' => $this->id_card_number,
             'phone' => $this->phone,
-            'email' => $this->email,
             'address' => $this->address,
             'is_active' => $this->is_active,
             'projects' => ProjectResource::collection($this->whenLoaded('projects')),
@@ -165,7 +202,13 @@ Bina file:
 app/Services/UserProfileService.php
 ```
 
+Fail: `app/Services/UserProfileService.php`
+
+Jenis copy: `COPY WHOLE FILE`.
+
 ```php
+<?php
+
 namespace App\Services;
 
 use App\Models\UserProfile;
@@ -226,11 +269,18 @@ class UserProfileService
 
 ## Step 4 - Refactor Controller
 
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - merge imports, constructor, dan CRUD methods ini ke dalam controller sedia ada. Jangan buang middleware security dalam `routes/api.php`.
+
 ```php
+// ... existing namespace and imports before
 use App\Http\Resources\UserProfileResource;
 use App\Models\UserProfile;
 use App\Services\UserProfileService;
+// ... existing imports after
 
+// ... existing class declaration before
 class UserProfileController extends Controller
 {
     public function __construct(private UserProfileService $service)
@@ -278,16 +328,23 @@ class UserProfileController extends Controller
         return response()->noContent();
     }
 }
+// ... existing class code after
 ```
 
 ## Step 5 - Fix Update Request Route Parameter
 
 Dalam `UpdateUserProfileRequest`, route parameter sekarang ialah model `$user`:
 
+Fail: `app/Http/Requests/UpdateUserProfileRequest.php`
+
+Jenis copy: `PARTIAL PATCH` - ubah bahagian route parameter dan unique rule dalam `rules()` sahaja.
+
 ```php
+// ... existing rules() code before
 $profile = $this->route('user');
 
 Rule::unique('user_profiles', 'id_card_number')->ignore($profile?->id)
+// ... existing rules() code after
 ```
 
 ## Step 6 - Test Final CRUD Flow
