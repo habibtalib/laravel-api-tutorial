@@ -97,21 +97,43 @@ flowchart TB
 
 ## Step 1 - Confirm The Current Index Endpoint Uses Pagination
 
-From Day 2, the index endpoint should use pagination:
+From Day 2, the index endpoint should use pagination. If your project already has `UserProfileResource`, return the resource collection directly so Laravel keeps pagination metadata at the top level:
+
+If the resource does not exist yet, create it first:
+
+```bash
+php artisan make:resource UserProfileResource
+```
 
 ```php
-public function index(): JsonResponse
+use App\Http\Resources\UserProfileResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+```
+
+```php
+public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
         ->latest()
         ->paginate(15);
 
-    return response()->json([
-        'message' => 'User profiles retrieved successfully.',
-        'data' => $profiles,
-    ]);
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
 }
 ```
+
+Do not wrap the collection like this:
+
+```php
+return response()->json([
+    'message' => 'User profiles retrieved successfully.',
+    'data' => UserProfileResource::collection($profiles),
+]);
+```
+
+That nests the resource response inside `data` and makes pagination harder for React to read. The expected list response shape is `message`, `data`, `links`, and `meta` at the top level.
 
 Test:
 
@@ -293,17 +315,17 @@ $profiles = UserProfile::with('projects')->paginate(15);
 Update the controller:
 
 ```php
-public function index(): JsonResponse
+public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
         ->with('projects')
         ->latest()
         ->paginate(15);
 
-    return response()->json([
-        'message' => 'User profiles retrieved successfully.',
-        'data' => $profiles,
-    ]);
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
 }
 ```
 
@@ -318,7 +340,7 @@ use Illuminate\Support\Facades\Cache;
 Update `index`:
 
 ```php
-public function index(): JsonResponse
+public function index(): AnonymousResourceCollection
 {
     $page = request()->integer('page', 1);
     $search = (string) request()->query('search', '');
@@ -337,10 +359,10 @@ public function index(): JsonResponse
             ->paginate(15);
     });
 
-    return response()->json([
-        'message' => 'User profiles retrieved successfully.',
-        'data' => $profiles,
-    ]);
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
 }
 ```
 
@@ -626,10 +648,10 @@ Constraints:
 - Cache list responses with keys that include page/search/filter values.
 - Clear stale cache after create, update, and delete.
 - Do not expose raw exception messages in API JSON.
-- Preserve existing response shape unless a resource layer already controls it.
+- If using `UserProfileResource`, return `UserProfileResource::collection($profiles)->additional(...)` so pagination metadata stays at the top level. Do not nest the resource collection under `data`.
 
 Done criteria:
-- GET /api/v1/users is paginated.
+- GET /api/v1/users is paginated and returns `message`, `data`, `links`, and `meta` at the top level.
 - projects are eager-loaded without N+1 queries.
 - repeated list calls can use cache.
 - write operations clear stale list cache.

@@ -17,6 +17,8 @@ Fail `bootstrap/app.php` yang disalin juga mengekalkan alias middleware Sanctum 
 | Fail contoh | Destinasi Laravel |
 | --- | --- |
 | `app/Http/Controllers/Api/V1/UserProfileController.php` | `app/Http/Controllers/Api/V1/UserProfileController.php` |
+| `app/Http/Resources/ProjectResource.php` | `app/Http/Resources/ProjectResource.php` |
+| `app/Http/Resources/UserProfileResource.php` | `app/Http/Resources/UserProfileResource.php` |
 | `app/Models/Project.php` | `app/Models/Project.php` |
 | `app/Models/UserProfile.php` | `app/Models/UserProfile.php` |
 | `bootstrap/app.php` | `bootstrap/app.php` |
@@ -28,6 +30,8 @@ Fail `bootstrap/app.php` yang disalin juga mengekalkan alias middleware Sanctum 
 
 ```bash
 php artisan make:model Project -m
+php artisan make:resource ProjectResource
+php artisan make:resource UserProfileResource
 php artisan migrate
 ```
 

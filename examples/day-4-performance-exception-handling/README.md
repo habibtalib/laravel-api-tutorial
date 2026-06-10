@@ -17,6 +17,8 @@ The copied `bootstrap/app.php` also keeps the Sanctum `abilities` middleware ali
 | Example file | Laravel destination |
 | --- | --- |
 | `app/Http/Controllers/Api/V1/UserProfileController.php` | `app/Http/Controllers/Api/V1/UserProfileController.php` |
+| `app/Http/Resources/ProjectResource.php` | `app/Http/Resources/ProjectResource.php` |
+| `app/Http/Resources/UserProfileResource.php` | `app/Http/Resources/UserProfileResource.php` |
 | `app/Models/Project.php` | `app/Models/Project.php` |
 | `app/Models/UserProfile.php` | `app/Models/UserProfile.php` |
 | `bootstrap/app.php` | `bootstrap/app.php` |
@@ -28,6 +30,8 @@ The copied `bootstrap/app.php` also keeps the Sanctum `abilities` middleware ali
 
 ```bash
 php artisan make:model Project -m
+php artisan make:resource ProjectResource
+php artisan make:resource UserProfileResource
 php artisan migrate
 ```
 

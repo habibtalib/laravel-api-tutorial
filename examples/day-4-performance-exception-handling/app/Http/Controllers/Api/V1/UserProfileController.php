@@ -5,13 +5,15 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserProfileRequest;
 use App\Http\Requests\UpdateUserProfileRequest;
+use App\Http\Resources\UserProfileResource;
 use App\Models\UserProfile;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Cache;
 
 class UserProfileController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(): AnonymousResourceCollection
     {
         $page = request()->integer('page', 1);
         $search = (string) request()->query('search', '');
@@ -29,10 +31,10 @@ class UserProfileController extends Controller
                 ->paginate(15);
         });
 
-        return response()->json([
-            'message' => 'User profiles retrieved successfully.',
-            'data' => $profiles,
-        ]);
+        return UserProfileResource::collection($profiles)
+            ->additional([
+                'message' => 'User profiles retrieved successfully.',
+            ]);
     }
 
     public function store(StoreUserProfileRequest $request): JsonResponse
@@ -42,7 +44,7 @@ class UserProfileController extends Controller
 
         return response()->json([
             'message' => 'User profile created successfully.',
-            'data' => $profile,
+            'data' => new UserProfileResource($profile),
         ], 201);
     }
 
@@ -54,7 +56,7 @@ class UserProfileController extends Controller
 
         return response()->json([
             'message' => 'User profile retrieved successfully.',
-            'data' => $profile,
+            'data' => new UserProfileResource($profile),
         ]);
     }
 
@@ -66,7 +68,7 @@ class UserProfileController extends Controller
 
         return response()->json([
             'message' => 'User profile updated successfully.',
-            'data' => $profile,
+            'data' => new UserProfileResource($profile),
         ]);
     }
 
@@ -79,4 +81,3 @@ class UserProfileController extends Controller
         return response()->json(null, 204);
     }
 }
-

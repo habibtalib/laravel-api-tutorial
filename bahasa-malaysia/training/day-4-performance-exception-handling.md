@@ -84,21 +84,43 @@ flowchart LR
 
 ## Step 1 - Confirm Pagination
 
-Dalam `index()`:
+Dalam `index()`, gunakan pagination. Jika projek anda sudah ada `UserProfileResource`, return resource collection secara terus supaya metadata pagination kekal pada top-level response:
+
+Jika resource belum wujud, cipta dahulu:
+
+```bash
+php artisan make:resource UserProfileResource
+```
 
 ```php
-public function index()
+use App\Http\Resources\UserProfileResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+```
+
+```php
+public function index(): AnonymousResourceCollection
 {
     $profiles = UserProfile::query()
         ->latest()
-        ->paginate(10);
+        ->paginate(15);
 
-    return response()->json([
-        'message' => 'User profiles retrieved successfully.',
-        'data' => $profiles,
-    ]);
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
 }
 ```
+
+Jangan wrap collection seperti ini:
+
+```php
+return response()->json([
+    'message' => 'User profiles retrieved successfully.',
+    'data' => UserProfileResource::collection($profiles),
+]);
+```
+
+Cara itu akan menjadikan response bersarang di dalam `data` dan menyukarkan React membaca metadata pagination. Bentuk response list yang dijangka ialah `message`, `data`, `links`, dan `meta` pada top-level.
 
 Test:
 
@@ -179,7 +201,7 @@ $profile->projects()->create([
 Tanpa eager loading:
 
 ```php
-UserProfile::query()->paginate(10);
+UserProfile::query()->paginate(15);
 ```
 
 Dengan eager loading:
@@ -188,7 +210,7 @@ Dengan eager loading:
 UserProfile::query()
     ->with('projects')
     ->latest()
-    ->paginate(10);
+    ->paginate(15);
 ```
 
 Gunakan eager loading apabila response perlu memaparkan relationship.
@@ -196,9 +218,11 @@ Gunakan eager loading apabila response perlu memaparkan relationship.
 ## Step 6 - Tambah Cache Pada Index Endpoint
 
 ```php
+use App\Http\Resources\UserProfileResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Cache;
 
-public function index()
+public function index(): AnonymousResourceCollection
 {
     $page = request()->integer('page', 1);
     $search = (string) request()->query('search', '');
@@ -213,13 +237,13 @@ public function index()
                     ->orWhere('id_card_number', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
     });
 
-    return response()->json([
-        'message' => 'User profiles retrieved successfully.',
-        'data' => $profiles,
-    ]);
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
 }
 ```
 
@@ -466,10 +490,10 @@ Constraints:
 - Cache list responses with keys that include page/search/filter values.
 - Clear stale cache after create, update, and delete.
 - Do not expose raw exception messages in API JSON.
-- Preserve existing response shape unless a resource layer already controls it.
+- Jika menggunakan `UserProfileResource`, return `UserProfileResource::collection($profiles)->additional(...)` supaya metadata pagination kekal pada top-level. Jangan letak resource collection di bawah `data`.
 
 Done criteria:
-- GET /api/v1/users is paginated.
+- GET /api/v1/users is paginated and returns `message`, `data`, `links`, and `meta` at the top level.
 - projects are eager-loaded without N+1 queries.
 - repeated list calls can use cache.
 - write operations clear stale list cache.
