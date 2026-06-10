@@ -206,6 +206,7 @@ class AuthController extends Controller
 ## Step 4 - Add Auth Routes
 
 ```php
+<?php
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -306,6 +307,7 @@ php artisan make:middleware VerifyFrontendToken
 ```
 
 ```php
+<?php
 namespace App\Http\Middleware;
 
 use Closure;
@@ -360,6 +362,7 @@ php artisan config:clear
 Dalam `bootstrap/app.php`:
 
 ```php
+<?php
 use App\Http\Middleware\VerifyFrontendToken;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Configuration\Exceptions;
