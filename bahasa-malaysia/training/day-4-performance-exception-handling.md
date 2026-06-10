@@ -609,6 +609,67 @@ Point pengajaran:
 
 Pilihan performance backend memberi kesan kepada UX frontend. Pagination, cache, dan JSON error yang konsisten menjadikan UI React lebih mudah dibina dan debug.
 
+### Prompt Update React Client
+
+Gunakan prompt ini jika peserta mahu Claude Code mengemaskini React client selepas perubahan backend Laravel Hari 4.
+
+Fail sasaran:
+
+- `examples/react-client-api-consumer/src/api.js`
+- `examples/react-client-api-consumer/src/App.jsx`
+- `examples/react-client-api-consumer/src/App.css`
+
+Jenis copy: `AI PROMPT` - paste prompt ini ke Claude Code daripada root projek React.
+
+```text
+Goal:
+Update my React client app so it works with the latest Day 4 Laravel API backend changes.
+
+Context:
+The Laravel API now has secured CRUD from Day 3 plus Day 4 pagination, eager-loaded projects, backend caching, cache clearing after writes, and centralized JSON exception handling. The list endpoint is GET /api/v1/users and returns a top-level response with message, data, links, and meta. The API still requires X-API-TOKEN and a Sanctum Bearer token with abilities.
+
+Relevant frontend files:
+- src/api.js
+- src/App.jsx
+- src/App.css
+
+Backend response contract:
+- GET /api/v1/users?page=1&search=abc returns:
+  - message
+  - data: array of user profiles
+  - links
+  - meta.total
+  - meta.current_page
+  - meta.last_page
+  - meta.per_page
+- 401 returns JSON with message "Unauthenticated."
+- 403 returns JSON with a missing ability or forbidden message.
+- 404 returns JSON with message "Resource not found."
+- 422 returns JSON with message and errors object.
+
+Tasks:
+1. Inspect the current React API helper and profile list code before editing.
+2. Keep existing login, logout, X-API-TOKEN, Bearer token, token expiry, and ability handling.
+3. Update the list loader to send page and search query parameters.
+4. Normalize the Laravel paginated response so records come from response.data and pagination comes from response.meta.
+5. Render total records, current page, last page, previous button, and next button.
+6. After create, update, or delete, reload the current list page so the UI reflects backend cache invalidation.
+7. Parse JSON errors consistently:
+   - 401: clear local token and show login-required message.
+   - 403: show missing permission/ability message.
+   - 404: show friendly not-found message.
+   - 422: show validation field messages.
+8. Add loading and disabled states while requests are running.
+9. Do not fake cache behavior in React. Cache is handled by Laravel; React should refresh data after writes.
+
+Done criteria:
+- Search calls GET /api/v1/users with query string values.
+- Pagination UI reads meta.total, meta.current_page, and meta.last_page.
+- CRUD still works with the secured Laravel API.
+- Validation, unauthorized, forbidden, and not-found errors display useful messages.
+- No auth headers or frontend token behavior are removed.
+```
+
 ## Prompt GSD Claude Code
 
 Gunakan prompt ini jika peserta mahu Claude Code membantu tutorial Hari 4 untuk performance dan error handling.
