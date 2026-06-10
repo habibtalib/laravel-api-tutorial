@@ -254,7 +254,7 @@ $profile = App\Models\UserProfile::first();
 $profile->projects()->create([
     'name' => 'Company Website',
     'status' => 'active',
-    'starts_at' => now()->toDateString(),
+    'started_at' => now()->toDateString(),
 ]);
 ```
 
