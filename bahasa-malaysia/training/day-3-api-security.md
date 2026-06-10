@@ -140,6 +140,7 @@ php artisan make:controller Api/V1/AuthController
 ```
 
 ```php
+<?php
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
