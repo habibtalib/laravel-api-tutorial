@@ -6,8 +6,12 @@ if [ -z "${TOKEN:-}" ]; then
 fi
 
 FRONTEND_API_TOKEN="${FRONTEND_API_TOKEN:-abc-training-frontend-token}"
+API_URL="${API_URL:-http://127.0.0.1:8000/api/v1/users}"
+SEARCH="${SEARCH:-}"
 
-curl "http://127.0.0.1:8000/api/v1/users?page=1" \
+curl --get "$API_URL" \
+  --data-urlencode "page=1" \
+  --data-urlencode "search=$SEARCH" \
   -H "Accept: application/json" \
   -H "X-API-TOKEN: $FRONTEND_API_TOKEN" \
   -H "Authorization: Bearer $TOKEN"

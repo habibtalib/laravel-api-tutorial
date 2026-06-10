@@ -63,4 +63,10 @@ TOKEN="PASTE_TOKEN_HERE" bash bahasa-malaysia/examples/day-4-performance-excepti
 TOKEN="PASTE_TOKEN_HERE" bash bahasa-malaysia/examples/day-4-performance-exception-handling/snippets/curl-404.sh
 ```
 
+Search list endpoint:
+
+```bash
+TOKEN="PASTE_TOKEN_HERE" SEARCH="Aina" bash bahasa-malaysia/examples/day-4-performance-exception-handling/snippets/curl-list.sh
+```
+
 Untuk test missing ability selepas update Hari 3, gunakan token tanpa `profiles:read` dan jangka JSON `403`.

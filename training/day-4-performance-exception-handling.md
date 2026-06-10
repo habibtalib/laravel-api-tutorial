@@ -436,7 +436,85 @@ public function index(): AnonymousResourceCollection
 // ... existing store/show/update/destroy methods after
 ```
 
-## Step 5 - Add Cache To The Index Endpoint
+## Step 5 - Add Search To The Index Endpoint
+
+After pagination and eager loading work, add a simple search query parameter to the same `index()` endpoint.
+
+The browser or React client will call:
+
+```text
+GET /api/v1/users?search=aina&page=1
+```
+
+File: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Copy type: `PARTIAL PATCH` - replace only the `index()` method.
+
+```php
+// ... existing imports and controller class before
+
+public function index(): AnonymousResourceCollection
+{
+    $search = trim((string) request()->query('search', ''));
+
+    $profiles = UserProfile::query()
+        ->with('projects')
+        ->when($search !== '', function ($query) use ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('id_card_number', 'like', "%{$search}%");
+            });
+        })
+        ->latest()
+        ->paginate(15);
+
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
+}
+
+// ... existing store/show/update/destroy methods after
+```
+
+Why the nested `where(function (...) { ... })` matters:
+
+- It groups the `OR` search conditions together.
+- It prevents future filters such as `is_active` from being broken by loose `orWhere()` conditions.
+- It keeps the endpoint ready for more filters later.
+
+Test search:
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/users?search=aina&page=1" \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer PASTE_TOKEN_HERE"
+```
+
+Expected response shape:
+
+```json
+{
+  "message": "User profiles retrieved successfully.",
+  "data": [
+    {
+      "id": 1,
+      "full_name": "Aina Rahman"
+    }
+  ],
+  "links": {},
+  "meta": {
+    "current_page": 1,
+    "total": 1
+  }
+}
+```
+
+If no record matches, `data` should be an empty array and `meta.total` should be `0`.
+
+## Step 6 - Add Cache To The Index Endpoint
 
 Import cache.
 
@@ -462,7 +540,7 @@ Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 public function index(): AnonymousResourceCollection
 {
     $page = request()->integer('page', 1);
-    $search = (string) request()->query('search', '');
+    $search = trim((string) request()->query('search', ''));
 
     $cacheKey = "user_profiles.index.page.{$page}.search.".md5($search);
 
@@ -470,9 +548,11 @@ public function index(): AnonymousResourceCollection
         return UserProfile::query()
             ->with('projects')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('id_card_number', 'like', "%{$search}%");
+                $query->where(function ($query) use ($search) {
+                    $query->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('id_card_number', 'like', "%{$search}%");
+                });
             })
             ->latest()
             ->paginate(15);
@@ -489,7 +569,7 @@ public function index(): AnonymousResourceCollection
 
 This caches each page and search combination separately.
 
-## Step 6 - Clear Cache After Writes
+## Step 7 - Clear Cache After Writes
 
 The simple class example is to clear all cache after create, update, or delete:
 
@@ -538,7 +618,7 @@ Trainer note:
 
 `Cache::flush()` is easy for class, but too broad for production. In production, prefer targeted keys, cache tags when supported, or events that clear only related cache.
 
-## Step 7 - Configure Redis Cache
+## Step 8 - Configure Redis Cache
 
 For class, file cache is acceptable. For Redis, install Predis:
 
@@ -577,7 +657,7 @@ CACHE_STORE=file
 
 The Laravel code remains the same because it uses the cache facade.
 
-## Step 8 - Production Optimization Commands
+## Step 9 - Production Optimization Commands
 
 Use these commands during deployment, not during active local editing:
 
@@ -600,7 +680,7 @@ Important:
 - Do not run `config:cache` and then expect `.env` edits to appear immediately.
 - Do not run `route:cache` while debugging route changes.
 
-## Step 9 - Add Laravel JSON Exception Handling
+## Step 10 - Add Laravel JSON Exception Handling
 
 In Laravel, exception rendering is configured in `bootstrap/app.php`.
 
@@ -695,7 +775,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
 Do not expose raw exception messages in production. Real exception messages may contain class names, table names, query details, or paths.
 
-## Step 10 - Test 404 JSON Response
+## Step 11 - Test 404 JSON Response
 
 ```bash
 curl http://127.0.0.1:8000/api/v1/users/999999 \
@@ -712,7 +792,7 @@ Expected shape:
 }
 ```
 
-## Step 11 - Test Validation JSON Response
+## Step 12 - Test Validation JSON Response
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/users \
@@ -739,7 +819,7 @@ Expected shape:
 }
 ```
 
-## Step 12 - Reflect API State In React
+## Step 13 - Reflect API State In React
 
 Use:
 
@@ -894,12 +974,13 @@ Students must:
 2. Add the `projects()` relationship to `UserProfile`.
 3. Add sample projects.
 4. Update the list endpoint to use eager loading.
-5. Add cache to the list endpoint.
-6. Clear cache after create, update, and delete.
-7. Add JSON exception handling.
-8. Test 404 and validation errors.
-9. Test missing ability and confirm JSON `403`.
-10. Confirm React displays loading, search/filter results, and error messages.
+5. Add search to the list endpoint and test `?search=...`.
+6. Add cache to the list endpoint.
+7. Clear cache after create, update, and delete.
+8. Add JSON exception handling.
+9. Test 404 and validation errors.
+10. Test missing ability and confirm JSON `403`.
+11. Confirm React displays loading, search/filter results, and error messages.
 
 ## Common Mistakes
 

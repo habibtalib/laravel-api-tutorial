@@ -63,4 +63,10 @@ TOKEN="PASTE_TOKEN_HERE" bash examples/day-4-performance-exception-handling/snip
 TOKEN="PASTE_TOKEN_HERE" bash examples/day-4-performance-exception-handling/snippets/curl-404.sh
 ```
 
+Search the list endpoint:
+
+```bash
+TOKEN="PASTE_TOKEN_HERE" SEARCH="Aina" bash examples/day-4-performance-exception-handling/snippets/curl-list.sh
+```
+
 To test missing ability behavior after the Day 3 update, use a token without `profiles:read` and expect a JSON `403`.

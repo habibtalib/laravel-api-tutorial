@@ -324,7 +324,85 @@ UserProfile::query()
 
 Gunakan eager loading apabila response perlu memaparkan relationship.
 
-## Step 6 - Tambah Cache Pada Index Endpoint
+## Step 6 - Tambah Search Pada Index Endpoint
+
+Selepas pagination dan eager loading siap, tambah query parameter `search` pada endpoint `index()`.
+
+Browser atau React client akan call:
+
+```text
+GET /api/v1/users?search=aina&page=1
+```
+
+Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
+
+Jenis copy: `PARTIAL PATCH` - gantikan method `index()` sahaja.
+
+```php
+// ... existing imports and controller class before
+
+public function index(): AnonymousResourceCollection
+{
+    $search = trim((string) request()->query('search', ''));
+
+    $profiles = UserProfile::query()
+        ->with('projects')
+        ->when($search !== '', function ($query) use ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('id_card_number', 'like', "%{$search}%");
+            });
+        })
+        ->latest()
+        ->paginate(15);
+
+    return UserProfileResource::collection($profiles)
+        ->additional([
+            'message' => 'User profiles retrieved successfully.',
+        ]);
+}
+
+// ... existing store/show/update/destroy methods after
+```
+
+Kenapa guna nested `where(function (...) { ... })`:
+
+- Ia mengumpulkan semua `OR` search conditions bersama.
+- Ia mengelakkan filter lain seperti `is_active` rosak kerana `orWhere()` yang tidak dikumpulkan.
+- Ia menjadikan endpoint lebih mudah ditambah filter lain kemudian.
+
+Test search:
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/users?search=aina&page=1" \
+  -H "Accept: application/json" \
+  -H "X-API-TOKEN: abc-training-frontend-token" \
+  -H "Authorization: Bearer PASTE_TOKEN_HERE"
+```
+
+Bentuk response dijangka:
+
+```json
+{
+  "message": "User profiles retrieved successfully.",
+  "data": [
+    {
+      "id": 1,
+      "full_name": "Aina Rahman"
+    }
+  ],
+  "links": {},
+  "meta": {
+    "current_page": 1,
+    "total": 1
+  }
+}
+```
+
+Jika tiada rekod sepadan, `data` perlu menjadi array kosong dan `meta.total` perlu menjadi `0`.
+
+## Step 7 - Tambah Cache Pada Index Endpoint
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
@@ -342,16 +420,18 @@ use Illuminate\Support\Facades\Cache;
 public function index(): AnonymousResourceCollection
 {
     $page = request()->integer('page', 1);
-    $search = (string) request()->query('search', '');
+    $search = trim((string) request()->query('search', ''));
     $cacheKey = "user_profiles.index.page.{$page}.search.".md5($search);
 
     $profiles = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($search) {
         return UserProfile::query()
             ->with('projects')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('id_card_number', 'like', "%{$search}%");
+                $query->where(function ($query) use ($search) {
+                    $query->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('id_card_number', 'like', "%{$search}%");
+                });
             })
             ->latest()
             ->paginate(15);
@@ -368,7 +448,7 @@ public function index(): AnonymousResourceCollection
 
 Cache key mesti memasukkan page dan search supaya result filter tidak bercampur.
 
-## Step 7 - Clear Cache Selepas Write
+## Step 8 - Clear Cache Selepas Write
 
 Untuk kelas, gunakan helper ringkas:
 
@@ -398,7 +478,7 @@ $this->clearUserProfileCache();
 
 Nota production: elakkan `Cache::flush()` jika cache digunakan oleh banyak module. Guna cache tags atau key strategy yang lebih spesifik jika driver menyokong.
 
-## Step 8 - Configure Redis Cache
+## Step 9 - Configure Redis Cache
 
 Jika guna Redis:
 
@@ -423,7 +503,7 @@ Clear config:
 php artisan config:clear
 ```
 
-## Step 9 - Production Optimization Commands
+## Step 10 - Production Optimization Commands
 
 ```bash
 php artisan config:cache
@@ -437,7 +517,7 @@ Semasa development, clear jika perubahan tidak muncul:
 php artisan optimize:clear
 ```
 
-## Step 10 - JSON Exception Handling Laravel
+## Step 11 - JSON Exception Handling Laravel
 
 Dalam `bootstrap/app.php`.
 
@@ -528,7 +608,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })->create();
 ```
 
-## Step 11 - Test JSON Error
+## Step 12 - Test JSON Error
 
 404:
 
@@ -569,7 +649,7 @@ Jangkaan:
 }
 ```
 
-## Step 12 - Paparkan API State Dalam React
+## Step 13 - Paparkan API State Dalam React
 
 Gunakan:
 
@@ -720,12 +800,13 @@ Verification:
 
 1. Tambah project kepada profile.
 2. Test endpoint list dengan eager loading.
-3. Call endpoint dua kali dan bincang cache.
-4. Update profile dan pastikan cache clear.
-5. Test 404 JSON response.
-6. Test validation JSON response.
-7. Test missing ability dan confirm JSON `403`.
-8. Confirm React memaparkan loading, search/filter results, dan error messages.
+3. Tambah search pada list endpoint dan test `?search=...`.
+4. Call endpoint dua kali dan bincang cache.
+5. Update profile dan pastikan cache clear.
+6. Test 404 JSON response.
+7. Test validation JSON response.
+8. Test missing ability dan confirm JSON `403`.
+9. Confirm React memaparkan loading, search/filter results, dan error messages.
 
 ## Kesilapan Biasa
 

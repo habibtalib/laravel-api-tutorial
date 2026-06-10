@@ -16,16 +16,18 @@ class UserProfileController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $page = request()->integer('page', 1);
-        $search = (string) request()->query('search', '');
+        $search = trim((string) request()->query('search', ''));
         $cacheKey = "user_profiles.index.page.{$page}.search.".md5($search);
 
         $profiles = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($search) {
             return UserProfile::query()
                 ->with('projects')
                 ->when($search !== '', function ($query) use ($search) {
-                    $query->where('full_name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('id_card_number', 'like', "%{$search}%");
+                    $query->where(function ($query) use ($search) {
+                        $query->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('id_card_number', 'like', "%{$search}%");
+                    });
                 })
                 ->latest()
                 ->paginate(15);
