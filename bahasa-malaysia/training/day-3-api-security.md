@@ -401,6 +401,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 ## Step 10 - Apply Middleware
 
+Dalam `routes/api.php`:
+
 ```php
 Route::prefix('v1')
     ->name('api.v1.')
