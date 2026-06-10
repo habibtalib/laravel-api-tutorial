@@ -93,14 +93,6 @@ flowchart LR
     Json --> Client
 ```
 
-## Code Snippet Convention
-
-For PHP snippets in this day:
-
-- `COPY WHOLE FILE` means replace the target file with the snippet.
-- `PARTIAL PATCH` means paste only the shown section into the existing file.
-- Lines such as `// ... existing code before` and `// ... existing code after` are context markers. Keep your real surrounding code.
-
 ## Step 1 - Use Route Model Binding
 
 Day 2 used manual lookup:
@@ -115,7 +107,6 @@ Laravel can do this automatically if the route parameter and controller argument
 
 File: `routes/api.php`
 
-Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge the `->parameters(...)` mapping into the existing secured route group.
 
 ```php
 <?php
@@ -167,7 +158,6 @@ php artisan make:resource UserProfileResource
 
 File: `app/Http/Resources/UserProfileResource.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -204,7 +194,6 @@ php artisan make:resource ProjectResource
 
 File: `app/Http/Resources/ProjectResource.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -247,7 +236,6 @@ app/Services/UserProfileService.php
 
 File: `app/Services/UserProfileService.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -315,7 +303,6 @@ Trainer note:
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge the constructor plus CRUD methods without removing security middleware from `routes/api.php`.
 
 ```php
 <?php
@@ -422,7 +409,6 @@ After route model binding, the parameter is now `userProfile`.
 
 File: `app/Http/Requests/UpdateUserProfileRequest.php`
 
-Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and update only the route-parameter lookup inside `rules()`.
 
 ```php
 <?php

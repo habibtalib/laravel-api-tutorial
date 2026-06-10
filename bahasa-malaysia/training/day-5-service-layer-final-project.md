@@ -67,14 +67,6 @@ flowchart LR
     JSON --> React
 ```
 
-## Konvensyen Code Snippet
-
-Untuk snippet PHP dalam hari ini:
-
-- `COPY WHOLE FILE` bermaksud gantikan fail sasaran dengan snippet tersebut.
-- `PARTIAL PATCH` bermaksud salin bahagian yang ditunjukkan sahaja ke dalam fail sedia ada.
-- Baris seperti `// ... existing code before` dan `// ... existing code after` ialah penanda context. Kekalkan code sebenar yang sudah ada di sekeliling bahagian itu.
-
 ## Step 1 - Gunakan Route Model Binding
 
 Laravel boleh inject model terus berdasarkan route parameter.
@@ -83,7 +75,6 @@ Sebelum:
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `OLD PARTIAL` - ini pattern lama untuk dibandingkan, jangan copy untuk hasil akhir.
 
 ```php
 // ... existing controller method before
@@ -98,7 +89,6 @@ Selepas:
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - tukar signature method supaya parameter model sepadan dengan route.
 
 ```php
 // ... existing controller method before
@@ -116,7 +106,6 @@ Jika route ialah:
 
 Fail: `routes/api.php`
 
-Jenis copy: `PARTIAL PATCH` - route parameter default ialah `{user}` jika tiada custom `parameters(...)`.
 
 ```php
 // ... existing v1 route group before
@@ -139,7 +128,6 @@ php artisan make:resource ProjectResource
 
 Fail: `app/Http/Resources/ProjectResource.php`
 
-Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -165,7 +153,6 @@ class ProjectResource extends JsonResource
 
 Fail: `app/Http/Resources/UserProfileResource.php`
 
-Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -204,7 +191,6 @@ app/Services/UserProfileService.php
 
 Fail: `app/Services/UserProfileService.php`
 
-Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -271,7 +257,6 @@ class UserProfileService
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - merge imports, constructor, dan CRUD methods ini ke dalam controller sedia ada. Jangan buang middleware security dalam `routes/api.php`.
 
 ```php
 // ... existing namespace and imports before
@@ -337,7 +322,6 @@ Dalam `UpdateUserProfileRequest`, route parameter sekarang ialah model `$user`:
 
 Fail: `app/Http/Requests/UpdateUserProfileRequest.php`
 
-Jenis copy: `PARTIAL PATCH` - ubah bahagian route parameter dan unique rule dalam `rules()` sahaja.
 
 ```php
 // ... existing rules() code before

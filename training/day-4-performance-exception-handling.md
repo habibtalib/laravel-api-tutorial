@@ -66,14 +66,6 @@ Route::apiResource('users', UserProfileController::class)
 
 Day 4 JSON exception handling should add `404` and `422` consistency without removing the Day 3 `403` ability response.
 
-## Code Snippet Convention
-
-For PHP snippets in this day:
-
-- `COPY WHOLE FILE` means replace the target file with the snippet.
-- `PARTIAL PATCH` means paste only the shown section into the existing file.
-- Lines such as `// ... existing code before` and `// ... existing code after` are context markers. Do not delete the real code that already exists around that section.
-
 ## Architecture Diagram
 
 Day 4 adds performance and error handling around the same API. Read requests should prefer cached data when available, while write requests must clear stale cache. Exceptions are centralized in `bootstrap/app.php`.
@@ -115,7 +107,6 @@ php artisan make:resource UserProfileResource
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - add these imports near the other `use` statements.
 
 ```php
 // ... existing imports before
@@ -126,7 +117,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
 // ... existing controller class code before
@@ -186,7 +176,6 @@ Update the generated migration.
 
 File: `database/migrations/YYYY_MM_DD_HHMMSS_create_projects_table.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -228,7 +217,6 @@ php artisan migrate
 
 File: `app/Models/Project.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -257,7 +245,6 @@ class Project extends Model
 
 File: `app/Models/UserProfile.php`
 
-Copy type: `COPY WHOLE FILE` for the tutorial project. For an existing project, use it as a `PARTIAL PATCH` and merge only the `HasMany` import and `projects()` method.
 
 ```php
 <?php
@@ -304,7 +291,6 @@ php artisan make:resource UserProfileResource
 
 File: `app/Http/Resources/ProjectResource.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -330,7 +316,6 @@ class ProjectResource extends JsonResource
 
 File: `app/Http/Resources/UserProfileResource.php`
 
-Copy type: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -415,7 +400,6 @@ Update the controller.
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
 // ... existing imports and controller class before
@@ -448,7 +432,6 @@ GET /api/v1/users?search=aina&page=1
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
 // ... existing imports and controller class before
@@ -520,7 +503,6 @@ Import cache.
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - add this near the other `use` statements.
 
 ```php
 // ... existing imports before
@@ -532,7 +514,6 @@ Update `index`.
 
 File: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Copy type: `PARTIAL PATCH` - replace only the `index()` method.
 
 ```php
 // ... existing imports and controller class before
@@ -630,7 +611,6 @@ Update `.env`.
 
 File: `.env`
 
-Copy type: `PARTIAL PATCH` - update or add only these keys.
 
 ```env
 CACHE_STORE=redis
@@ -649,7 +629,6 @@ If Redis is not installed locally, keep:
 
 File: `.env`
 
-Copy type: `PARTIAL PATCH` - keep or set this single key for local class machines without Redis.
 
 ```env
 CACHE_STORE=file
@@ -688,7 +667,6 @@ Update the `withExceptions` section.
 
 File: `bootstrap/app.php`
 
-Copy type: `PARTIAL PATCH` - merge the imports and replace only the `withExceptions(...)` block if the project already has routing and middleware configured.
 
 ```php
 <?php
@@ -840,7 +818,6 @@ Example query call:
 
 File: `examples/react-client-api-consumer/src/App.jsx`
 
-Copy type: `PARTIAL PATCH` - use this inside the list-loading function.
 
 ```js
 // ... existing list-loading function before
@@ -869,7 +846,6 @@ Target files:
 - `examples/react-client-api-consumer/src/App.jsx`
 - `examples/react-client-api-consumer/src/App.css`
 
-Copy type: `AI PROMPT` - paste this into Claude Code from the React project root.
 
 ```text
 Goal:
@@ -1014,7 +990,6 @@ Example route:
 
 File: `routes/api.php`
 
-Copy type: `PARTIAL PATCH` - add this inside the secured `/api/v1` route group if the endpoint should require `X-API-TOKEN`.
 
 ```php
 // ... existing v1 route group before

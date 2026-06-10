@@ -65,14 +65,6 @@ Route::apiResource('users', UserProfileController::class)
 
 JSON exception handling Hari 4 perlu menambah konsistensi `404` dan `422` tanpa membuang response `403` missing ability daripada Hari 3.
 
-## Konvensyen Code Snippet
-
-Untuk snippet PHP dalam hari ini:
-
-- `COPY WHOLE FILE` bermaksud gantikan fail sasaran dengan snippet tersebut.
-- `PARTIAL PATCH` bermaksud salin bahagian yang ditunjukkan sahaja ke dalam fail sedia ada.
-- Baris seperti `// ... existing code before` dan `// ... existing code after` ialah penanda context. Jangan padam code sebenar yang sudah ada di sekeliling bahagian itu.
-
 ## Diagram Architecture
 
 ```mermaid
@@ -102,7 +94,6 @@ php artisan make:resource UserProfileResource
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - tambah import ini berdekatan `use` statements lain.
 
 ```php
 // ... existing imports before
@@ -113,7 +104,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - gantikan method `index()` sahaja.
 
 ```php
 // ... existing controller class code before
@@ -162,7 +152,6 @@ php artisan make:model Project -m
 
 Fail: `database/migrations/YYYY_MM_DD_HHMMSS_create_projects_table.php`
 
-Jenis copy: `PARTIAL PATCH` - gantikan kandungan closure `Schema::create('projects', ...)` dalam migration yang dijana.
 
 ```php
 // ... existing migration up() method before
@@ -189,7 +178,6 @@ Dalam `UserProfile`.
 
 Fail: `app/Models/UserProfile.php`
 
-Jenis copy: `PARTIAL PATCH` - tambah import dan method relationship sahaja.
 
 ```php
 // ... existing imports before
@@ -208,7 +196,6 @@ Dalam `Project`.
 
 Fail: `app/Models/Project.php`
 
-Jenis copy: `PARTIAL PATCH` - tambah import dan method relationship sahaja.
 
 ```php
 // ... existing imports before
@@ -234,7 +221,6 @@ php artisan make:resource UserProfileResource
 
 Fail: `app/Http/Resources/ProjectResource.php`
 
-Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -260,7 +246,6 @@ class ProjectResource extends JsonResource
 
 Fail: `app/Http/Resources/UserProfileResource.php`
 
-Jenis copy: `COPY WHOLE FILE`.
 
 ```php
 <?php
@@ -336,7 +321,6 @@ GET /api/v1/users?search=aina&page=1
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - gantikan method `index()` sahaja.
 
 ```php
 // ... existing imports and controller class before
@@ -406,7 +390,6 @@ Jika tiada rekod sepadan, `data` perlu menjadi array kosong dan `meta.total` per
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - tambah imports dan gantikan method `index()` sahaja.
 
 ```php
 // ... existing imports before
@@ -454,7 +437,6 @@ Untuk kelas, gunakan helper ringkas:
 
 Fail: `app/Http/Controllers/Api/V1/UserProfileController.php`
 
-Jenis copy: `PARTIAL PATCH` - tambah private helper dalam controller.
 
 ```php
 // ... existing controller methods before
@@ -488,7 +470,6 @@ composer require predis/predis
 
 Fail: `.env`
 
-Jenis copy: `PARTIAL PATCH` - tambah atau ubah key ini sahaja.
 
 ```dotenv
 CACHE_STORE=redis
@@ -523,7 +504,6 @@ Dalam `bootstrap/app.php`.
 
 Fail: `bootstrap/app.php`
 
-Jenis copy: `PARTIAL PATCH` - merge imports dan gantikan bahagian `withExceptions(...)` sahaja jika project sudah ada routing/middleware.
 
 ```php
 // ... existing imports before
@@ -670,7 +650,6 @@ Contoh query call:
 
 Fail: `examples/react-client-api-consumer/src/App.jsx`
 
-Jenis copy: `PARTIAL PATCH` - gunakan dalam function yang load senarai profile.
 
 ```js
 // ... existing list-loading function before
@@ -699,7 +678,6 @@ Fail sasaran:
 - `examples/react-client-api-consumer/src/App.jsx`
 - `examples/react-client-api-consumer/src/App.css`
 
-Jenis copy: `AI PROMPT` - paste prompt ini ke Claude Code daripada root projek React.
 
 ```text
 Goal:
