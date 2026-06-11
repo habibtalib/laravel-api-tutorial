@@ -744,6 +744,87 @@ Recommended workflow:
 
 The API documentation should not be a one-time task. It should change whenever route behavior, payloads, status codes, or security changes.
 
+## AI Prompt - Setup Swagger And Populate API Docs
+
+Use this prompt when students want Claude Code or another coding assistant to install Swagger/OpenAPI support and populate the API documentation from the current Laravel API.
+
+Reference example folder:
+
+```text
+https://github.com/habibtalib/laravel-api-tutorial/tree/master/examples/bonus-swagger-openapi
+```
+
+```text
+Goal:
+Set up Swagger/OpenAPI documentation for my Laravel API and populate the generated API docs.
+
+Context:
+This Laravel project is based on the Day 5 ABC Company Profile API. It has versioned routes under /api/v1, Sanctum bearer token authentication, a custom X-API-TOKEN frontend token middleware, user profile CRUD, pagination, search, active filtering, API resources, service classes, and JSON error responses.
+
+Reference files and folder:
+- examples/bonus-swagger-openapi
+- examples/bonus-swagger-openapi/app/OpenApi/OpenApiSpec.php
+- examples/bonus-swagger-openapi/app/OpenApi/Schemas.php
+- examples/bonus-swagger-openapi/app/Http/Controllers/Api/V1/AuthController.php
+- examples/bonus-swagger-openapi/app/Http/Controllers/Api/V1/UserProfileController.php
+- examples/bonus-swagger-openapi/tests/Feature/OpenApiDocumentationTest.php
+- examples/bonus-swagger-openapi/snippets/generate-docs.sh
+
+Tasks:
+1. Inspect my current Laravel routes, controllers, form requests, resources, service classes, and auth middleware before editing.
+2. Install and publish L5-Swagger if it is not installed:
+   - composer require darkaonline/l5-swagger
+   - php artisan vendor:publish --provider "L5Swagger\\L5SwaggerServiceProvider"
+3. Configure .env and config/l5-swagger.php so the app directory is scanned and local docs are generated to storage/api-docs/api-docs.json.
+4. Add or merge OpenAPI metadata in app/OpenApi/OpenApiSpec.php:
+   - API title and version
+   - local server URL
+   - bearer token security scheme for Sanctum
+   - apiKey security scheme for X-API-TOKEN
+5. Add or merge reusable schemas in app/OpenApi/Schemas.php:
+   - UserProfile
+   - paginated UserProfile list response
+   - login request/response
+   - validation error
+   - unauthorized error
+   - not found error
+6. Populate OpenAPI attributes for these endpoints:
+   - POST /api/v1/auth/login
+   - POST /api/v1/auth/logout
+   - GET /api/v1/users with page, search, and active query parameters
+   - POST /api/v1/users
+   - GET /api/v1/users/{userProfile}
+   - PATCH /api/v1/users/{userProfile}
+   - DELETE /api/v1/users/{userProfile}
+7. Make protected endpoints document both required headers:
+   - Authorization: Bearer <token>
+   - X-API-TOKEN: abc-training-frontend-token
+8. Generate API docs:
+   - php artisan l5-swagger:generate
+9. Verify:
+   - storage/api-docs/api-docs.json exists
+   - /api/documentation opens in the browser
+   - the OpenAPI paths include every endpoint above
+   - Swagger UI Authorize supports both bearer token and X-API-TOKEN
+   - one protected endpoint can be called from Swagger UI after authorization
+10. Add or update a feature test like OpenApiDocumentationTest if the project already has tests.
+
+Constraints:
+- Do not remove existing auth, frontend token, token abilities, validation, API resources, service layer, or JSON exception handling.
+- Do not put real production tokens, secrets, or customer data in examples.
+- Do not document response shapes from memory. Inspect the actual resources and controller responses.
+- Keep generated docs local unless the project intentionally tracks storage/api-docs/api-docs.json.
+
+Done criteria:
+- L5-Swagger is installed and configured.
+- app/OpenApi/OpenApiSpec.php and app/OpenApi/Schemas.php exist.
+- Auth and user profile endpoints have OpenAPI attributes.
+- Pagination, search, active filter, request bodies, responses, and error responses are documented.
+- Both security layers are documented.
+- php artisan l5-swagger:generate succeeds.
+- /api/documentation shows populated API docs.
+```
+
 ## Optional - Validate The Generated Spec In CI
 
 You can add a simple test to confirm the OpenAPI JSON file exists.

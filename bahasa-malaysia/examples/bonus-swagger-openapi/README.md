@@ -46,6 +46,38 @@ Buka:
 http://127.0.0.1:8000/api/documentation
 ```
 
+## Prompt AI - Setup Swagger Dan Populate API Docs
+
+Gunakan prompt ini daripada root projek Laravel apabila mahu Claude Code memasang Swagger/OpenAPI, merge fail contoh ini, dan generate docs yang lengkap.
+
+```text
+Goal:
+Set up Swagger/OpenAPI documentation for my Laravel API and populate /api/documentation.
+
+Reference example folder:
+https://github.com/habibtalib/laravel-api-tutorial/tree/master/examples/bonus-swagger-openapi
+
+Context:
+The API is the Day 5 ABC Company Profile API with /api/v1 routes, Sanctum bearer tokens, X-API-TOKEN frontend middleware, user profile CRUD, pagination, search, active filtering, API resources, service classes, and JSON error responses.
+
+Tasks:
+1. Inspect current routes, controllers, form requests, resources, services, and middleware.
+2. Install and publish L5-Swagger if missing.
+3. Configure .env and config/l5-swagger.php so app annotations are scanned.
+4. Merge the example OpenAPI files and controller attributes from examples/bonus-swagger-openapi.
+5. Document login, logout, list, create, show, update, and delete endpoints.
+6. Document page, search, and active query parameters on GET /api/v1/users.
+7. Document both security headers: Authorization bearer token and X-API-TOKEN.
+8. Run php artisan l5-swagger:generate.
+9. Verify storage/api-docs/api-docs.json exists and /api/documentation is populated.
+10. Run or add OpenApiDocumentationTest if tests are available.
+
+Constraints:
+- Do not remove existing auth, frontend token, token abilities, validation, resources, service layer, or JSON exception handling.
+- Do not put real production tokens or secrets in examples.
+- Inspect actual response shapes before documenting them.
+```
+
 ## Security Schemes
 
 Contoh ini mendokumentasi kedua-dua layer security API:
